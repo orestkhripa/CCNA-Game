@@ -1,0 +1,1366 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCNA Quest</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Rajdhani:wght@400;600;700&family=Orbitron:wght@700;900&display=swap');
+
+  :root {
+    --bg: #050a12;
+    --panel: #0a1628;
+    --border: #1a3a5c;
+    --accent: #00d4ff;
+    --accent2: #ff6b35;
+    --accent3: #00ff88;
+    --text: #c8e4f0;
+    --dim: #4a7090;
+    --glow: rgba(0,212,255,0.15);
+    --danger: #ff3366;
+    --gold: #ffd700;
+  }
+
+  * { margin:0; padding:0; box-sizing:border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* Animated grid background */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,212,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,212,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: radial-gradient(ellipse at 20% 50%, rgba(0,100,200,0.08) 0%, transparent 60%),
+                radial-gradient(ellipse at 80% 20%, rgba(0,212,255,0.05) 0%, transparent 50%);
+    z-index: 0;
+    pointer-events: none;
+  }
+
+  .container {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 20px;
+  }
+
+  /* HEADER */
+  .header {
+    text-align: center;
+    padding: 30px 0 20px;
+  }
+
+  .logo {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(2rem, 6vw, 3.5rem);
+    font-weight: 900;
+    color: var(--accent);
+    text-shadow: 0 0 30px rgba(0,212,255,0.5), 0 0 60px rgba(0,212,255,0.2);
+    letter-spacing: 6px;
+    animation: pulse-glow 3s ease-in-out infinite;
+  }
+
+  @keyframes pulse-glow {
+    0%, 100% { text-shadow: 0 0 30px rgba(0,212,255,0.5), 0 0 60px rgba(0,212,255,0.2); }
+    50% { text-shadow: 0 0 50px rgba(0,212,255,0.8), 0 0 100px rgba(0,212,255,0.4); }
+  }
+
+  .subtitle {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    font-size: 0.85rem;
+    letter-spacing: 4px;
+    margin-top: 6px;
+  }
+
+  /* STATS BAR */
+  .stats-bar {
+    display: flex;
+    gap: 12px;
+    margin: 20px 0;
+    flex-wrap: wrap;
+  }
+
+  .stat {
+    flex: 1;
+    min-width: 100px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 12px 16px;
+    border-radius: 4px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .stat::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+    background: var(--accent);
+  }
+
+  .stat-val {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.4rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .stat-label {
+    font-size: 0.7rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    margin-top: 2px;
+  }
+
+  /* XP Bar */
+  .xp-bar-wrap {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 10px 16px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+  }
+
+  .xp-bar-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--dim);
+    margin-bottom: 6px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .xp-track {
+    height: 8px;
+    background: rgba(0,212,255,0.1);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 4px;
+    transition: width 0.8s cubic-bezier(0.4,0,0.2,1);
+    box-shadow: 0 0 10px rgba(0,212,255,0.5);
+  }
+
+  /* TOPIC SELECTOR */
+  .section-title {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--dim);
+    font-size: 0.75rem;
+    letter-spacing: 3px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+
+  .topic-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .topic-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 14px 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 1px;
+    text-align: left;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .topic-btn .topic-icon {
+    font-size: 1.2rem;
+    margin-bottom: 6px;
+    display: block;
+  }
+
+  .topic-btn .topic-stars {
+    position: absolute;
+    top: 8px; right: 8px;
+    font-size: 0.6rem;
+    color: var(--gold);
+  }
+
+  .topic-btn:hover {
+    border-color: var(--accent);
+    color: var(--accent);
+    box-shadow: 0 0 20px var(--glow);
+    transform: translateY(-2px);
+  }
+
+  .topic-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.08);
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  /* MODE SELECTOR */
+  .mode-row {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+  }
+
+  .mode-btn {
+    flex: 1;
+    min-width: 120px;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--dim);
+    padding: 12px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 700;
+    font-size: 0.85rem;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    text-align: center;
+    transition: all 0.2s;
+  }
+
+  .mode-btn.active {
+    border-color: var(--accent2);
+    color: var(--accent2);
+    background: rgba(255,107,53,0.08);
+  }
+
+  .mode-btn:hover:not(.active) {
+    border-color: var(--dim);
+    color: var(--text);
+  }
+
+  /* START BUTTON */
+  .start-btn {
+    width: 100%;
+    padding: 18px;
+    background: transparent;
+    border: 2px solid var(--accent);
+    color: var(--accent);
+    font-family: 'Orbitron', monospace;
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 4px;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    margin-bottom: 24px;
+  }
+
+  .start-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--accent);
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 0.3s;
+    z-index: -1;
+  }
+
+  .start-btn:hover::before { transform: scaleX(1); }
+  .start-btn:hover { color: var(--bg); box-shadow: 0 0 30px rgba(0,212,255,0.4); }
+  .start-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  /* QUESTION PANEL */
+  #quiz-panel { display: none; }
+
+  .question-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 20px;
+  }
+
+  .q-meta {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--dim);
+  }
+
+  .timer-ring {
+    width: 56px; height: 56px;
+    position: relative;
+  }
+
+  .timer-ring svg { transform: rotate(-90deg); }
+
+  .timer-ring circle {
+    fill: none;
+    stroke-width: 4;
+  }
+
+  .timer-bg { stroke: rgba(0,212,255,0.1); }
+  .timer-arc { stroke: var(--accent); stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.5s; }
+
+  .timer-num {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .question-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 24px;
+    border-radius: 4px;
+    margin-bottom: 20px;
+    min-height: 80px;
+  }
+
+  .question-text {
+    font-size: 1.05rem;
+    font-weight: 600;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .question-tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--accent2);
+    background: rgba(255,107,53,0.1);
+    border: 1px solid rgba(255,107,53,0.3);
+    padding: 2px 8px;
+    border-radius: 2px;
+    margin-bottom: 12px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  /* OPTIONS */
+  .options-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    margin-bottom: 20px;
+  }
+
+  @media (max-width: 600px) {
+    .options-grid { grid-template-columns: 1fr; }
+  }
+
+  .opt-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 16px 18px;
+    cursor: pointer;
+    border-radius: 4px;
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    text-align: left;
+    transition: all 0.2s;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    line-height: 1.4;
+  }
+
+  .opt-label {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.7rem;
+    color: var(--dim);
+    min-width: 18px;
+    margin-top: 2px;
+  }
+
+  .opt-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    color: var(--accent);
+    background: rgba(0,212,255,0.05);
+  }
+
+  .opt-btn.correct {
+    border-color: var(--accent3);
+    background: rgba(0,255,136,0.1);
+    color: var(--accent3);
+  }
+
+  .opt-btn.wrong {
+    border-color: var(--danger);
+    background: rgba(255,51,102,0.1);
+    color: var(--danger);
+  }
+
+  .opt-btn:disabled { cursor: default; }
+
+  /* FEEDBACK */
+  .feedback-box {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    border-radius: 4px;
+    margin-bottom: 16px;
+    display: none;
+    animation: slide-in 0.3s ease;
+  }
+
+  @keyframes slide-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .feedback-box.show { display: block; }
+
+  .feedback-box.correct-fb { border-left: 3px solid var(--accent3); }
+  .feedback-box.wrong-fb { border-left: 3px solid var(--danger); }
+
+  .feedback-title {
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    font-weight: 700;
+    margin-bottom: 8px;
+    letter-spacing: 2px;
+  }
+
+  .correct-fb .feedback-title { color: var(--accent3); }
+  .wrong-fb .feedback-title { color: var(--danger); }
+
+  .feedback-text {
+    font-size: 0.9rem;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  /* NEXT BUTTON */
+  .next-btn {
+    width: 100%;
+    padding: 14px;
+    background: transparent;
+    border: 1px solid var(--accent3);
+    color: var(--accent3);
+    font-family: 'Orbitron', monospace;
+    font-size: 0.85rem;
+    font-weight: 700;
+    letter-spacing: 3px;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.2s;
+    display: none;
+  }
+
+  .next-btn.show { display: block; }
+  .next-btn:hover { background: rgba(0,255,136,0.1); box-shadow: 0 0 20px rgba(0,255,136,0.2); }
+
+  /* LOADING */
+  .loading-state {
+    text-align: center;
+    padding: 40px;
+    display: none;
+  }
+
+  .loading-state.show { display: block; }
+
+  .spinner {
+    width: 40px; height: 40px;
+    border: 3px solid rgba(0,212,255,0.1);
+    border-top-color: var(--accent);
+    border-radius: 50%;
+    animation: spin 0.8s linear infinite;
+    margin: 0 auto 16px;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .loading-text {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+    animation: blink 1.2s ease-in-out infinite;
+  }
+
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* PROGRESS DOTS */
+  .progress-dots {
+    display: flex;
+    gap: 6px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+
+  .dot {
+    width: 10px; height: 10px;
+    border-radius: 50%;
+    border: 1px solid var(--border);
+    background: transparent;
+    transition: all 0.3s;
+  }
+
+  .dot.answered { background: var(--dim); border-color: var(--dim); }
+  .dot.correct-dot { background: var(--accent3); border-color: var(--accent3); }
+  .dot.wrong-dot { background: var(--danger); border-color: var(--danger); }
+  .dot.current { border-color: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  /* RESULT SCREEN */
+  #result-panel {
+    display: none;
+    text-align: center;
+    padding: 40px 20px;
+  }
+
+  .result-score {
+    font-family: 'Orbitron', monospace;
+    font-size: clamp(3rem, 12vw, 6rem);
+    font-weight: 900;
+    line-height: 1;
+    margin: 20px 0;
+  }
+
+  .result-grade {
+    font-size: 1rem;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 4px;
+    margin-bottom: 30px;
+    padding: 8px 20px;
+    border-radius: 2px;
+    display: inline-block;
+  }
+
+  .result-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 12px;
+    margin: 24px 0;
+  }
+
+  .result-stat {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px;
+    border-radius: 4px;
+  }
+
+  .result-stat-val {
+    font-family: 'Orbitron', monospace;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--accent);
+  }
+
+  .result-stat-label {
+    font-size: 0.7rem;
+    color: var(--dim);
+    letter-spacing: 2px;
+    margin-top: 4px;
+  }
+
+  .result-actions {
+    display: flex;
+    gap: 12px;
+    margin-top: 24px;
+  }
+
+  .result-actions button {
+    flex: 1;
+    padding: 14px;
+    border-radius: 4px;
+    font-family: 'Orbitron', monospace;
+    font-size: 0.75rem;
+    letter-spacing: 2px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+
+  .btn-retry {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+  }
+
+  .btn-retry:hover { background: rgba(0,212,255,0.1); }
+
+  .btn-menu {
+    background: transparent;
+    border: 1px solid var(--dim);
+    color: var(--dim);
+  }
+
+  .btn-menu:hover { border-color: var(--text); color: var(--text); }
+
+  /* ACHIEVEMENT TOAST */
+  .achievement-toast {
+    position: fixed;
+    top: 20px; right: 20px;
+    background: var(--panel);
+    border: 1px solid var(--gold);
+    padding: 14px 20px;
+    border-radius: 4px;
+    z-index: 100;
+    font-family: 'Rajdhani', sans-serif;
+    box-shadow: 0 0 30px rgba(255,215,0,0.2);
+    transform: translateX(120%);
+    transition: transform 0.4s cubic-bezier(0.4,0,0.2,1);
+    max-width: 280px;
+  }
+
+  .achievement-toast.show { transform: translateX(0); }
+
+  .toast-title {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.65rem;
+    color: var(--gold);
+    letter-spacing: 3px;
+    margin-bottom: 4px;
+  }
+
+  .toast-text {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: var(--text);
+  }
+
+  /* STREAK indicator */
+  .streak-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: rgba(255,107,53,0.15);
+    border: 1px solid rgba(255,107,53,0.4);
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 0.75rem;
+    color: var(--accent2);
+    margin-left: 10px;
+  }
+
+  /* Error state */
+  .error-box {
+    background: rgba(255,51,102,0.08);
+    border: 1px solid rgba(255,51,102,0.3);
+    border-left: 3px solid var(--danger);
+    padding: 16px 20px;
+    border-radius: 4px;
+    font-size: 0.9rem;
+    color: #ff8aaa;
+    display: none;
+    margin-bottom: 16px;
+  }
+
+  .error-box.show { display: block; }
+
+  /* Difficulty badge */
+  .diff-badge {
+    display: inline-block;
+    font-size: 0.65rem;
+    font-family: 'Share Tech Mono', monospace;
+    padding: 2px 8px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+    margin-left: 8px;
+  }
+
+  .diff-easy { background: rgba(0,255,136,0.1); color: var(--accent3); border: 1px solid rgba(0,255,136,0.3); }
+  .diff-medium { background: rgba(0,212,255,0.1); color: var(--accent); border: 1px solid rgba(0,212,255,0.3); }
+  .diff-hard { background: rgba(255,107,53,0.1); color: var(--accent2); border: 1px solid rgba(255,107,53,0.3); }
+</style>
+</head>
+<body>
+<nav style="background:#0d1117;border-bottom:1px solid #1f2d3d;padding:0;position:sticky;top:0;z-index:100">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap">
+    <a href="index.html" style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:#3b82f6;padding:14px 20px;text-decoration:none;letter-spacing:2px;border-right:1px solid #1f2d3d">CCNA LAB</a>
+    <a href="index.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#64748b;text-decoration:none;border-right:1px solid #1f2d3d;transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'">🏠 Home</a>
+    <a href="ccna-game.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#3b82f6;text-decoration:none;border-right:1px solid #1f2d3d;border-bottom:2px solid #3b82f6">🎮 Quiz Game</a>
+    <a href="ccna-interactive.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#64748b;text-decoration:none;border-right:1px solid #1f2d3d;transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'">⚗️ Interactive Lab</a>
+    <a href="ccna-schemas.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#64748b;text-decoration:none;border-right:1px solid #1f2d3d;transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'">📚 Schemi</a>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 16px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#64748b">LV</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700;color:#06b6d4" id="nav-lv">1</span>
+      <div style="width:60px;height:4px;background:#1f2d3d;border-radius:2px;overflow:hidden"><div style="height:100%;background:#3b82f6;border-radius:2px;transition:width .4s" id="nav-bar"></div></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#3b82f6" id="nav-pts">0 XP</span>
+    </div>
+  </div>
+</nav>
+
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="logo">CCNA QUEST</div>
+    <div class="subtitle">// CISCO NETWORKING TRAINING SIMULATOR //</div>
+  </div>
+
+  <!-- STATS -->
+  <div class="stats-bar">
+    <div class="stat">
+      <div class="stat-val" id="stat-level">1</div>
+      <div class="stat-label">Livello</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-score">0</div>
+      <div class="stat-label">Punteggio</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-correct">0</div>
+      <div class="stat-label">Corrette</div>
+    </div>
+    <div class="stat">
+      <div class="stat-val" id="stat-streak">0</div>
+      <div class="stat-label">Streak 🔥</div>
+    </div>
+  </div>
+
+  <!-- XP BAR -->
+  <div class="xp-bar-wrap">
+    <div class="xp-bar-label">
+      <span>XP</span>
+      <span id="xp-label">0 / 200</span>
+    </div>
+    <div class="xp-track"><div class="xp-fill" id="xp-fill" style="width:0%"></div></div>
+  </div>
+
+  <!-- MENU PANEL -->
+  <div id="menu-panel">
+
+    <div class="section-title">Argomento CCNA</div>
+    <div class="topic-grid" id="topic-grid">
+      <button class="topic-btn active" data-topic="OSI & TCP/IP Model" onclick="selectTopic(this)">
+        <span class="topic-icon">📡</span>
+        OSI & TCP/IP Model
+        <span class="topic-stars">★★★★★</span>
+      </button>
+      <button class="topic-btn" data-topic="IP Addressing & Subnetting" onclick="selectTopic(this)">
+        <span class="topic-icon">🔢</span>
+        IP Addressing & Subnetting
+        <span class="topic-stars">★★★★★</span>
+      </button>
+      <button class="topic-btn" data-topic="VLANs & Switching" onclick="selectTopic(this)">
+        <span class="topic-icon">🔀</span>
+        VLANs & Switching
+        <span class="topic-stars">★★★★</span>
+      </button>
+      <button class="topic-btn" data-topic="Routing Protocols (OSPF, EIGRP, RIP)" onclick="selectTopic(this)">
+        <span class="topic-icon">🗺️</span>
+        Routing Protocols
+        <span class="topic-stars">★★★</span>
+      </button>
+      <button class="topic-btn" data-topic="NAT & PAT" onclick="selectTopic(this)">
+        <span class="topic-icon">🔄</span>
+        NAT & PAT
+        <span class="topic-stars">★★★</span>
+      </button>
+      <button class="topic-btn" data-topic="ACLs (Access Control Lists)" onclick="selectTopic(this)">
+        <span class="topic-icon">🛡️</span>
+        ACLs
+        <span class="topic-stars">★★★</span>
+      </button>
+      <button class="topic-btn" data-topic="WAN Technologies & VPN" onclick="selectTopic(this)">
+        <span class="topic-icon">🌐</span>
+        WAN & VPN
+        <span class="topic-stars">★★</span>
+      </button>
+      <button class="topic-btn" data-topic="Network Security (AAA, SSH, Port Security)" onclick="selectTopic(this)">
+        <span class="topic-icon">🔒</span>
+        Network Security
+        <span class="topic-stars">★★</span>
+      </button>
+      <button class="topic-btn" data-topic="IPv6" onclick="selectTopic(this)">
+        <span class="topic-icon">6️⃣</span>
+        IPv6
+        <span class="topic-stars">★★</span>
+      </button>
+      <button class="topic-btn" data-topic="Network Automation & SDN" onclick="selectTopic(this)">
+        <span class="topic-icon">🤖</span>
+        Automation & SDN
+        <span class="topic-stars">★</span>
+      </button>
+    </div>
+
+    <div class="section-title">Modalità di gioco</div>
+    <div class="mode-row">
+      <button class="mode-btn active" data-mode="practice" onclick="selectMode(this)">🎯 Practice</button>
+      <button class="mode-btn" data-mode="speed" onclick="selectMode(this)">⚡ Speed Run</button>
+      <button class="mode-btn" data-mode="hardcore" onclick="selectMode(this)">💀 Hardcore</button>
+      <button class="mode-btn" data-mode="exam" onclick="selectMode(this)">📋 Esame Sim</button>
+    </div>
+
+    <div class="section-title">Difficoltà</div>
+    <div class="mode-row">
+      <button class="mode-btn active" data-diff="mixed" onclick="selectDiff(this)">🎲 Misto</button>
+      <button class="mode-btn" data-diff="easy" onclick="selectDiff(this)">🟢 Base</button>
+      <button class="mode-btn" data-diff="medium" onclick="selectDiff(this)">🔵 Intermedio</button>
+      <button class="mode-btn" data-diff="hard" onclick="selectDiff(this)">🔴 Avanzato</button>
+    </div>
+
+    <button class="start-btn" id="start-btn" onclick="startGame()">⚡ INIZIA MISSIONE</button>
+
+  </div>
+
+  <!-- QUIZ PANEL -->
+  <div id="quiz-panel">
+
+    <div class="question-header">
+      <div>
+        <div class="q-meta" id="q-meta">Domanda 1 / 10</div>
+        <div id="q-topic-badge" style="margin-top:4px; font-family: 'Share Tech Mono'; font-size:0.65rem; color: var(--accent2);"></div>
+      </div>
+      <div class="timer-ring" id="timer-ring">
+        <svg width="56" height="56" viewBox="0 0 56 56">
+          <circle class="timer-bg" cx="28" cy="28" r="24"/>
+          <circle class="timer-arc" id="timer-arc" cx="28" cy="28" r="24"
+            stroke-dasharray="150.8" stroke-dashoffset="0"/>
+        </svg>
+        <div class="timer-num" id="timer-num">30</div>
+      </div>
+    </div>
+
+    <div class="progress-dots" id="progress-dots"></div>
+
+    <div class="loading-state" id="loading-state">
+      <div class="spinner"></div>
+      <div class="loading-text">GENERANDO DOMANDA...</div>
+    </div>
+
+    <div class="error-box" id="error-box">
+      ⚠️ Errore API. Verifica la connessione e riprova.
+    </div>
+
+    <div class="question-box" id="question-box" style="display:none">
+      <div class="question-tag" id="question-tag"></div>
+      <div class="question-text" id="question-text"></div>
+    </div>
+
+    <div class="options-grid" id="options-grid"></div>
+
+    <div class="feedback-box" id="feedback-box">
+      <div class="feedback-title" id="feedback-title"></div>
+      <div class="feedback-text" id="feedback-text"></div>
+    </div>
+
+    <button class="next-btn" id="next-btn" onclick="nextQuestion()">PROSSIMA DOMANDA →</button>
+
+  </div>
+
+  <!-- RESULT PANEL -->
+  <div id="result-panel">
+    <div class="section-title">Missione completata</div>
+    <div class="result-score" id="result-score-num"></div>
+    <div class="result-grade" id="result-grade"></div>
+
+    <div class="result-stats">
+      <div class="result-stat">
+        <div class="result-stat-val" id="res-correct">0</div>
+        <div class="result-stat-label">Corrette</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-val" id="res-wrong">0</div>
+        <div class="result-stat-label">Errate</div>
+      </div>
+      <div class="result-stat">
+        <div class="result-stat-val" id="res-time">0s</div>
+        <div class="result-stat-label">Tempo medio</div>
+      </div>
+    </div>
+
+    <div class="result-actions">
+      <button class="btn-retry" onclick="startGame()">🔄 RIGIOCA</button>
+      <button class="btn-menu" onclick="showMenu()">🏠 MENU</button>
+    </div>
+  </div>
+
+</div>
+
+<!-- ACHIEVEMENT TOAST -->
+<div class="achievement-toast" id="achievement-toast">
+  <div class="toast-title">🏆 ACHIEVEMENT SBLOCCATO</div>
+  <div class="toast-text" id="toast-text"></div>
+</div>
+
+<script>
+// STATE
+const state = {
+  topic: 'OSI & TCP/IP Model',
+  mode: 'practice',
+  difficulty: 'mixed',
+  score: 0,
+  level: 1,
+  xp: 0,
+  xpMax: 200,
+  streak: 0,
+  totalCorrect: 0,
+  currentQ: 0,
+  totalQ: 10,
+  questions: [],
+  currentQuestion: null,
+  answered: false,
+  timer: null,
+  timeLeft: 30,
+  timers: [],
+  startTime: 0,
+  questionTimes: [],
+  results: []
+};
+
+// CONFIG per modalità
+const MODE_CONFIG = {
+  practice: { totalQ: 10, timeLimit: 60, xpMult: 1 },
+  speed:    { totalQ: 15, timeLimit: 20, xpMult: 1.5 },
+  hardcore: { totalQ: 10, timeLimit: 30, xpMult: 2 },
+  exam:     { totalQ: 30, timeLimit: 90, xpMult: 1.2 }
+};
+
+const DIFF_LABELS = { easy: 'BASE', medium: 'INTERMEDIO', hard: 'AVANZATO', mixed: 'MISTO' };
+const LABELS = ['A', 'B', 'C', 'D'];
+
+// SELECTION
+function selectTopic(btn) {
+  document.querySelectorAll('.topic-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.topic = btn.dataset.topic;
+}
+
+function selectMode(btn) {
+  document.querySelectorAll('[data-mode]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.mode = btn.dataset.mode;
+}
+
+function selectDiff(btn) {
+  document.querySelectorAll('[data-diff]').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  state.difficulty = btn.dataset.diff;
+}
+
+// GAME START
+async function startGame() {
+  const cfg = MODE_CONFIG[state.mode];
+  state.totalQ = cfg.totalQ;
+  state.currentQ = 0;
+  state.results = [];
+  state.questionTimes = [];
+
+  document.getElementById('menu-panel').style.display = 'none';
+  document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('quiz-panel').style.display = 'block';
+
+  buildProgressDots();
+  await loadQuestion();
+}
+
+function buildProgressDots() {
+  const el = document.getElementById('progress-dots');
+  el.innerHTML = '';
+  for(let i = 0; i < state.totalQ; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i === 0 ? ' current' : '');
+    d.id = `dot-${i}`;
+    el.appendChild(d);
+  }
+}
+
+// LOAD QUESTION from AI
+async function loadQuestion() {
+  state.answered = false;
+  clearInterval(state.timer);
+
+  document.getElementById('loading-state').classList.add('show');
+  document.getElementById('question-box').style.display = 'none';
+  document.getElementById('options-grid').innerHTML = '';
+  document.getElementById('feedback-box').classList.remove('show', 'correct-fb', 'wrong-fb');
+  document.getElementById('next-btn').classList.remove('show');
+  document.getElementById('error-box').classList.remove('show');
+
+  const diff = state.difficulty === 'mixed'
+    ? ['easy','medium','hard'][Math.floor(Math.random()*3)]
+    : state.difficulty;
+
+  const diffLabel = DIFF_LABELS[diff] || 'MISTO';
+
+  // Avoid repetition
+  const prevQs = state.results.map(r => r.question).slice(-3);
+  const avoidStr = prevQs.length ? `Non ripetere queste domande: "${prevQs.join('", "')}"` : '';
+
+  const prompt = `Sei un trainer CCNA esperto. Genera UNA domanda a risposta multipla (4 opzioni, UNA sola corretta) sull'argomento: "${state.topic}".
+Difficoltà: ${diffLabel}.
+${avoidStr}
+
+Rispondi SOLO con JSON valido (nessun markdown, nessun testo extra):
+{
+  "question": "...",
+  "options": ["A) ...", "B) ...", "C) ...", "D) ..."],
+  "correct": 0,
+  "explanation": "Spiegazione breve in italiano (2-3 frasi) del perché la risposta è corretta e cosa bisogna sapere.",
+  "difficulty": "${diff}",
+  "subtopic": "sotto-argomento specifico"
+}`;
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'anthropic-version': '2023-06-01', 'anthropic-dangerous-direct-browser-ipc': 'true' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        messages: [{ role: 'user', content: prompt }]
+      })
+    });
+
+    const data = await res.json();
+    if (!res.ok || !data.content?.[0]?.text) throw new Error('API error');
+
+    let raw = data.content[0].text.trim();
+    raw = raw.replace(/```json|```/g, '').trim();
+    const q = JSON.parse(raw);
+
+    state.currentQuestion = q;
+    state.currentQuestion.diff = diff;
+    renderQuestion(q);
+
+  } catch(e) {
+    console.error(e);
+    document.getElementById('loading-state').classList.remove('show');
+    document.getElementById('error-box').classList.add('show');
+    document.getElementById('error-box').innerHTML = `⚠️ Errore nel generare la domanda. <button onclick="loadQuestion()" style="background:none;border:1px solid #ff3366;color:#ff8aaa;padding:4px 12px;cursor:pointer;border-radius:2px;margin-left:8px;font-family:Rajdhani">Riprova</button>`;
+  }
+}
+
+function renderQuestion(q) {
+  document.getElementById('loading-state').classList.remove('show');
+  document.getElementById('question-box').style.display = 'block';
+
+  document.getElementById('q-meta').textContent = `Domanda ${state.currentQ + 1} / ${state.totalQ}`;
+  document.getElementById('q-topic-badge').textContent = `${state.topic}${q.subtopic ? ' › ' + q.subtopic : ''}`;
+  document.getElementById('question-tag').innerHTML = `
+    ${q.subtopic || state.topic}
+    <span class="diff-badge diff-${q.difficulty || 'medium'}">${DIFF_LABELS[q.difficulty] || q.difficulty}</span>
+  `;
+  document.getElementById('question-text').textContent = q.question;
+
+  const grid = document.getElementById('options-grid');
+  grid.innerHTML = '';
+
+  q.options.forEach((opt, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'opt-btn';
+    btn.innerHTML = `<span class="opt-label">${LABELS[i]}</span><span>${opt.replace(/^[A-D]\)\s*/, '')}</span>`;
+    btn.onclick = () => answerQuestion(i, btn);
+    grid.appendChild(btn);
+  });
+
+  startTimer();
+  state.startTime = Date.now();
+}
+
+// TIMER
+function startTimer() {
+  const cfg = MODE_CONFIG[state.mode];
+  state.timeLeft = cfg.timeLimit;
+  updateTimerDisplay();
+
+  state.timer = setInterval(() => {
+    state.timeLeft--;
+    updateTimerDisplay();
+    if(state.timeLeft <= 0) {
+      clearInterval(state.timer);
+      if(!state.answered) timeOut();
+    }
+  }, 1000);
+}
+
+function updateTimerDisplay() {
+  const cfg = MODE_CONFIG[state.mode];
+  const pct = state.timeLeft / cfg.timeLimit;
+  const circ = 150.8;
+  const offset = circ * (1 - pct);
+
+  const arc = document.getElementById('timer-arc');
+  arc.style.strokeDashoffset = offset;
+
+  if(pct < 0.3) arc.style.stroke = 'var(--danger)';
+  else if(pct < 0.5) arc.style.stroke = 'var(--accent2)';
+  else arc.style.stroke = 'var(--accent)';
+
+  document.getElementById('timer-num').textContent = state.timeLeft;
+  document.getElementById('timer-num').style.color = pct < 0.3 ? 'var(--danger)' : 'var(--accent)';
+}
+
+function timeOut() {
+  if(state.answered) return;
+  state.answered = true;
+  const elapsed = (Date.now() - state.startTime) / 1000;
+  state.questionTimes.push(elapsed);
+
+  // Show correct
+  const btns = document.querySelectorAll('.opt-btn');
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if(i === state.currentQuestion.correct) b.classList.add('correct');
+  });
+
+  state.streak = 0;
+  state.results.push({ question: state.currentQuestion.question, correct: false });
+
+  showFeedback(false, '⏱️ Tempo scaduto!', state.currentQuestion.explanation);
+  updateDots(false);
+  updateStats(false);
+  document.getElementById('next-btn').classList.add('show');
+}
+
+// ANSWER
+function answerQuestion(idx, btn) {
+  if(state.answered) return;
+  state.answered = true;
+  clearInterval(state.timer);
+
+  const elapsed = (Date.now() - state.startTime) / 1000;
+  state.questionTimes.push(elapsed);
+
+  const correct = idx === state.currentQuestion.correct;
+  const btns = document.querySelectorAll('.opt-btn');
+
+  btns.forEach((b, i) => {
+    b.disabled = true;
+    if(i === state.currentQuestion.correct) b.classList.add('correct');
+  });
+
+  if(!correct) btn.classList.add('wrong');
+
+  // Hardcore: wrong = game over
+  if(state.mode === 'hardcore' && !correct) {
+    state.results.push({ question: state.currentQuestion.question, correct: false });
+    state.streak = 0;
+    updateStats(false);
+    updateDots(false);
+    showFeedback(false, '💀 ELIMINATO!', state.currentQuestion.explanation);
+    document.getElementById('next-btn').textContent = 'VER RISULTATI';
+    document.getElementById('next-btn').onclick = showResults;
+    document.getElementById('next-btn').classList.add('show');
+    return;
+  }
+
+  state.results.push({ question: state.currentQuestion.question, correct });
+
+  if(correct) {
+    state.streak++;
+    const baseXP = { easy: 10, medium: 20, hard: 35 }[state.currentQuestion.diff] || 20;
+    const speedBonus = state.timeLeft > 0 ? Math.floor(state.timeLeft * 0.5) : 0;
+    const streakBonus = state.streak > 2 ? (state.streak - 2) * 5 : 0;
+    const mult = MODE_CONFIG[state.mode].xpMult;
+    const xpGain = Math.round((baseXP + speedBonus + streakBonus) * mult);
+
+    addXP(xpGain);
+    state.score += xpGain;
+    state.totalCorrect++;
+    checkAchievements();
+
+    const msg = state.streak >= 3
+      ? `🔥 STREAK x${state.streak}! +${xpGain} XP (base: ${baseXP} + velocità: ${speedBonus} + streak: ${streakBonus})`
+      : `✓ Corretto! +${xpGain} XP`;
+    showFeedback(true, msg, state.currentQuestion.explanation);
+  } else {
+    state.streak = 0;
+    showFeedback(false, '✗ Risposta errata', state.currentQuestion.explanation);
+  }
+
+  updateStats(correct);
+  updateDots(correct);
+  document.getElementById('next-btn').classList.add('show');
+}
+
+function showFeedback(correct, title, text) {
+  const box = document.getElementById('feedback-box');
+  box.className = 'feedback-box show ' + (correct ? 'correct-fb' : 'wrong-fb');
+  document.getElementById('feedback-title').textContent = title;
+  document.getElementById('feedback-text').textContent = text;
+}
+
+function updateDots(correct) {
+  const dot = document.getElementById(`dot-${state.currentQ}`);
+  if(dot) {
+    dot.classList.remove('current', 'answered');
+    dot.classList.add(correct ? 'correct-dot' : 'wrong-dot');
+  }
+}
+
+function updateStats(correct) {
+  document.getElementById('stat-score').textContent = state.score;
+  document.getElementById('stat-correct').textContent = state.totalCorrect;
+  document.getElementById('stat-streak').textContent = state.streak;
+  document.getElementById('stat-level').textContent = state.level;
+}
+
+function addXP(amount) {
+  state.xp += amount;
+  while(state.xp >= state.xpMax) {
+    state.xp -= state.xpMax;
+    state.level++;
+    state.xpMax = Math.round(state.xpMax * 1.3);
+    showAchievement(`LEVEL UP → Livello ${state.level}! 🎖️`);
+  }
+  const pct = (state.xp / state.xpMax) * 100;
+  document.getElementById('xp-fill').style.width = pct + '%';
+  document.getElementById('xp-label').textContent = `${state.xp} / ${state.xpMax}`;
+  document.getElementById('stat-level').textContent = state.level;
+}
+
+// ACHIEVEMENTS
+const achievements = new Set();
+function checkAchievements() {
+  if(state.streak === 3 && !achievements.has('streak3')) {
+    achievements.add('streak3');
+    showAchievement('Streak x3 — Sei in forma! 🔥');
+  }
+  if(state.streak === 5 && !achievements.has('streak5')) {
+    achievements.add('streak5');
+    showAchievement('Streak x5 — INARRESTABILE! ⚡');
+  }
+  if(state.totalCorrect === 10 && !achievements.has('10correct')) {
+    achievements.add('10correct');
+    showAchievement('10 risposte corrette — Network Apprentice! 📡');
+  }
+  if(state.score >= 500 && !achievements.has('500pts')) {
+    achievements.add('500pts');
+    showAchievement('500 punti — CCNA Candidate! 🏆');
+  }
+}
+
+function showAchievement(text) {
+  const toast = document.getElementById('achievement-toast');
+  document.getElementById('toast-text').textContent = text;
+  toast.classList.add('show');
+  setTimeout(() => toast.classList.remove('show'), 3500);
+}
+
+// NEXT
+async function nextQuestion() {
+  state.currentQ++;
+
+  if(state.currentQ >= state.totalQ) {
+    showResults();
+    return;
+  }
+
+  const nextDot = document.getElementById(`dot-${state.currentQ}`);
+  if(nextDot) nextDot.classList.add('current');
+
+  document.getElementById('next-btn').classList.remove('show');
+  document.getElementById('next-btn').textContent = 'PROSSIMA DOMANDA →';
+  document.getElementById('next-btn').onclick = nextQuestion;
+  await loadQuestion();
+}
+
+// RESULTS
+function showResults() {
+  clearInterval(state.timer);
+  document.getElementById('quiz-panel').style.display = 'none';
+  document.getElementById('result-panel').style.display = 'block';
+
+  const correct = state.results.filter(r => r.correct).length;
+  const total = state.results.length;
+  const pct = Math.round((correct / total) * 100);
+  const avgTime = state.questionTimes.length
+    ? Math.round(state.questionTimes.reduce((a,b)=>a+b,0) / state.questionTimes.length)
+    : 0;
+
+  document.getElementById('result-score-num').textContent = pct + '%';
+  document.getElementById('res-correct').textContent = correct;
+  document.getElementById('res-wrong').textContent = total - correct;
+  document.getElementById('res-time').textContent = avgTime + 's';
+
+  let grade, color;
+  if(pct >= 90) { grade = '🏆 CCNA MASTER'; color = 'var(--gold)'; }
+  else if(pct >= 75) { grade = '✅ PROMOSSO'; color = 'var(--accent3)'; }
+  else if(pct >= 60) { grade = '⚠️ BORDERLINE'; color = 'var(--accent)'; }
+  else { grade = '❌ RIPASSA'; color = 'var(--danger)'; }
+
+  const gradeEl = document.getElementById('result-grade');
+  gradeEl.textContent = grade;
+  gradeEl.style.color = color;
+  gradeEl.style.background = color + '22';
+  gradeEl.style.border = `1px solid ${color}44`;
+
+  document.getElementById('result-score-num').style.color = color;
+}
+
+function showMenu() {
+  document.getElementById('result-panel').style.display = 'none';
+  document.getElementById('quiz-panel').style.display = 'none';
+  document.getElementById('menu-panel').style.display = 'block';
+}
+
+// ── GLOBAL PROGRESS SYNC ──
+(function(){
+  const KEY='ccna_progress_v2';
+  function loadG(){try{const s=JSON.parse(localStorage.getItem(KEY));return s||{xp:0,xpNext:100,level:1,score:0}}catch(e){return{xp:0,xpNext:100,level:1,score:0};}}
+  function saveG(d){try{localStorage.setItem(KEY,JSON.stringify(d));}catch(e){}}
+  function renderNav(d){
+    const lv=document.getElementById('nav-lv');
+    const bar=document.getElementById('nav-bar');
+    const pts=document.getElementById('nav-pts');
+    if(lv)lv.textContent=d.level;
+    if(bar)bar.style.width=(d.xp/d.xpNext*100)+'%';
+    if(pts)pts.textContent=d.score+' XP';
+  }
+  const gd=loadG();
+  renderNav(gd);
+  window.syncGlobalXP=function(pts){
+    const d=loadG();
+    d.xp+=pts; d.score+=pts;
+    while(d.xp>=d.xpNext){d.xp-=d.xpNext;d.level++;d.xpNext=Math.round(d.xpNext*1.35);}
+    saveG(d); renderNav(d);
+  };
+})();
+
+</script>
+</body>
+</html>

@@ -1,0 +1,1069 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCNA Schemas — Reference</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+
+:root {
+  --bg: #07090f;
+  --surface: #0d1117;
+  --panel: #111827;
+  --border: #1f2d3d;
+  --accent: #3b82f6;
+  --cyan: #06b6d4;
+  --green: #10b981;
+  --orange: #f59e0b;
+  --red: #ef4444;
+  --purple: #8b5cf6;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --dim: #334155;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+}
+
+body::before {
+  content:'';
+  position:fixed;
+  inset:0;
+  background: repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);
+  pointer-events:none;
+  z-index:9999;
+}
+
+/* ── LAYOUT ── */
+.app { display:flex; min-height:100vh; }
+
+.sidebar {
+  width:240px; min-width:240px;
+  background:var(--surface);
+  border-right:1px solid var(--border);
+  position:sticky; top:0; height:100vh;
+  overflow-y:auto;
+  display:flex; flex-direction:column;
+}
+
+.sidebar-logo {
+  padding:22px 18px 16px;
+  border-bottom:1px solid var(--border);
+}
+
+.logo-text { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; color:var(--accent); }
+.logo-sub  { font-family:'JetBrains Mono',monospace; font-size:0.58rem; color:var(--muted); letter-spacing:3px; margin-top:3px; }
+
+.nav-section {
+  padding:12px 18px 4px;
+  font-family:'JetBrains Mono',monospace;
+  font-size:0.58rem; color:var(--muted); letter-spacing:3px; text-transform:uppercase;
+}
+
+.nav-item {
+  display:flex; align-items:center; gap:10px;
+  padding:9px 18px; cursor:pointer;
+  transition:all 0.15s;
+  border-left:3px solid transparent;
+  font-size:0.82rem; font-weight:500; color:var(--muted);
+}
+.nav-item:hover { color:var(--text); background:rgba(255,255,255,0.03); }
+.nav-item.active { color:var(--accent); background:rgba(59,130,246,0.08); border-left-color:var(--accent); }
+.nav-item .ni { font-size:0.95rem; min-width:18px; }
+
+.main { flex:1; overflow-y:auto; }
+
+.topbar {
+  padding:18px 28px;
+  border-bottom:1px solid var(--border);
+  background:var(--surface);
+  position:sticky; top:0; z-index:10;
+  display:flex; align-items:center; justify-content:space-between;
+}
+
+.topbar-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; }
+.topbar-sub   { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+
+.home-link {
+  font-family:'JetBrains Mono',monospace; font-size:0.7rem;
+  color:var(--muted); background:var(--panel);
+  border:1px solid var(--border); padding:6px 14px; border-radius:6px;
+  cursor:pointer; transition:all 0.15s; text-decoration:none;
+}
+.home-link:hover { color:var(--text); border-color:var(--dim); }
+
+.content { padding:28px; }
+
+/* ── SECTION ── */
+.schema-section { display:none; }
+.schema-section.active { display:block; }
+
+.section-intro {
+  background:linear-gradient(135deg,rgba(59,130,246,0.08),rgba(6,182,212,0.04));
+  border:1px solid var(--border);
+  border-radius:12px; padding:24px 28px; margin-bottom:28px;
+}
+
+.section-intro h1 { font-family:'Syne',sans-serif; font-size:1.6rem; font-weight:800; margin-bottom:8px; }
+.section-intro p  { color:var(--muted); font-size:0.88rem; line-height:1.7; max-width:600px; }
+
+/* Schema card */
+.schema-card {
+  background:var(--panel); border:1px solid var(--border);
+  border-radius:12px; padding:0; margin-bottom:24px; overflow:hidden;
+}
+
+.card-header {
+  padding:16px 22px;
+  border-bottom:1px solid var(--border);
+  display:flex; align-items:center; gap:12px;
+  background:rgba(255,255,255,0.015);
+}
+
+.card-icon { font-size:1.3rem; }
+.card-title { font-family:'Syne',sans-serif; font-size:1rem; font-weight:700; }
+.card-subtitle { font-size:0.75rem; color:var(--muted); margin-top:2px; }
+
+.card-tag {
+  margin-left:auto;
+  font-family:'JetBrains Mono',monospace; font-size:0.58rem;
+  padding:3px 8px; border-radius:4px; letter-spacing:1px; text-transform:uppercase;
+}
+
+.tag-diagram  { background:rgba(139,92,246,0.15); color:var(--purple); border:1px solid rgba(139,92,246,0.3); }
+.tag-table    { background:rgba(16,185,129,0.15);  color:var(--green);  border:1px solid rgba(16,185,129,0.3); }
+.tag-example  { background:rgba(245,158,11,0.15);  color:var(--orange); border:1px solid rgba(245,158,11,0.3); }
+.tag-formula  { background:rgba(6,182,212,0.15);   color:var(--cyan);   border:1px solid rgba(6,182,212,0.3); }
+.tag-command  { background:rgba(59,130,246,0.15);  color:var(--accent); border:1px solid rgba(59,130,246,0.3); }
+
+.card-body { padding:22px; }
+
+/* ── SVG DIAGRAMS ── */
+svg { max-width:100%; height:auto; display:block; }
+
+/* ── TABLES ── */
+.ref-table { width:100%; border-collapse:collapse; font-size:0.82rem; }
+.ref-table th {
+  background:var(--surface); padding:10px 14px;
+  text-align:left; font-family:'JetBrains Mono',monospace;
+  font-size:0.65rem; color:var(--muted); letter-spacing:2px;
+  border-bottom:2px solid var(--border);
+}
+.ref-table td { padding:10px 14px; border-bottom:1px solid var(--border); vertical-align:top; line-height:1.5; }
+.ref-table tr:last-child td { border-bottom:none; }
+.ref-table tr:hover td { background:rgba(255,255,255,0.02); }
+
+.cell-mono { font-family:'JetBrains Mono',monospace; font-size:0.78rem; color:var(--cyan); }
+.cell-green { font-family:'JetBrains Mono',monospace; color:var(--green); }
+.cell-orange { font-family:'JetBrains Mono',monospace; color:var(--orange); }
+.cell-accent { color:var(--accent); font-weight:600; }
+
+/* ── CODE BLOCKS ── */
+.code-block {
+  background:#020408; border:1px solid var(--border); border-radius:8px;
+  padding:16px 18px; font-family:'JetBrains Mono',monospace;
+  font-size:0.78rem; line-height:1.9; overflow-x:auto;
+}
+
+.c-comment { color:var(--muted); }
+.c-prompt  { color:var(--green); }
+.c-cmd     { color:var(--text); }
+.c-out     { color:#94a3b8; }
+.c-key     { color:var(--cyan); }
+.c-val     { color:var(--orange); }
+.c-ok      { color:var(--green); }
+.c-err     { color:var(--red); }
+
+/* ── FORMULA BOXES ── */
+.formula-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); gap:14px; }
+.formula-box {
+  background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:16px;
+}
+.formula-label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--muted); letter-spacing:2px; margin-bottom:8px; text-transform:uppercase; }
+.formula-val   { font-family:'JetBrains Mono',monospace; font-size:1rem; color:var(--cyan); font-weight:700; }
+.formula-sub   { font-size:0.75rem; color:var(--muted); margin-top:4px; line-height:1.5; }
+
+/* ── 2-COL ── */
+.two-col { display:grid; grid-template-columns:1fr 1fr; gap:20px; }
+@media(max-width:700px){ .two-col { grid-template-columns:1fr; } }
+
+/* ── EXAMPLE BLOCK ── */
+.example-block {
+  background:rgba(16,185,129,0.06); border:1px solid rgba(16,185,129,0.2);
+  border-left:3px solid var(--green); border-radius:8px; padding:16px 18px;
+  margin-top:14px;
+}
+.example-label { font-family:'JetBrains Mono',monospace; font-size:0.62rem; color:var(--green); letter-spacing:2px; margin-bottom:8px; text-transform:uppercase; }
+.example-text  { font-size:0.84rem; line-height:1.7; color:var(--text); }
+.example-text strong { color:var(--orange); }
+
+/* note */
+.note-block {
+  background:rgba(59,130,246,0.07); border:1px solid rgba(59,130,246,0.2);
+  border-left:3px solid var(--accent); border-radius:8px; padding:14px 18px; margin-top:14px;
+  font-size:0.82rem; line-height:1.7; color:#93c5fd;
+}
+
+/* ── RESPONSIVE ── */
+@media(max-width:768px){
+  .sidebar { display:none; }
+  .content { padding:16px; }
+}
+</style>
+</head>
+<body>
+<nav style="background:#0d1117;border-bottom:1px solid #1f2d3d;padding:0;position:sticky;top:0;z-index:100">
+  <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap">
+    <a href="index.html" style="font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:#3b82f6;padding:14px 20px;text-decoration:none;letter-spacing:2px;border-right:1px solid #1f2d3d">CCNA LAB</a>
+    <a href="index.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#64748b;text-decoration:none;border-right:1px solid #1f2d3d;transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'">🏠 Home</a>
+    <a href="ccna-game.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#64748b;text-decoration:none;border-right:1px solid #1f2d3d;transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'">🎮 Quiz Game</a>
+    <a href="index.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#64748b;text-decoration:none;border-right:1px solid #1f2d3d;transition:color .15s" onmouseover="this.style.color='#e2e8f0'" onmouseout="this.style.color='#64748b'">⚗️ Interactive Lab</a>
+    <a href="ccna-schemas.html" style="display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:#3b82f6;text-decoration:none;border-right:1px solid #1f2d3d;border-bottom:2px solid #3b82f6">📚 Schemi</a>
+    <div style="margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 16px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#64748b">LV</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700;color:#06b6d4" id="nav-lv">1</span>
+      <div style="width:60px;height:4px;background:#1f2d3d;border-radius:2px;overflow:hidden"><div style="height:100%;background:#3b82f6;border-radius:2px;transition:width .4s" id="nav-bar"></div></div>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:#3b82f6" id="nav-pts">0 XP</span>
+    </div>
+  </div>
+</nav>
+
+<div class="app">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sidebar-logo">
+    <div class="logo-text">CCNA SCHEMAS</div>
+    <div class="logo-sub">// REFERENCE GUIDE</div>
+  </div>
+  <div class="nav-section">Argomenti</div>
+  <div class="nav-item active" onclick="showSection('osi')"><span class="ni">📶</span> Modello OSI</div>
+  <div class="nav-item" onclick="showSection('tcpip')"><span class="ni">🌐</span> TCP/IP Stack</div>
+  <div class="nav-item" onclick="showSection('subnet')"><span class="ni">🔢</span> Subnetting</div>
+  <div class="nav-item" onclick="showSection('vlan')"><span class="ni">🔀</span> VLANs</div>
+  <div class="nav-item" onclick="showSection('routing')"><span class="ni">🗺️</span> Routing</div>
+  <div class="nav-item" onclick="showSection('cli')"><span class="ni">💻</span> CLI Cisco IOS</div>
+  <div class="nav-item" onclick="showSection('nat')"><span class="ni">🔄</span> NAT & PAT</div>
+  <div class="nav-item" onclick="showSection('acl')"><span class="ni">🛡️</span> ACL</div>
+  <div class="nav-item" onclick="showSection('spanning')"><span class="ni">🌳</span> Spanning Tree</div>
+  <div class="nav-item" onclick="showSection('ipv6')"><span class="ni">6️⃣</span> IPv6</div>
+</nav>
+
+<!-- MAIN -->
+<div class="main">
+  <div class="topbar">
+    <div>
+      <div class="topbar-title" id="topbar-title">Modello OSI</div>
+      <div class="topbar-sub">Schemi e riferimenti rapidi</div>
+    </div>
+    <a class="home-link" href="ccna-interactive.html">← Torna al Lab</a>
+  </div>
+
+  <div class="content">
+
+<!-- ══════════════════════════════════════
+     OSI MODEL
+══════════════════════════════════════ -->
+<div class="schema-section active" id="sec-osi">
+  <div class="section-intro">
+    <h1>📶 Modello OSI</h1>
+    <p>Il modello OSI (Open Systems Interconnection) divide la comunicazione di rete in 7 layer indipendenti. Ogni layer ha responsabilità precise e comunica solo con i layer adiacenti.</p>
+  </div>
+
+  <!-- STACK DIAGRAM -->
+  <div class="schema-card">
+    <div class="card-header">
+      <span class="card-icon">🏗️</span>
+      <div><div class="card-title">I 7 Layer OSI — Diagramma completo</div><div class="card-subtitle">Con PDU, protocolli e dispositivi di riferimento</div></div>
+      <span class="card-tag tag-diagram">DIAGRAMMA</span>
+    </div>
+    <div class="card-body">
+      <svg viewBox="0 0 780 400" xmlns="http://www.w3.org/2000/svg" style="font-family:'JetBrains Mono',monospace">
+        <!-- Background -->
+        <rect width="780" height="400" fill="#111827" rx="8"/>
+        <!-- Layer blocks -->
+        <!-- L7 Application -->
+        <rect x="10" y="14" width="220" height="48" rx="6" fill="rgba(239,68,68,0.15)" stroke="#ef4444" stroke-width="1.5"/>
+        <text x="20" y="34" fill="#fca5a5" font-size="10" font-weight="700">7 — APPLICATION</text>
+        <text x="20" y="50" fill="#64748b" font-size="9">HTTP, FTP, DNS, SMTP, Telnet, SNMP</text>
+        <!-- L6 Presentation -->
+        <rect x="10" y="68" width="220" height="48" rx="6" fill="rgba(245,158,11,0.15)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="20" y="88" fill="#fcd34d" font-size="10" font-weight="700">6 — PRESENTATION</text>
+        <text x="20" y="104" fill="#64748b" font-size="9">SSL/TLS, JPEG, GIF, MPEG, ASCII</text>
+        <!-- L5 Session -->
+        <rect x="10" y="122" width="220" height="48" rx="6" fill="rgba(234,179,8,0.12)" stroke="#eab308" stroke-width="1.5"/>
+        <text x="20" y="142" fill="#fde047" font-size="10" font-weight="700">5 — SESSION</text>
+        <text x="20" y="158" fill="#64748b" font-size="9">NetBIOS, RPC, SQL Session, NFS</text>
+        <!-- L4 Transport -->
+        <rect x="10" y="176" width="220" height="48" rx="6" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="20" y="196" fill="#6ee7b7" font-size="10" font-weight="700">4 — TRANSPORT</text>
+        <text x="20" y="212" fill="#64748b" font-size="9">TCP, UDP — Segment/Datagram</text>
+        <!-- L3 Network -->
+        <rect x="10" y="230" width="220" height="48" rx="6" fill="rgba(6,182,212,0.15)" stroke="#06b6d4" stroke-width="1.5"/>
+        <text x="20" y="250" fill="#67e8f9" font-size="10" font-weight="700">3 — NETWORK</text>
+        <text x="20" y="266" fill="#64748b" font-size="9">IP, ICMP, OSPF, BGP — Packet</text>
+        <!-- L2 Data Link -->
+        <rect x="10" y="284" width="220" height="48" rx="6" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="20" y="304" fill="#93c5fd" font-size="10" font-weight="700">2 — DATA LINK</text>
+        <text x="20" y="320" fill="#64748b" font-size="9">Ethernet, 802.11, PPP — Frame</text>
+        <!-- L1 Physical -->
+        <rect x="10" y="338" width="220" height="48" rx="6" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="20" y="358" fill="#c4b5fd" font-size="10" font-weight="700">1 — PHYSICAL</text>
+        <text x="20" y="374" fill="#64748b" font-size="9">UTP, Fibra, Wi-Fi, Hub — Bits</text>
+
+        <!-- PDU column -->
+        <text x="248" y="12" fill="#475569" font-size="9" letter-spacing="2">PDU</text>
+        <rect x="244" y="20" width="72" height="36" rx="4" fill="rgba(239,68,68,0.08)" stroke="rgba(239,68,68,0.3)" stroke-width="1"/>
+        <text x="280" y="43" fill="#fca5a5" font-size="9" text-anchor="middle">Data</text>
+        <rect x="244" y="74" width="72" height="36" rx="4" fill="rgba(245,158,11,0.08)" stroke="rgba(245,158,11,0.3)" stroke-width="1"/>
+        <text x="280" y="97" fill="#fcd34d" font-size="9" text-anchor="middle">Data</text>
+        <rect x="244" y="128" width="72" height="36" rx="4" fill="rgba(234,179,8,0.08)" stroke="rgba(234,179,8,0.3)" stroke-width="1"/>
+        <text x="280" y="151" fill="#fde047" font-size="9" text-anchor="middle">Data</text>
+        <rect x="244" y="182" width="72" height="36" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+        <text x="280" y="205" fill="#6ee7b7" font-size="9" text-anchor="middle">Segment</text>
+        <rect x="244" y="236" width="72" height="36" rx="4" fill="rgba(6,182,212,0.1)" stroke="rgba(6,182,212,0.3)" stroke-width="1"/>
+        <text x="280" y="259" fill="#67e8f9" font-size="9" text-anchor="middle">Packet</text>
+        <rect x="244" y="290" width="72" height="36" rx="4" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.3)" stroke-width="1"/>
+        <text x="280" y="313" fill="#93c5fd" font-size="9" text-anchor="middle">Frame</text>
+        <rect x="244" y="344" width="72" height="36" rx="4" fill="rgba(139,92,246,0.1)" stroke="rgba(139,92,246,0.3)" stroke-width="1"/>
+        <text x="280" y="367" fill="#c4b5fd" font-size="9" text-anchor="middle">Bits</text>
+
+        <!-- DEVICE column -->
+        <text x="336" y="12" fill="#475569" font-size="9" letter-spacing="2">DISPOSITIVO</text>
+        <text x="336" y="45" fill="#64748b" font-size="9">Firewall, PC, Server</text>
+        <text x="336" y="99" fill="#64748b" font-size="9">Gateway</text>
+        <text x="336" y="153" fill="#64748b" font-size="9">Gateway</text>
+        <text x="336" y="207" fill="#64748b" font-size="9">Firewall, Load Balancer</text>
+        <text x="336" y="261" fill="#64748b" font-size="9">Router, Layer-3 Switch</text>
+        <text x="336" y="315" fill="#64748b" font-size="9">Switch, Bridge, NIC</text>
+        <text x="336" y="369" fill="#64748b" font-size="9">Hub, Cavi, Ripetitore</text>
+
+        <!-- Arrows encapsulation -->
+        <text x="560" y="30" fill="#3b82f6" font-size="10" font-weight="700">INCAPSULAMENTO →</text>
+        <!-- arrow down -->
+        <line x1="555" y1="40" x2="555" y2="380" stroke="#3b82f6" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="549,374 555,386 561,374" fill="#3b82f6"/>
+        <text x="562" y="200" fill="#3b82f6" font-size="9" transform="rotate(90,562,200)">SENDER</text>
+
+        <text x="600" y="390" fill="#10b981" font-size="10" font-weight="700">← DECAPSULAMENTO</text>
+        <line x1="620" y1="375" x2="620" y2="40" stroke="#10b981" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <polygon points="614,46 620,34 626,46" fill="#10b981"/>
+        <text x="627" y="200" fill="#10b981" font-size="9" transform="rotate(90,627,200)">RECEIVER</text>
+
+        <!-- Mnemonics -->
+        <text x="680" y="25" fill="#334155" font-size="9" font-weight="700">MNEMONICO</text>
+        <text x="680" y="45" fill="#fca5a5" font-size="9">All</text>
+        <text x="680" y="99" fill="#fcd34d" font-size="9">People</text>
+        <text x="680" y="153" fill="#fde047" font-size="9">Seem</text>
+        <text x="680" y="207" fill="#6ee7b7" font-size="9">To</text>
+        <text x="680" y="261" fill="#67e8f9" font-size="9">Need</text>
+        <text x="680" y="315" fill="#93c5fd" font-size="9">Data</text>
+        <text x="680" y="369" fill="#c4b5fd" font-size="9">Processing</text>
+      </svg>
+
+      <div class="note-block" style="margin-top:16px">
+        💡 <strong>Mnemonico:</strong> <em>"All People Seem To Need Data Processing"</em> (dall'alto, L7→L1). Al contrario: "Please Do Not Throw Sausage Pizza Away" (L1→L7).
+      </div>
+    </div>
+  </div>
+
+  <!-- ENCAPSULATION EXAMPLE -->
+  <div class="schema-card">
+    <div class="card-header">
+      <span class="card-icon">📦</span>
+      <div><div class="card-title">Esempio: Incapsulamento HTTP</div><div class="card-subtitle">Come un messaggio HTTP diventa bit sul cavo</div></div>
+      <span class="card-tag tag-example">ESEMPIO REALE</span>
+    </div>
+    <div class="card-body">
+      <svg viewBox="0 0 740 160" xmlns="http://www.w3.org/2000/svg" style="font-family:'JetBrains Mono',monospace">
+        <rect width="740" height="160" fill="#111827" rx="8"/>
+        <!-- L7 -->
+        <rect x="10" y="16" width="720" height="30" rx="4" fill="rgba(239,68,68,0.12)" stroke="rgba(239,68,68,0.4)" stroke-width="1"/>
+        <text x="20" y="34" fill="#fca5a5" font-size="9" font-weight="700">L7 DATA</text>
+        <text x="95" y="34" fill="#e2e8f0" font-size="9">"GET /index.html HTTP/1.1  Host: example.com"</text>
+        <!-- L4 -->
+        <rect x="10" y="52" width="720" height="30" rx="4" fill="rgba(16,185,129,0.12)" stroke="rgba(16,185,129,0.4)" stroke-width="1"/>
+        <text x="20" y="70" fill="#6ee7b7" font-size="9" font-weight="700">TCP HDR</text>
+        <text x="93" y="70" fill="#94a3b8" font-size="8">Src:52341 Dst:80 Seq:1001 Ack:0 Flags:SYN</text>
+        <rect x="200" y="58" width="510" height="18" rx="2" fill="rgba(239,68,68,0.06)" stroke="rgba(239,68,68,0.2)" stroke-width="1"/>
+        <text x="440" y="70" fill="#fca5a5" font-size="8" text-anchor="middle">← DATI L7 →</text>
+        <!-- L3 -->
+        <rect x="10" y="88" width="720" height="30" rx="4" fill="rgba(6,182,212,0.12)" stroke="rgba(6,182,212,0.4)" stroke-width="1"/>
+        <text x="20" y="106" fill="#67e8f9" font-size="9" font-weight="700">IP HDR</text>
+        <text x="82" y="106" fill="#94a3b8" font-size="8">Src:192.168.1.10  Dst:93.184.216.34  TTL:64  Proto:TCP</text>
+        <rect x="310" y="94" width="400" height="18" rx="2" fill="rgba(16,185,129,0.06)" stroke="rgba(16,185,129,0.2)" stroke-width="1"/>
+        <text x="510" y="106" fill="#6ee7b7" font-size="8" text-anchor="middle">← TCP SEGMENT →</text>
+        <!-- L2 -->
+        <rect x="10" y="124" width="720" height="28" rx="4" fill="rgba(59,130,246,0.12)" stroke="rgba(59,130,246,0.4)" stroke-width="1"/>
+        <text x="20" y="142" fill="#93c5fd" font-size="9" font-weight="700">ETH HDR</text>
+        <text x="90" y="142" fill="#94a3b8" font-size="8">Dst MAC:AA:BB:CC  Src MAC:11:22:33  Type:0x0800</text>
+        <rect x="390" y="130" width="270" height="16" rx="2" fill="rgba(6,182,212,0.06)" stroke="rgba(6,182,212,0.2)" stroke-width="1"/>
+        <text x="525" y="142" fill="#67e8f9" font-size="8" text-anchor="middle">← IP PACKET →</text>
+        <rect x="666" y="130" width="52" height="16" rx="2" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.3)" stroke-width="1"/>
+        <text x="692" y="142" fill="#93c5fd" font-size="8" text-anchor="middle">FCS</text>
+      </svg>
+      <div class="example-block">
+        <div class="example-label">Come leggere lo schema</div>
+        <div class="example-text">Ogni header aggiunto contiene info per quel layer. <strong>ETH HDR</strong> ha MAC src/dst (Layer 2). <strong>IP HDR</strong> ha IP src/dst (Layer 3). <strong>TCP HDR</strong> ha porte e numeri di sequenza (Layer 4). Il payload viene mantenuto intatto.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     TCP/IP STACK
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-tcpip">
+  <div class="section-intro">
+    <h1>🌐 TCP/IP Stack</h1>
+    <p>Il modello TCP/IP ha 4 layer (o 5 nella versione estesa). È il modello reale usato su Internet, una semplificazione pratica dell'OSI.</p>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">⚖️</span>
+      <div><div class="card-title">OSI vs TCP/IP — Confronto</div><div class="card-subtitle">Mappatura dei layer nei due modelli</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>LAYER OSI</th><th>LAYER TCP/IP</th><th>PROTOCOLLI</th><th>NOTE</th></tr>
+        <tr><td class="cell-accent">7 Application<br>6 Presentation<br>5 Session</td><td class="cell-green">Application</td><td class="cell-mono">HTTP, FTP, DNS, SMTP, Telnet, SSH</td><td style="color:var(--muted);font-size:0.78rem">Nel TCP/IP i primi 3 layer OSI collassano in uno solo</td></tr>
+        <tr><td class="cell-accent">4 Transport</td><td class="cell-green">Transport</td><td class="cell-mono">TCP, UDP</td><td style="color:var(--muted);font-size:0.78rem">Uguale in entrambi i modelli</td></tr>
+        <tr><td class="cell-accent">3 Network</td><td class="cell-green">Internet</td><td class="cell-mono">IP, ICMP, ARP, OSPF, BGP</td><td style="color:var(--muted);font-size:0.78rem">Chiamato "Internet" nel TCP/IP</td></tr>
+        <tr><td class="cell-accent">2 Data Link<br>1 Physical</td><td class="cell-green">Network Access</td><td class="cell-mono">Ethernet, Wi-Fi, PPP</td><td style="color:var(--muted);font-size:0.78rem">Hardware + driver NIC</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🔌</span>
+      <div><div class="card-title">TCP vs UDP — Confronto dettagliato</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>CARATTERISTICA</th><th style="color:#67e8f9">TCP</th><th style="color:#fcd34d">UDP</th></tr>
+        <tr><td>Connessione</td><td class="cell-mono" style="color:var(--cyan)">Connection-oriented (3-way handshake)</td><td class="cell-mono" style="color:var(--orange)">Connectionless</td></tr>
+        <tr><td>Affidabilità</td><td style="color:var(--cyan)">✓ Acknowledgment, ritrasmissione</td><td style="color:var(--orange)">✗ Best effort, nessuna garanzia</td></tr>
+        <tr><td>Ordine pacchetti</td><td style="color:var(--cyan)">✓ Numeri di sequenza</td><td style="color:var(--orange)">✗ Non garantito</td></tr>
+        <tr><td>Velocità</td><td style="color:var(--orange)">Più lento (overhead)</td><td style="color:var(--green)">Più veloce (no overhead)</td></tr>
+        <tr><td>Usi tipici</td><td class="cell-mono" style="color:var(--cyan)">HTTP, FTP, SSH, Email</td><td class="cell-mono" style="color:var(--orange)">DNS, VoIP, Video streaming, DHCP</td></tr>
+        <tr><td>3-Way Handshake</td><td style="color:var(--cyan)">SYN → SYN-ACK → ACK</td><td style="color:var(--muted)">Non applicabile</td></tr>
+      </table>
+      <div class="example-block">
+        <div class="example-label">Esempio concreto</div>
+        <div class="example-text">Quando apri una pagina web, il browser usa <strong>TCP porta 80</strong> (o 443 HTTPS). Ogni pacchetto viene confermato. Quando fai una query DNS, il resolver usa <strong>UDP porta 53</strong> — è una domanda/risposta singola, non serve connessione.</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🤝</span>
+      <div><div class="card-title">TCP 3-Way Handshake</div></div>
+      <span class="card-tag tag-diagram">DIAGRAMMA</span>
+    </div>
+    <div class="card-body">
+      <svg viewBox="0 0 600 200" xmlns="http://www.w3.org/2000/svg" style="font-family:'JetBrains Mono',monospace">
+        <rect width="600" height="200" fill="#111827" rx="8"/>
+        <rect x="20" y="20" width="80" height="30" rx="4" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="60" y="40" fill="#93c5fd" font-size="10" text-anchor="middle" font-weight="700">CLIENT</text>
+        <rect x="500" y="20" width="80" height="30" rx="4" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="540" y="40" fill="#6ee7b7" font-size="10" text-anchor="middle" font-weight="700">SERVER</text>
+        <line x1="60" y1="50" x2="60" y2="190" stroke="#1f2d3d" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <line x1="540" y1="50" x2="540" y2="190" stroke="#1f2d3d" stroke-width="1.5" stroke-dasharray="4,3"/>
+        <!-- SYN -->
+        <line x1="65" y1="80" x2="530" y2="100" stroke="#3b82f6" stroke-width="2"/>
+        <polygon points="525,95 535,103 522,107" fill="#3b82f6"/>
+        <text x="290" y="82" fill="#3b82f6" font-size="9" text-anchor="middle" font-weight="700">SYN  seq=1000</text>
+        <!-- SYN-ACK -->
+        <line x1="535" y1="110" x2="70" y2="130" stroke="#10b981" stroke-width="2"/>
+        <polygon points="75,125 65,133 78,137" fill="#10b981"/>
+        <text x="290" y="112" fill="#10b981" font-size="9" text-anchor="middle" font-weight="700">SYN-ACK  seq=5000 ack=1001</text>
+        <!-- ACK -->
+        <line x1="65" y1="140" x2="530" y2="160" stroke="#f59e0b" stroke-width="2"/>
+        <polygon points="525,155 535,163 522,167" fill="#f59e0b"/>
+        <text x="290" y="142" fill="#f59e0b" font-size="9" text-anchor="middle" font-weight="700">ACK  ack=5001</text>
+        <text x="290" y="185" fill="#475569" font-size="9" text-anchor="middle">✓ Connessione stabilita — dati possono fluire</text>
+      </svg>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SUBNETTING
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-subnet">
+  <div class="section-intro">
+    <h1>🔢 IP Addressing & Subnetting</h1>
+    <p>Subnetting divide una rete in sottoreti più piccole. Fondamentale per gestire efficacemente lo spazio IP e la sicurezza di rete.</p>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📊</span>
+      <div><div class="card-title">Classi IP — Tabella di riferimento</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>CLASSE</th><th>RANGE PRIMO OTTETTO</th><th>MASK DEFAULT</th><th>RETI / HOST</th><th>USO</th></tr>
+        <tr><td class="cell-accent">A</td><td class="cell-mono">1 — 126</td><td class="cell-mono">255.0.0.0 /8</td><td style="color:var(--muted);font-size:0.78rem">126 reti / 16M host</td><td style="font-size:0.78rem">Grandi organizzazioni</td></tr>
+        <tr><td class="cell-accent">B</td><td class="cell-mono">128 — 191</td><td class="cell-mono">255.255.0.0 /16</td><td style="color:var(--muted);font-size:0.78rem">16384 reti / 65534 host</td><td style="font-size:0.78rem">Medie organizzazioni</td></tr>
+        <tr><td class="cell-accent">C</td><td class="cell-mono">192 — 223</td><td class="cell-mono">255.255.255.0 /24</td><td style="color:var(--muted);font-size:0.78rem">2M reti / 254 host</td><td style="font-size:0.78rem">Piccole reti</td></tr>
+        <tr><td class="cell-accent">D</td><td class="cell-mono">224 — 239</td><td class="cell-mono">—</td><td style="color:var(--muted);font-size:0.78rem">Multicast</td><td style="font-size:0.78rem">Streaming, routing</td></tr>
+        <tr><td class="cell-accent">Privati A</td><td class="cell-mono">10.0.0.0</td><td class="cell-mono">/8</td><td class="cell-orange">RFC 1918</td><td style="font-size:0.78rem">LAN interne</td></tr>
+        <tr><td class="cell-accent">Privati B</td><td class="cell-mono">172.16.0.0–172.31.x.x</td><td class="cell-mono">/12</td><td class="cell-orange">RFC 1918</td><td style="font-size:0.78rem">LAN interne</td></tr>
+        <tr><td class="cell-accent">Privati C</td><td class="cell-mono">192.168.0.0</td><td class="cell-mono">/16</td><td class="cell-orange">RFC 1918</td><td style="font-size:0.78rem">Home/ufficio</td></tr>
+      </table>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🧮</span>
+      <div><div class="card-title">Formule Subnetting</div></div>
+      <span class="card-tag tag-formula">FORMULE</span>
+    </div>
+    <div class="card-body">
+      <div class="formula-grid">
+        <div class="formula-box">
+          <div class="formula-label">Host utilizzabili</div>
+          <div class="formula-val">2ʰ − 2</div>
+          <div class="formula-sub">h = bit di host (32 − CIDR). Si sottraggono network e broadcast.</div>
+        </div>
+        <div class="formula-box">
+          <div class="formula-label">Numero di subnet</div>
+          <div class="formula-val">2ˢ</div>
+          <div class="formula-sub">s = bit di subnet presi in prestito dalla parte host.</div>
+        </div>
+        <div class="formula-box">
+          <div class="formula-label">Block size (passo)</div>
+          <div class="formula-val">256 − valore ottetto mask</div>
+          <div class="formula-sub">Es: mask 255.255.255.192 → 256−192=64. Subnet ogni 64.</div>
+        </div>
+        <div class="formula-box">
+          <div class="formula-label">Broadcast</div>
+          <div class="formula-val">Network + Block − 1</div>
+          <div class="formula-sub">Es: 192.168.1.64/26 → broadcast = 64+64−1 = 127</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📐</span>
+      <div><div class="card-title">Esempio: Subnetting /26 su rete /24</div><div class="card-subtitle">Dividiamo 192.168.1.0/24 in 4 subnet /26</div></div>
+      <span class="card-tag tag-example">ESEMPIO</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>SUBNET #</th><th>NETWORK</th><th>PRIMO HOST</th><th>ULTIMO HOST</th><th>BROADCAST</th><th>HOST</th></tr>
+        <tr><td class="cell-accent">1</td><td class="cell-mono">192.168.1.0/26</td><td class="cell-green">192.168.1.1</td><td class="cell-green">192.168.1.62</td><td class="cell-orange">192.168.1.63</td><td class="cell-mono">62</td></tr>
+        <tr><td class="cell-accent">2</td><td class="cell-mono">192.168.1.64/26</td><td class="cell-green">192.168.1.65</td><td class="cell-green">192.168.1.126</td><td class="cell-orange">192.168.1.127</td><td class="cell-mono">62</td></tr>
+        <tr><td class="cell-accent">3</td><td class="cell-mono">192.168.1.128/26</td><td class="cell-green">192.168.1.129</td><td class="cell-green">192.168.1.190</td><td class="cell-orange">192.168.1.191</td><td class="cell-mono">62</td></tr>
+        <tr><td class="cell-accent">4</td><td class="cell-mono">192.168.1.192/26</td><td class="cell-green">192.168.1.193</td><td class="cell-green">192.168.1.254</td><td class="cell-orange">192.168.1.255</td><td class="cell-mono">62</td></tr>
+      </table>
+      <div class="note-block">💡 /26 = 26 bit di rete, 6 bit di host → 2⁶−2 = <strong>62 host</strong> per subnet. Block size = 256−192 = 64.</div>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📋</span>
+      <div><div class="card-title">Cheat Sheet CIDR</div></div>
+      <span class="card-tag tag-table">REFERENCE</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>CIDR</th><th>SUBNET MASK</th><th>HOST USABILI</th><th>SUBNET DA /24</th></tr>
+        <tr><td class="cell-mono">/24</td><td class="cell-mono">255.255.255.0</td><td class="cell-green">254</td><td class="cell-orange">1</td></tr>
+        <tr><td class="cell-mono">/25</td><td class="cell-mono">255.255.255.128</td><td class="cell-green">126</td><td class="cell-orange">2</td></tr>
+        <tr><td class="cell-mono">/26</td><td class="cell-mono">255.255.255.192</td><td class="cell-green">62</td><td class="cell-orange">4</td></tr>
+        <tr><td class="cell-mono">/27</td><td class="cell-mono">255.255.255.224</td><td class="cell-green">30</td><td class="cell-orange">8</td></tr>
+        <tr><td class="cell-mono">/28</td><td class="cell-mono">255.255.255.240</td><td class="cell-green">14</td><td class="cell-orange">16</td></tr>
+        <tr><td class="cell-mono">/29</td><td class="cell-mono">255.255.255.248</td><td class="cell-green">6</td><td class="cell-orange">32</td></tr>
+        <tr><td class="cell-mono">/30</td><td class="cell-mono">255.255.255.252</td><td class="cell-green">2</td><td class="cell-orange">64</td></tr>
+        <tr><td class="cell-mono">/31</td><td class="cell-mono">255.255.255.254</td><td class="cell-green">0 (point-to-point)</td><td class="cell-orange">128</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     VLAN
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-vlan">
+  <div class="section-intro">
+    <h1>🔀 VLANs & Switching</h1>
+    <p>Le VLAN separano logicamente il traffico su uno stesso switch fisico. Essenziale per sicurezza e segmentazione di rete.</p>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🏢</span>
+      <div><div class="card-title">Esempio: Ufficio con 3 VLAN</div><div class="card-subtitle">Sales, IT, Management su uno stesso switch fisico</div></div>
+      <span class="card-tag tag-diagram">DIAGRAMMA</span>
+    </div>
+    <div class="card-body">
+      <svg viewBox="0 0 720 300" xmlns="http://www.w3.org/2000/svg" style="font-family:'JetBrains Mono',monospace">
+        <rect width="720" height="300" fill="#111827" rx="8"/>
+        <!-- Switch centrale -->
+        <rect x="270" y="120" width="180" height="60" rx="8" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="2"/>
+        <text x="360" y="146" fill="#93c5fd" font-size="11" text-anchor="middle" font-weight="700">SWITCH</text>
+        <text x="360" y="162" fill="#64748b" font-size="8" text-anchor="middle">Fa0/1-8</text>
+        <!-- VLAN 10 -->
+        <rect x="20" y="20" width="160" height="70" rx="6" fill="rgba(239,68,68,0.1)" stroke="rgba(239,68,68,0.4)" stroke-width="1.5"/>
+        <text x="100" y="40" fill="#fca5a5" font-size="10" text-anchor="middle" font-weight="700">VLAN 10 — Sales</text>
+        <text x="100" y="58" fill="#64748b" font-size="8" text-anchor="middle">💼 PC-Sales1  Fa0/1</text>
+        <text x="100" y="72" fill="#64748b" font-size="8" text-anchor="middle">💼 PC-Sales2  Fa0/2</text>
+        <!-- VLAN 20 -->
+        <rect x="280" y="20" width="160" height="70" rx="6" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.4)" stroke-width="1.5"/>
+        <text x="360" y="40" fill="#6ee7b7" font-size="10" text-anchor="middle" font-weight="700">VLAN 20 — IT</text>
+        <text x="360" y="58" fill="#64748b" font-size="8" text-anchor="middle">⚙️ Server-IT  Fa0/3</text>
+        <text x="360" y="72" fill="#64748b" font-size="8" text-anchor="middle">⚙️ PC-Admin   Fa0/4</text>
+        <!-- VLAN 30 -->
+        <rect x="540" y="20" width="160" height="70" rx="6" fill="rgba(245,158,11,0.1)" stroke="rgba(245,158,11,0.4)" stroke-width="1.5"/>
+        <text x="620" y="40" fill="#fcd34d" font-size="10" text-anchor="middle" font-weight="700">VLAN 30 — Mgmt</text>
+        <text x="620" y="58" fill="#64748b" font-size="8" text-anchor="middle">📡 Router     Fa0/5</text>
+        <text x="620" y="72" fill="#64748b" font-size="8" text-anchor="middle">🔀 SW-Mgmt    Fa0/6</text>
+        <!-- Lines VLAN10 to switch -->
+        <line x1="100" y1="90" x2="280" y2="138" stroke="rgba(239,68,68,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- Lines VLAN20 to switch -->
+        <line x1="360" y1="90" x2="360" y2="120" stroke="rgba(16,185,129,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- Lines VLAN30 to switch -->
+        <line x1="620" y1="90" x2="450" y2="138" stroke="rgba(245,158,11,0.5)" stroke-width="1.5" stroke-dasharray="5,3"/>
+        <!-- Trunk to router -->
+        <line x1="360" y1="180" x2="360" y2="230" stroke="#8b5cf6" stroke-width="3"/>
+        <rect x="290" y="230" width="140" height="50" rx="6" fill="rgba(139,92,246,0.15)" stroke="#8b5cf6" stroke-width="2"/>
+        <text x="360" y="252" fill="#c4b5fd" font-size="10" text-anchor="middle" font-weight="700">ROUTER</text>
+        <text x="360" y="268" fill="#64748b" font-size="8" text-anchor="middle">Inter-VLAN Routing</text>
+        <text x="276" y="212" fill="#8b5cf6" font-size="8">TRUNK 802.1Q</text>
+        <!-- Legend -->
+        <rect x="20" y="240" width="240" height="50" rx="4" fill="rgba(255,255,255,0.02)" stroke="#1f2d3d" stroke-width="1"/>
+        <text x="30" y="258" fill="#64748b" font-size="8">Access ports: un solo VLAN, nessun tag</text>
+        <text x="30" y="272" fill="#64748b" font-size="8">Trunk port: più VLAN, tag 802.1Q aggiunto</text>
+        <text x="30" y="284" fill="#64748b" font-size="8">VLAN separate = broadcast domain separati</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">⌨️</span>
+      <div><div class="card-title">Comandi CLI: Configurazione VLAN</div></div>
+      <span class="card-tag tag-command">CLI</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div style="font-family:'JetBrains Mono';font-size:0.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">CREA VLAN & ASSEGNA PORTA</div>
+          <div class="code-block">
+<span class="c-comment">! Entra in config mode</span>
+<span class="c-prompt">SW1#</span> <span class="c-cmd">configure terminal</span>
+<span class="c-comment">! Crea VLAN 10</span>
+<span class="c-prompt">SW1(config)#</span> <span class="c-cmd">vlan 10</span>
+<span class="c-prompt">SW1(config-vlan)#</span> <span class="c-cmd">name Sales</span>
+<span class="c-prompt">SW1(config-vlan)#</span> <span class="c-cmd">exit</span>
+<span class="c-comment">! Assegna porta Fa0/1 a VLAN 10</span>
+<span class="c-prompt">SW1(config)#</span> <span class="c-cmd">interface Fa0/1</span>
+<span class="c-prompt">SW1(config-if)#</span> <span class="c-cmd">switchport mode access</span>
+<span class="c-prompt">SW1(config-if)#</span> <span class="c-cmd">switchport access vlan 10</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono';font-size:0.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">CONFIGURA TRUNK PORT</div>
+          <div class="code-block">
+<span class="c-comment">! Porta trunk verso router</span>
+<span class="c-prompt">SW1(config)#</span> <span class="c-cmd">interface Fa0/24</span>
+<span class="c-prompt">SW1(config-if)#</span> <span class="c-cmd">switchport mode trunk</span>
+<span class="c-prompt">SW1(config-if)#</span> <span class="c-cmd">switchport trunk allowed vlan 10,20,30</span>
+<span class="c-comment">! Verifica VLAN</span>
+<span class="c-prompt">SW1#</span> <span class="c-cmd">show vlan brief</span>
+<span class="c-out">VLAN  Name      Status  Ports</span>
+<span class="c-out">10    Sales     active  Fa0/1, Fa0/2</span>
+<span class="c-out">20    IT        active  Fa0/3, Fa0/4</span>
+<span class="c-out">30    Mgmt      active  Fa0/5, Fa0/6</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ROUTING
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-routing">
+  <div class="section-intro">
+    <h1>🗺️ Routing Protocols</h1>
+    <p>I protocolli di routing permettono ai router di imparare percorsi verso reti remote e scegliere il percorso migliore.</p>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">⚖️</span>
+      <div><div class="card-title">Confronto protocolli di routing</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>PROTOCOLLO</th><th>TIPO</th><th>ALGORITMO</th><th>METRICA</th><th>AD</th><th>NOTA</th></tr>
+        <tr><td class="cell-accent">RIP v2</td><td>Distance Vector</td><td>Bellman-Ford</td><td class="cell-mono">Hop count (max 15)</td><td class="cell-orange">120</td><td style="font-size:0.78rem;color:var(--muted)">Lento, obsoleto</td></tr>
+        <tr><td class="cell-accent">OSPF</td><td>Link State</td><td>Dijkstra (SPF)</td><td class="cell-mono">Cost (100Mbps/bw)</td><td class="cell-green">110</td><td style="font-size:0.78rem;color:var(--muted)">Standard, scalabile</td></tr>
+        <tr><td class="cell-accent">EIGRP</td><td>Hybrid (Cisco)</td><td>DUAL</td><td class="cell-mono">BW + Delay</td><td class="cell-green">90</td><td style="font-size:0.78rem;color:var(--muted)">Solo Cisco, veloce</td></tr>
+        <tr><td class="cell-accent">BGP</td><td>Path Vector</td><td>Best Path</td><td class="cell-mono">AS Path + policy</td><td class="cell-orange">20/200</td><td style="font-size:0.78rem;color:var(--muted)">Internet routing</td></tr>
+        <tr><td class="cell-accent">Static</td><td>Manuale</td><td>—</td><td class="cell-mono">—</td><td class="cell-green">1</td><td style="font-size:0.78rem;color:var(--muted)">Rotte fisse</td></tr>
+        <tr><td class="cell-accent">Connected</td><td>Diretto</td><td>—</td><td class="cell-mono">—</td><td class="cell-green">0</td><td style="font-size:0.78rem;color:var(--muted)">Interfacce attive</td></tr>
+      </table>
+      <div class="note-block">💡 <strong>AD (Administrative Distance)</strong> = affidabilità della fonte. Valore più basso = più preferita. Se due protocolli conoscono la stessa rete, vince quello con AD più bassa.</div>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">⌨️</span>
+      <div><div class="card-title">OSPF — Configurazione di base</div></div>
+      <span class="card-tag tag-command">CLI</span>
+    </div>
+    <div class="card-body">
+      <div class="code-block">
+<span class="c-comment">! Abilita OSPF processo 1</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">router ospf 1</span>
+<span class="c-comment">! Dichiara le reti connesse (area 0 = backbone)</span>
+<span class="c-prompt">R1(config-router)#</span> <span class="c-cmd">network 192.168.1.0 0.0.0.255 area 0</span>
+<span class="c-prompt">R1(config-router)#</span> <span class="c-cmd">network 10.0.0.0 0.255.255.255 area 0</span>
+<span class="c-comment">! Verifica</span>
+<span class="c-prompt">R1#</span> <span class="c-cmd">show ip ospf neighbor</span>
+<span class="c-out">Neighbor ID  Pri  State    Interface</span>
+<span class="c-out">2.2.2.2      1    FULL/-   Fa0/0</span>
+<span class="c-prompt">R1#</span> <span class="c-cmd">show ip route ospf</span>
+<span class="c-out">O    10.1.1.0/24 [110/2] via 192.168.1.2, 00:01:23, Fa0/0</span>
+      </div>
+      <div class="note-block" style="margin-top:12px">💡 La wildcard mask è l'inverso della subnet mask: /24 → 0.0.0.255. OSPF area 0 è la backbone; tutte le altre aree devono connettersi all'area 0.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     CLI
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-cli">
+  <div class="section-intro">
+    <h1>💻 Comandi CLI Cisco IOS</h1>
+    <p>Riferimento rapido ai comandi essenziali per la configurazione di router e switch Cisco.</p>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🗂️</span>
+      <div><div class="card-title">Modi della CLI</div></div>
+      <span class="card-tag tag-diagram">DIAGRAMMA</span>
+    </div>
+    <div class="card-body">
+      <svg viewBox="0 0 700 120" xmlns="http://www.w3.org/2000/svg" style="font-family:'JetBrains Mono',monospace">
+        <rect width="700" height="120" fill="#111827" rx="8"/>
+        <rect x="10" y="35" width="130" height="50" rx="6" fill="rgba(139,92,246,0.12)" stroke="#8b5cf6" stroke-width="1.5"/>
+        <text x="75" y="57" fill="#c4b5fd" font-size="9" text-anchor="middle" font-weight="700">USER EXEC</text>
+        <text x="75" y="72" fill="#64748b" font-size="8" text-anchor="middle">Router></text>
+        <text x="75" y="85" fill="#475569" font-size="7" text-anchor="middle">show, ping, traceroute</text>
+        <line x1="140" y1="60" x2="178" y2="60" stroke="#475569" stroke-width="1.5"/>
+        <polygon points="173,55 183,60 173,65" fill="#475569"/>
+        <text x="155" y="52" fill="#475569" font-size="7">enable</text>
+        <rect x="183" y="35" width="130" height="50" rx="6" fill="rgba(59,130,246,0.12)" stroke="#3b82f6" stroke-width="1.5"/>
+        <text x="248" y="57" fill="#93c5fd" font-size="9" text-anchor="middle" font-weight="700">PRIVILEGED</text>
+        <text x="248" y="72" fill="#64748b" font-size="8" text-anchor="middle">Router#</text>
+        <text x="248" y="85" fill="#475569" font-size="7" text-anchor="middle">show run, debug, copy</text>
+        <line x1="313" y1="60" x2="351" y2="60" stroke="#475569" stroke-width="1.5"/>
+        <polygon points="346,55 356,60 346,65" fill="#475569"/>
+        <text x="325" y="52" fill="#475569" font-size="7">conf t</text>
+        <rect x="356" y="35" width="150" height="50" rx="6" fill="rgba(16,185,129,0.12)" stroke="#10b981" stroke-width="1.5"/>
+        <text x="431" y="57" fill="#6ee7b7" font-size="9" text-anchor="middle" font-weight="700">GLOBAL CONFIG</text>
+        <text x="431" y="72" fill="#64748b" font-size="8" text-anchor="middle">Router(config)#</text>
+        <text x="431" y="85" fill="#475569" font-size="7" text-anchor="middle">hostname, ip route</text>
+        <line x1="506" y1="60" x2="544" y2="60" stroke="#475569" stroke-width="1.5"/>
+        <polygon points="539,55 549,60 539,65" fill="#475569"/>
+        <text x="518" y="52" fill="#475569" font-size="7">int/line</text>
+        <rect x="549" y="35" width="140" height="50" rx="6" fill="rgba(245,158,11,0.12)" stroke="#f59e0b" stroke-width="1.5"/>
+        <text x="619" y="54" fill="#fcd34d" font-size="8" text-anchor="middle" font-weight="700">SUB-CONFIG</text>
+        <text x="619" y="68" fill="#64748b" font-size="7" text-anchor="middle">(config-if)#</text>
+        <text x="619" y="81" fill="#64748b" font-size="7" text-anchor="middle">(config-line)#</text>
+        <text x="619" y="92" fill="#475569" font-size="7" text-anchor="middle">ip address, speed</text>
+      </svg>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📋</span>
+      <div><div class="card-title">Comandi essenziali — Cheat Sheet</div></div>
+      <span class="card-tag tag-command">CLI REFERENCE</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <table class="ref-table">
+            <tr><th colspan="2">SHOW COMMANDS</th></tr>
+            <tr><td class="cell-mono">show running-config</td><td style="font-size:0.78rem;color:var(--muted)">Config corrente in RAM</td></tr>
+            <tr><td class="cell-mono">show startup-config</td><td style="font-size:0.78rem;color:var(--muted)">Config salvata in NVRAM</td></tr>
+            <tr><td class="cell-mono">show ip interface brief</td><td style="font-size:0.78rem;color:var(--muted)">Stato interfacce</td></tr>
+            <tr><td class="cell-mono">show ip route</td><td style="font-size:0.78rem;color:var(--muted)">Routing table</td></tr>
+            <tr><td class="cell-mono">show version</td><td style="font-size:0.78rem;color:var(--muted)">Info IOS e hardware</td></tr>
+            <tr><td class="cell-mono">show mac-address-table</td><td style="font-size:0.78rem;color:var(--muted)">CAM table switch</td></tr>
+            <tr><td class="cell-mono">show vlan brief</td><td style="font-size:0.78rem;color:var(--muted)">VLAN configurate</td></tr>
+          </table>
+        </div>
+        <div>
+          <table class="ref-table">
+            <tr><th colspan="2">CONFIGURAZIONE BASE</th></tr>
+            <tr><td class="cell-mono">enable secret cisco</td><td style="font-size:0.78rem;color:var(--muted)">Password privileged (cifrata)</td></tr>
+            <tr><td class="cell-mono">service password-enc</td><td style="font-size:0.78rem;color:var(--muted)">Cifra tutte le pwd</td></tr>
+            <tr><td class="cell-mono">no ip domain-lookup</td><td style="font-size:0.78rem;color:var(--muted)">Disabilita DNS lookup</td></tr>
+            <tr><td class="cell-mono">ip route 0.0.0.0 0.0.0.0 x.x.x.x</td><td style="font-size:0.78rem;color:var(--muted)">Default route</td></tr>
+            <tr><td class="cell-mono">copy run start</td><td style="font-size:0.78rem;color:var(--muted)">Salva configurazione</td></tr>
+            <tr><td class="cell-mono">erase startup-config</td><td style="font-size:0.78rem;color:var(--muted)">Reset config</td></tr>
+            <tr><td class="cell-mono">reload</td><td style="font-size:0.78rem;color:var(--muted)">Riavvia dispositivo</td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     NAT
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-nat">
+  <div class="section-intro">
+    <h1>🔄 NAT & PAT</h1>
+    <p>NAT traduce indirizzi IP privati in pubblici per consentire l'accesso a Internet. PAT (Port Address Translation) è la versione più comune — un solo IP pubblico per tutti.</p>
+  </div>
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🔄</span>
+      <div><div class="card-title">Tipi di NAT</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>TIPO</th><th>DESCRIZIONE</th><th>USO</th><th>ESEMPIO</th></tr>
+        <tr><td class="cell-accent">Static NAT</td><td>1 IP privato ↔ 1 IP pubblico fisso</td><td style="font-size:0.78rem">Server esposti (web, mail)</td><td class="cell-mono" style="font-size:0.78rem">10.0.0.1 → 203.0.113.10</td></tr>
+        <tr><td class="cell-accent">Dynamic NAT</td><td>Pool di IP pubblici, assegnati dinamicamente</td><td style="font-size:0.78rem">Raro, pool dedicato</td><td class="cell-mono" style="font-size:0.78rem">Pool: 203.0.113.1-10</td></tr>
+        <tr><td class="cell-accent">PAT / NAT Overload</td><td>Molti IP privati → 1 IP pubblico (differenziati da porta)</td><td style="font-size:0.78rem">Home, uffici — il più usato</td><td class="cell-mono" style="font-size:0.78rem">192.168.x.x → 203.0.113.1:12345</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">⌨️</span>
+      <div><div class="card-title">PAT — Configurazione completa</div></div>
+      <span class="card-tag tag-command">CLI</span>
+    </div>
+    <div class="card-body">
+      <div class="code-block">
+<span class="c-comment">! 1. Definisci ACL che identifica il traffico interno</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">access-list 1 permit 192.168.1.0 0.0.0.255</span>
+<span class="c-comment">! 2. Configura PAT (overload = usa la porta)</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">ip nat inside source list 1 interface Gi0/1 overload</span>
+<span class="c-comment">! 3. Marca interfacce</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">interface GigabitEthernet0/0</span>
+<span class="c-prompt">R1(config-if)#</span> <span class="c-cmd">ip nat inside</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">interface GigabitEthernet0/1</span>
+<span class="c-prompt">R1(config-if)#</span> <span class="c-cmd">ip nat outside</span>
+<span class="c-comment">! Verifica</span>
+<span class="c-prompt">R1#</span> <span class="c-cmd">show ip nat translations</span>
+<span class="c-out">Pro  Inside local    Inside global    Outside global</span>
+<span class="c-out">tcp  192.168.1.10:1025  203.0.113.1:12001  8.8.8.8:53</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     ACL
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-acl">
+  <div class="section-intro">
+    <h1>🛡️ Access Control Lists (ACL)</h1>
+    <p>Le ACL filtrano il traffico su router e switch. Ogni regola viene processata in ordine — la prima che fa match viene applicata.</p>
+  </div>
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📋</span>
+      <div><div class="card-title">Standard vs Extended ACL</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>TIPO</th><th>NUMERO</th><th>FILTRA</th><th>POSIZIONE CONSIGLIATA</th></tr>
+        <tr><td class="cell-accent">Standard</td><td class="cell-mono">1 — 99, 1300-1999</td><td>Solo IP sorgente</td><td style="font-size:0.78rem">Vicino alla destinazione</td></tr>
+        <tr><td class="cell-accent">Extended</td><td class="cell-mono">100 — 199, 2000-2699</td><td>Src IP, Dst IP, Protocollo, Porta</td><td style="font-size:0.78rem">Vicino alla sorgente</td></tr>
+        <tr><td class="cell-accent">Named</td><td class="cell-mono">Stringa</td><td>Come standard/extended</td><td style="font-size:0.78rem">Flessibile, più leggibile</td></tr>
+      </table>
+    </div>
+  </div>
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">⌨️</span>
+      <div><div class="card-title">Esempi ACL pratici</div></div>
+      <span class="card-tag tag-command">CLI</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div style="font-family:'JetBrains Mono';font-size:0.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">STANDARD — blocca rete 10.x</div>
+          <div class="code-block">
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">access-list 10 deny 10.0.0.0 0.255.255.255</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">access-list 10 permit any</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">interface Gi0/1</span>
+<span class="c-prompt">R1(config-if)#</span> <span class="c-cmd">ip access-group 10 in</span>
+          </div>
+        </div>
+        <div>
+          <div style="font-family:'JetBrains Mono';font-size:0.65rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">EXTENDED — permetti solo HTTP</div>
+          <div class="code-block">
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">access-list 101 permit tcp 192.168.1.0 0.0.0.255 any eq 80</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">access-list 101 permit tcp 192.168.1.0 0.0.0.255 any eq 443</span>
+<span class="c-prompt">R1(config)#</span> <span class="c-cmd">access-list 101 deny ip any any</span>
+<span class="c-comment">! (implicit deny già esiste, ma esplicito è best practice)</span>
+          </div>
+        </div>
+      </div>
+      <div class="note-block" style="margin-top:14px">⚠️ <strong>Implicit deny:</strong> alla fine di ogni ACL c'è sempre un "deny any any" invisibile. Se non inserisci un "permit any", tutto il traffico non matchato viene bloccato!</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     SPANNING TREE
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-spanning">
+  <div class="section-intro">
+    <h1>🌳 Spanning Tree Protocol (STP)</h1>
+    <p>STP previene i loop di rete in topologie con switch ridondanti. Blocca automaticamente le porte ridondanti, lasciandole in standby.</p>
+  </div>
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">🏆</span>
+      <div><div class="card-title">Elezione Root Bridge & Port States</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <div class="two-col">
+        <div>
+          <div style="margin-bottom:8px;font-weight:600;font-size:0.85rem">Elezione Root Bridge</div>
+          <table class="ref-table">
+            <tr><th>CRITERIO</th><th>DETTAGLIO</th></tr>
+            <tr><td class="cell-accent">1. Bridge Priority</td><td class="cell-mono">Default 32768, vince il minore</td></tr>
+            <tr><td class="cell-accent">2. MAC Address</td><td class="cell-mono">Se priority uguale, vince MAC minore</td></tr>
+          </table>
+        </div>
+        <div>
+          <div style="margin-bottom:8px;font-weight:600;font-size:0.85rem">Stati delle porte STP</div>
+          <table class="ref-table">
+            <tr><th>STATO</th><th>AZIONE</th></tr>
+            <tr><td class="cell-accent">Blocking</td><td style="font-size:0.78rem;color:var(--muted)">Riceve BPDU, non forwarda</td></tr>
+            <tr><td class="cell-accent">Listening</td><td style="font-size:0.78rem;color:var(--muted)">Processa BPDU (15s)</td></tr>
+            <tr><td class="cell-accent">Learning</td><td style="font-size:0.78rem;color:var(--muted)">Impara MAC table (15s)</td></tr>
+            <tr><td class="cell-accent">Forwarding</td><td style="font-size:0.78rem;color:var(--green)">Forwarda il traffico ✓</td></tr>
+          </table>
+        </div>
+      </div>
+      <div class="note-block" style="margin-top:14px">💡 <strong>RSTP (802.1w)</strong> è la versione moderna di STP — convergenza in secondi invece di ~50s. <strong>PVST+</strong> è la variante Cisco con istanza STP separata per ogni VLAN.</div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════
+     IPv6
+══════════════════════════════════════ -->
+<div class="schema-section" id="sec-ipv6">
+  <div class="section-intro">
+    <h1>6️⃣ IPv6</h1>
+    <p>IPv6 usa indirizzi a 128 bit (vs 32 bit IPv4). Niente più NAT, autoconfigurazione SLAAC, e molto più spazio di indirizzamento.</p>
+  </div>
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📏</span>
+      <div><div class="card-title">Struttura indirizzo IPv6</div></div>
+      <span class="card-tag tag-diagram">DIAGRAMMA</span>
+    </div>
+    <div class="card-body">
+      <svg viewBox="0 0 700 100" xmlns="http://www.w3.org/2000/svg" style="font-family:'JetBrains Mono',monospace">
+        <rect width="700" height="100" fill="#111827" rx="8"/>
+        <text x="350" y="22" fill="#64748b" font-size="9" text-anchor="middle">2001:0db8:85a3:0000:0000:8a2e:0370:7334</text>
+        <!-- 8 gruppi da 16 bit -->
+        <rect x="10"  y="32" width="76" height="30" rx="4" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1"/>
+        <rect x="92"  y="32" width="76" height="30" rx="4" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1"/>
+        <rect x="174" y="32" width="76" height="30" rx="4" fill="rgba(59,130,246,0.15)" stroke="#3b82f6" stroke-width="1"/>
+        <rect x="256" y="32" width="76" height="30" rx="4" fill="rgba(59,130,246,0.1)" stroke="rgba(59,130,246,0.4)" stroke-width="1"/>
+        <rect x="338" y="32" width="76" height="30" rx="4" fill="rgba(16,185,129,0.1)" stroke="rgba(16,185,129,0.4)" stroke-width="1"/>
+        <rect x="420" y="32" width="76" height="30" rx="4" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1"/>
+        <rect x="502" y="32" width="76" height="30" rx="4" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1"/>
+        <rect x="584" y="32" width="76" height="30" rx="4" fill="rgba(16,185,129,0.15)" stroke="#10b981" stroke-width="1"/>
+        <text x="48"  y="52" fill="#93c5fd" font-size="10" text-anchor="middle" font-weight="700">2001</text>
+        <text x="130" y="52" fill="#93c5fd" font-size="10" text-anchor="middle" font-weight="700">0db8</text>
+        <text x="212" y="52" fill="#93c5fd" font-size="10" text-anchor="middle" font-weight="700">85a3</text>
+        <text x="294" y="52" fill="#64748b" font-size="10" text-anchor="middle">0000</text>
+        <text x="376" y="52" fill="#64748b" font-size="10" text-anchor="middle">0000</text>
+        <text x="458" y="52" fill="#6ee7b7" font-size="10" text-anchor="middle" font-weight="700">8a2e</text>
+        <text x="540" y="52" fill="#6ee7b7" font-size="10" text-anchor="middle" font-weight="700">0370</text>
+        <text x="622" y="52" fill="#6ee7b7" font-size="10" text-anchor="middle" font-weight="700">7334</text>
+        <!-- Labels -->
+        <rect x="10" y="68" width="246" height="16" rx="2" fill="rgba(59,130,246,0.08)" stroke="rgba(59,130,246,0.3)" stroke-width="1"/>
+        <text x="133" y="80" fill="#93c5fd" font-size="8" text-anchor="middle">Network Prefix (/48)</text>
+        <rect x="420" y="68" width="240" height="16" rx="2" fill="rgba(16,185,129,0.08)" stroke="rgba(16,185,129,0.3)" stroke-width="1"/>
+        <text x="540" y="80" fill="#6ee7b7" font-size="8" text-anchor="middle">Interface ID (64 bit)</text>
+      </svg>
+      <div class="example-block" style="margin-top:14px">
+        <div class="example-label">Regole di abbreviazione</div>
+        <div class="example-text">
+          1. Rimuovi gli zeri iniziali in ogni gruppo: <strong>0db8 → db8</strong>, <strong>0000 → 0</strong><br>
+          2. Sostituisci uno o più gruppi consecutivi di soli zeri con <strong>::</strong> (solo una volta)<br>
+          Esempio: <strong>2001:0db8:0000:0000:0000:0000:0000:0001 → 2001:db8::1</strong>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="schema-card">
+    <div class="card-header"><span class="card-icon">📋</span>
+      <div><div class="card-title">Tipi di indirizzi IPv6</div></div>
+      <span class="card-tag tag-table">TABELLA</span>
+    </div>
+    <div class="card-body">
+      <table class="ref-table">
+        <tr><th>TIPO</th><th>PREFISSO</th><th>EQUIVALENTE IPv4</th><th>DESCRIZIONE</th></tr>
+        <tr><td class="cell-accent">Global Unicast</td><td class="cell-mono">2000::/3</td><td style="font-size:0.78rem">IP pubblico</td><td style="font-size:0.78rem;color:var(--muted)">Instradabile su Internet</td></tr>
+        <tr><td class="cell-accent">Link-Local</td><td class="cell-mono">FE80::/10</td><td style="font-size:0.78rem">169.254.x.x</td><td style="font-size:0.78rem;color:var(--muted)">Solo subnet locale, autogenerato</td></tr>
+        <tr><td class="cell-accent">Unique Local</td><td class="cell-mono">FC00::/7</td><td style="font-size:0.78rem">192.168.x.x</td><td style="font-size:0.78rem;color:var(--muted)">Privato, non routable Internet</td></tr>
+        <tr><td class="cell-accent">Multicast</td><td class="cell-mono">FF00::/8</td><td style="font-size:0.78rem">224.x.x.x</td><td style="font-size:0.78rem;color:var(--muted)">Gruppo di destinatari</td></tr>
+        <tr><td class="cell-accent">Loopback</td><td class="cell-mono">::1</td><td style="font-size:0.78rem">127.0.0.1</td><td style="font-size:0.78rem;color:var(--muted)">Localhost</td></tr>
+      </table>
+    </div>
+  </div>
+</div>
+
+  </div><!-- /content -->
+</div><!-- /main -->
+</div><!-- /app -->
+
+<script>
+function showSection(id) {
+  document.querySelectorAll('.schema-section').forEach(s => s.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.getElementById('sec-' + id).classList.add('active');
+  event.currentTarget.classList.add('active');
+  const titles = {
+    osi:'Modello OSI', tcpip:'TCP/IP Stack', subnet:'IP Addressing & Subnetting',
+    vlan:'VLANs & Switching', routing:'Routing Protocols', cli:'CLI Cisco IOS',
+    nat:'NAT & PAT', acl:'Access Control Lists', spanning:'Spanning Tree Protocol', ipv6:'IPv6'
+  };
+  document.getElementById('topbar-title').textContent = titles[id] || id;
+}
+</script>
+
+<script>
+(function(){
+  const KEY='ccna_progress_v2';
+  function loadG(){try{const s=JSON.parse(localStorage.getItem(KEY));return s||{xp:0,xpNext:100,level:1,score:0}}catch(e){return{xp:0,xpNext:100,level:1,score:0};}}
+  function renderNav(d){
+    const lv=document.getElementById('nav-lv');const bar=document.getElementById('nav-bar');const pts=document.getElementById('nav-pts');
+    if(lv)lv.textContent=d.level;if(bar)bar.style.width=(d.xp/d.xpNext*100)+'%';if(pts)pts.textContent=d.score+' XP';
+  }
+  renderNav(loadG());
+})();
+</script>
+
+</body>
+</html>

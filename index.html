@@ -1,0 +1,489 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CCNA Lab — Home</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+:root{--bg:#07090f;--surface:#0d1117;--panel:#111827;--border:#1f2d3d;--accent:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--muted:#64748b;--dim:#334155}
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
+body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:9999}
+/* NAV */
+.top-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0;position:sticky;top:0;z-index:100}
+.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap}
+.nav-brand{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:var(--accent);padding:14px 20px;text-decoration:none;letter-spacing:2px;border-right:1px solid var(--border)}
+.nav-link{display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:var(--muted);text-decoration:none;border-right:1px solid var(--border);transition:all .15s}
+.nav-link:hover{color:var(--text);background:rgba(255,255,255,0.03)}
+.nav-link.active{color:var(--accent);border-bottom:2px solid var(--accent)}
+.nav-xp{margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 16px}
+.xp-lv{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)}
+.xp-num{font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--cyan)}
+.xp-mini-track{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
+.xp-mini-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
+.xp-pts{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent)}
+/* HERO */
+.hero{max-width:1100px;margin:0 auto;padding:60px 32px 40px}
+.hero-top{display:flex;align-items:flex-start;gap:40px;flex-wrap:wrap;margin-bottom:48px}
+.hero-text{flex:1;min-width:280px}
+.hero-badge{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent);background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:4px 12px;border-radius:20px;letter-spacing:2px;display:inline-block;margin-bottom:16px}
+.hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
+.hero h1 span{color:var(--accent)}
+.hero p{color:var(--muted);font-size:0.95rem;line-height:1.7;max-width:480px;margin-bottom:24px}
+/* LEVEL CARD */
+.level-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:260px;flex-shrink:0}
+.lc-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
+.lc-avatar{width:52px;height:52px;border-radius:50%;background:rgba(59,130,246,0.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.lc-info{}
+.lc-rank{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text)}
+.lc-lv{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:2px}
+.lc-xp-label{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:6px}
+.lc-xp-track{height:8px;background:var(--dim);border-radius:4px;overflow:hidden;margin-bottom:16px}
+.lc-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:4px;transition:width .6s ease}
+.lc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lc-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
+.lc-stat-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--cyan)}
+.lc-stat-label{font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-top:2px;text-transform:uppercase}
+/* PROGRESS TREE */
+.section{max-width:1100px;margin:0 auto;padding:0 32px 48px}
+.section-title{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
+.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+/* TIER */
+.tier-block{margin-bottom:32px}
+.tier-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;display:inline-block;margin-bottom:12px}
+.tier-row{display:flex;gap:10px;flex-wrap:wrap}
+/* MODULE NODE */
+.mod-node{flex:1;min-width:140px;max-width:190px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.mod-node::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border);transition:background .2s}
+.mod-node:hover:not(.locked){transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
+.mod-node.unlocked::before{background:var(--accent)}
+.mod-node.completed::before{background:var(--green)}
+.mod-node.boss-node::before{background:var(--red)}
+.mod-node.cert-node{border-color:var(--orange);border-width:2px}
+.mod-node.cert-node::before{background:var(--orange)}
+.mod-node.locked{opacity:.45;cursor:not-allowed}
+.mod-icon{font-size:1.4rem;margin-bottom:8px}
+.mod-title{font-size:0.82rem;font-weight:600;margin-bottom:3px;line-height:1.3}
+.mod-sub{font-size:0.72rem;color:var(--muted);line-height:1.4;margin-bottom:8px}
+.mod-xp{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:6px}
+.mod-bar{height:3px;background:var(--dim);border-radius:2px;overflow:hidden}
+.mod-bar-fill{height:100%;border-radius:2px;transition:width .4s}
+.unlocked .mod-bar-fill{background:var(--accent)}
+.completed .mod-bar-fill{background:var(--green)}
+.mod-badge{position:absolute;top:8px;right:8px;font-size:0.58rem;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:10px}
+.badge-lock{background:rgba(100,116,139,0.15);color:var(--muted)}
+.badge-open{background:rgba(59,130,246,0.15);color:var(--accent)}
+.badge-done{background:rgba(16,185,129,0.15);color:var(--green)}
+.badge-boss{background:rgba(239,68,68,0.15);color:var(--red)}
+.badge-cert{background:rgba(245,158,11,0.2);color:var(--orange)}
+/* CONNECTOR */
+.tier-connector{display:flex;justify-content:flex-start;padding:6px 16px}
+.connector-line{width:2px;height:24px;background:var(--border);border-radius:1px}
+/* APP CARDS */
+.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:48px}
+.app-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;text-decoration:none;color:var(--text);transition:all .2s;display:block}
+.app-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 30px rgba(59,130,246,0.1)}
+.app-card-icon{font-size:2rem;margin-bottom:12px}
+.app-card-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;margin-bottom:6px}
+.app-card-desc{font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:12px}
+.app-card-tags{display:flex;gap:6px;flex-wrap:wrap}
+.app-tag{font-family:'JetBrains Mono',monospace;font-size:0.58rem;padding:2px 8px;border-radius:4px}
+/* MODAL */
+.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;display:none}
+.modal-overlay.open{display:flex}
+.modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
+.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px}
+.modal-close:hover{color:var(--text)}
+.modal-icon{font-size:2.5rem;margin-bottom:12px}
+.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px}
+.modal-meta{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:14px;letter-spacing:1px}
+.modal-desc{font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:16px}
+.modal-prereqs{margin-bottom:16px}
+.modal-prereqs-label{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
+.prereq-item{display:flex;align-items:center;gap:8px;font-size:0.82rem;padding:5px 0;border-bottom:1px solid var(--border)}
+.prereq-item:last-child{border-bottom:none}
+.prereq-check{font-size:0.8rem}
+.modal-games{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
+.modal-game-tag{font-family:'JetBrains Mono',monospace;font-size:0.62rem;padding:3px 10px;border-radius:4px;background:rgba(59,130,246,0.1);color:var(--accent);border:1px solid rgba(59,130,246,0.3)}
+.modal-actions{display:flex;gap:10px;flex-wrap:wrap}
+.btn-primary{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s}
+.btn-primary:hover{opacity:.9}
+.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
+.btn-secondary:hover{color:var(--text);border-color:var(--dim)}
+.btn-disabled{opacity:.4;cursor:not-allowed;background:var(--dim);color:var(--muted);border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem}
+/* TOAST */
+.toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:0.85rem;font-weight:600;z-index:300;transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
+.toast.show{transform:translateX(0)}
+/* LEGEND */
+.legend{display:flex;gap:14px;flex-wrap:wrap;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:32px}
+.legend-item{display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--muted)}
+.legend-dot{width:10px;height:10px;border-radius:50%}
+</style>
+</head>
+<body>
+
+<!-- NAV -->
+<nav class="top-nav">
+  <div class="nav-inner">
+    <a class="nav-brand" href="index.html">CCNA LAB</a>
+    <a class="nav-link active" href="index.html">🏠 Home</a>
+    <a class="nav-link" href="ccna-game.html">🎮 Quiz Game</a>
+    <a class="nav-link" href="ccna-interactive.html">⚗️ Interactive Lab</a>
+    <a class="nav-link" href="ccna-schemas.html">📚 Schemi</a>
+    <div class="nav-xp">
+      <span class="xp-lv">LV</span>
+      <span class="xp-num" id="nav-lv">1</span>
+      <div class="xp-mini-track"><div class="xp-mini-fill" id="nav-bar" style="width:0%"></div></div>
+      <span class="xp-pts" id="nav-pts">0 XP</span>
+    </div>
+  </div>
+</nav>
+
+<!-- HERO -->
+<div class="hero">
+  <div class="hero-top">
+    <div class="hero-text">
+      <div class="hero-badge">// CISCO CCNA 200-301 TRAINING PLATFORM</div>
+      <h1>Diventa un<br><span>Network Engineer</span></h1>
+      <p>Percorso strutturato da zero a CCNA. Ogni modulo sblocca il successivo. Impara con quiz AI, simulazioni CLI, drag & drop e calcoli subnet interattivi.</p>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <a href="#tree" class="btn-primary" style="text-decoration:none">▶ Inizia percorso</a>
+        <a href="ccna-schemas.html" class="btn-secondary" style="text-decoration:none">📚 Studia gli schemi</a>
+      </div>
+    </div>
+    <!-- LEVEL CARD -->
+    <div class="level-card">
+      <div class="lc-top">
+        <div class="lc-avatar" id="lc-avatar">🌐</div>
+        <div class="lc-info">
+          <div class="lc-rank" id="lc-rank">Network Apprentice</div>
+          <div class="lc-lv" id="lc-lv">Livello 1</div>
+        </div>
+      </div>
+      <div class="lc-xp-label">
+        <span id="lc-xp-cur">0 XP</span><span id="lc-xp-max">100 XP</span>
+      </div>
+      <div class="lc-xp-track"><div class="lc-xp-fill" id="lc-xp-fill" style="width:0%"></div></div>
+      <div class="lc-stats">
+        <div class="lc-stat"><div class="lc-stat-val" id="lc-done">0</div><div class="lc-stat-label">Moduli</div></div>
+        <div class="lc-stat"><div class="lc-stat-val" id="lc-score">0</div><div class="lc-stat-label">Punti</div></div>
+        <div class="lc-stat"><div class="lc-stat-val" id="lc-streak">0🔥</div><div class="lc-stat-label">Streak</div></div>
+        <div class="lc-stat"><div class="lc-stat-val" id="lc-cert">0</div><div class="lc-stat-label">Cert.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- APP LINKS -->
+  <div class="section-title">Strumenti disponibili</div>
+  <div class="app-grid">
+    <a href="ccna-game.html" class="app-card">
+      <div class="app-card-icon">🎮</div>
+      <div class="app-card-title">Quiz Game</div>
+      <div class="app-card-desc">Domande AI su tutti gli argomenti CCNA. Modalità practice, speed run, hardcore e simulazione d'esame.</div>
+      <div class="app-card-tags">
+        <span class="app-tag" style="background:rgba(59,130,246,0.1);color:var(--accent);border:1px solid rgba(59,130,246,0.3)">QUIZ AI</span>
+        <span class="app-tag" style="background:rgba(245,158,11,0.1);color:var(--orange);border:1px solid rgba(245,158,11,0.3)">STREAK</span>
+      </div>
+    </a>
+    <a href="ccna-interactive.html" class="app-card">
+      <div class="app-card-icon">⚗️</div>
+      <div class="app-card-title">Interactive Lab</div>
+      <div class="app-card-desc">CLI Cisco simulato, drag & drop VLAN, subnet calculator, packet flow animator e quiz AI per ogni argomento.</div>
+      <div class="app-card-tags">
+        <span class="app-tag" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.3)">CLI</span>
+        <span class="app-tag" style="background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.3)">DRAG&DROP</span>
+      </div>
+    </a>
+    <a href="ccna-schemas.html" class="app-card">
+      <div class="app-card-icon">📚</div>
+      <div class="app-card-title">Schemi & Reference</div>
+      <div class="app-card-desc">Diagrammi OSI, tabelle subnetting, cheat sheet CLI, esempi NAT/ACL/IPv6 con codice Cisco commentato.</div>
+      <div class="app-card-tags">
+        <span class="app-tag" style="background:rgba(6,182,212,0.1);color:var(--cyan);border:1px solid rgba(6,182,212,0.3)">REFERENCE</span>
+        <span class="app-tag" style="background:rgba(245,158,11,0.1);color:var(--orange);border:1px solid rgba(245,158,11,0.3)">FORMULE</span>
+      </div>
+    </a>
+  </div>
+</div>
+
+<!-- PROGRESS TREE -->
+<div class="section" id="tree">
+  <div class="section-title">Percorso di apprendimento</div>
+  <div class="legend">
+    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Disponibile</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--muted)"></div>Bloccato</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Completato</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Boss challenge</div>
+    <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Certificazione</div>
+  </div>
+  <div id="tree-container"></div>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
+  <div class="modal" id="modal-inner"></div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+// ── RANKS ──
+const RANKS=[
+  [1,'Network Apprentice','🌐'],
+  [3,'Packet Analyst','📡'],
+  [5,'Subnet Specialist','🔢'],
+  [8,'VLAN Engineer','🔀'],
+  [11,'Routing Architect','🗺️'],
+  [14,'Security Expert','🛡️'],
+  [17,'CCNA Candidate','📋'],
+  [20,'CCNA Champion','🏆'],
+];
+
+// ── MODULE DEFINITIONS ──
+const TIERS=[
+  {id:0,label:'Tier 0 — Fondamenta (zero assoluto)'},
+  {id:1,label:'Tier 1 — Modelli di rete'},
+  {id:2,label:'Tier 2 — Indirizzamento IP'},
+  {id:3,label:'Tier 3 — Switching'},
+  {id:4,label:'Tier 4 — Routing'},
+  {id:5,label:'Tier 5 — Sicurezza'},
+  {id:6,label:'Tier 6 — Avanzato'},
+  {id:7,label:'Tier 7 — Certificazione'},
+];
+
+const MODS=[
+  // T0
+  {id:'net_basics',tier:0,icon:'🌐',title:'Fondamenta di rete',sub:'LAN, WAN, topologie, cavi',xp:50,req:[],type:'normal',games:['Quiz AI','Drag & Drop'],desc:'Il punto di partenza assoluto. Cos\'è una rete, topologie (bus, star, ring, mesh), cavi UTP e fibra, dispositivi base (hub, switch, router). Nessun prerequisito.',link:'ccna-interactive.html'},
+  {id:'binary',tier:0,icon:'🔢',title:'Binario & Esadecimale',sub:'Conversioni, bit, byte, hex',xp:60,req:[],type:'normal',games:['Calcolatore','Quiz AI'],desc:'Conversione decimale↔binario↔esadecimale. Fondamentale per capire indirizzi IP e subnet mask a livello bit. Base di tutta la matematica di rete.',link:'ccna-schemas.html'},
+  // T1
+  {id:'osi',tier:1,icon:'📶',title:'Modello OSI',sub:'7 layer, PDU, protocolli',xp:80,req:['net_basics'],type:'normal',games:['Drag & Drop','Quiz AI','Simulazione'],desc:'I 7 layer OSI con PDU, protocolli e dispositivi. Incapsulamento e decapsulamento. Mnemonico "All People Seem To Need Data Processing".',link:'ccna-interactive.html'},
+  {id:'tcpip',tier:1,icon:'🤝',title:'Stack TCP/IP',sub:'TCP, UDP, 3-way handshake, porte',xp:80,req:['net_basics'],type:'normal',games:['Simulazione','Quiz AI'],desc:'Il modello reale di Internet. TCP vs UDP, 3-way handshake SYN/SYN-ACK/ACK, porte standard (HTTP 80, HTTPS 443, SSH 22, DNS 53).',link:'ccna-schemas.html'},
+  // T2
+  {id:'ip_addr',tier:2,icon:'🏠',title:'Indirizzi IP v4',sub:'Classi A/B/C, privati, RFC 1918',xp:90,req:['binary','osi'],type:'normal',games:['Quiz AI','Tabelle'],desc:'Classi A/B/C, indirizzi privati RFC 1918, loopback 127.0.0.1, APIPA 169.254.x.x, broadcast. Il vocabolario base dell\'indirizzamento.',link:'ccna-schemas.html'},
+  {id:'subnetting',tier:2,icon:'📐',title:'Subnetting CIDR',sub:'Calcoli, VLSM, block size',xp:120,req:['ip_addr'],type:'normal',games:['Calcolatore','Sfide a tempo','Quiz AI'],desc:'Il cuore del CCNA. Subnet mask, CIDR, calcolo network/broadcast/host range, VLSM per dividere reti in modo efficiente. Formule 2ʰ−2.',link:'ccna-interactive.html'},
+  // BOSS 1
+  {id:'boss1',tier:2,icon:'💀',title:'BOSS: Subnet Gauntlet',sub:'10 sfide CIDR in 5 minuti',xp:200,req:['subnetting'],type:'boss',games:['Speed Subnetting'],desc:'Sfida cronometrata: 10 calcoli di subnet in 5 minuti. Velocità e precisione. Sblocca il modulo VLAN e l\'accesso ai lab di switching.',link:'ccna-interactive.html'},
+  // T3
+  {id:'switching',tier:3,icon:'🔀',title:'Switching & Ethernet',sub:'MAC, CAM table, STP, RSTP',xp:100,req:['osi'],type:'normal',games:['Simulazione','Quiz AI'],desc:'Come funziona uno switch: MAC address, CAM table, flooding vs unicast, Spanning Tree Protocol per prevenire loop in topologie ridondanti.',link:'ccna-interactive.html'},
+  {id:'vlan',tier:3,icon:'🏢',title:'VLANs & 802.1Q',sub:'Access, trunk, inter-VLAN routing',xp:110,req:['switching','boss1'],type:'normal',games:['Drag & Drop','CLI','Quiz AI'],desc:'VLAN per segmentare logicamente la rete. Access port vs trunk port, tagging 802.1Q, inter-VLAN routing con router-on-a-stick e Layer 3 switch.',link:'ccna-interactive.html'},
+  // T4
+  {id:'routing_static',tier:4,icon:'🗺️',title:'Routing statico',sub:'Route table, default gateway, floating',xp:100,req:['ip_addr'],type:'normal',games:['CLI','Simulazione'],desc:'Configurare rotte statiche su router Cisco. Routing table, gateway di ultima istanza (default route 0.0.0.0/0), floating static routes per ridondanza.',link:'ccna-interactive.html'},
+  {id:'ospf',tier:4,icon:'🌐',title:'OSPF',sub:'Link-state, SPF, aree, DR/BDR',xp:130,req:['routing_static','vlan'],type:'normal',games:['CLI','Quiz AI','Simulazione'],desc:'Open Shortest Path First: protocollo link-state con algoritmo Dijkstra. Concetti chiave: Area 0 backbone, LSA, LSDB, DR/BDR election, costo interfacce.',link:'ccna-interactive.html'},
+  {id:'eigrp',tier:4,icon:'⚡',title:'EIGRP',sub:'Hybrid Cisco, DUAL, successor/FS',xp:120,req:['routing_static'],type:'normal',games:['CLI','Quiz AI'],desc:'Enhanced IGRP di Cisco: protocollo ibrido con algoritmo DUAL. Successor e Feasible Successor per convergenza rapida. Metrica composita BW+Delay.',link:'ccna-interactive.html'},
+  // BOSS 2
+  {id:'boss2',tier:4,icon:'💀',title:'BOSS: Routing Lab',sub:'Topologia 4 router da zero',xp:250,req:['ospf','eigrp'],type:'boss',games:['CLI Challenge'],desc:'Configura una topologia a 4 router con OSPF multi-area e redistribuzione EIGRP. Ogni rete deve essere raggiungibile da ogni router.',link:'ccna-interactive.html'},
+  // T5
+  {id:'acl',tier:5,icon:'🛡️',title:'ACL',sub:'Standard, extended, named, wildcard',xp:110,req:['routing_static'],type:'normal',games:['CLI','Quiz AI'],desc:'Access Control Lists per filtrare traffico. Standard (solo src IP, vicino destinazione) vs Extended (src/dst IP, proto, porta, vicino sorgente). Implicit deny.',link:'ccna-schemas.html'},
+  {id:'nat_pat',tier:5,icon:'🔄',title:'NAT & PAT',sub:'Static, dynamic, overload/PAT',xp:110,req:['ip_addr','routing_static'],type:'normal',games:['Simulazione','CLI','Quiz AI'],desc:'Network Address Translation. Static NAT 1:1 per server pubblici, Dynamic NAT con pool, PAT (overload) per condividere un IP pubblico tra molti host interni.',link:'ccna-schemas.html'},
+  {id:'ssh_sec',tier:5,icon:'🔒',title:'Sicurezza dispositivi',sub:'SSH, AAA, enable secret, port security',xp:100,req:['vlan'],type:'normal',games:['CLI','Quiz AI'],desc:'Best practice per securizzare router e switch Cisco: SSH al posto di Telnet, enable secret (non enable password), AAA, port security sullo switch, banner MOTD.',link:'ccna-interactive.html'},
+  // T6
+  {id:'ipv6',tier:6,icon:'6️⃣',title:'IPv6',sub:'128-bit, SLAAC, NDP, tipi',xp:130,req:['subnetting'],type:'normal',games:['Quiz AI','Calcolatore'],desc:'Il protocollo del futuro. Struttura 128-bit, tipi di indirizzo (global unicast, link-local FE80, multicast FF), SLAAC per autoconfigurazione, NDP al posto di ARP.',link:'ccna-schemas.html'},
+  {id:'wan',tier:6,icon:'🌍',title:'WAN & VPN',sub:'MPLS, PPP, GRE, IPSec, DMVPN',xp:120,req:['ospf'],type:'normal',games:['Quiz AI','Schema'],desc:'Tecnologie WAN: MPLS Label Switching, PPP authentication (PAP/CHAP), leased lines. Tunnel VPN: GRE per multiprotocollo, IPSec per cifratura, DMVPN per scalabilità.',link:'ccna-schemas.html'},
+  {id:'automation',tier:6,icon:'🤖',title:'Network Automation',sub:'SDN, REST API, Ansible, Python',xp:140,req:['boss2'],type:'normal',games:['Quiz AI','Demo'],desc:'Il futuro del networking. Software-Defined Networking, Cisco DNA Center, NETCONF/YANG, REST API con JSON, Ansible playbook e Python Netmiko per automatizzare config.',link:'ccna-interactive.html'},
+  // BOSS 3
+  {id:'boss3',tier:5,icon:'💀',title:'BOSS: Security Audit',sub:'Trova e correggi 8 vulnerabilità',xp:300,req:['acl','nat_pat','ssh_sec'],type:'boss',games:['Lab Challenge'],desc:'Ti viene data una config con 8 problemi di sicurezza. Identificali tutti e applica le correzioni con comandi CLI corretti. ACL mancanti, Telnet attivo, password deboli.',link:'ccna-interactive.html'},
+  // CERT
+  {id:'ccna_cert',tier:7,icon:'🏆',title:'CCNA 200-301 Exam Sim',sub:'120 domande — 120 minuti',xp:500,req:['boss1','boss2','boss3','ipv6','wan','automation'],type:'cert',games:['Esame Completo AI'],desc:'La simulazione d\'esame finale basata sul curriculo CCNA 200-301. 120 domande AI in 120 minuti, copertura completa di tutti gli argomenti del percorso.',link:'ccna-game.html'},
+];
+
+// ── STATE ──
+const SAVE_KEY='ccna_progress_v2';
+function loadState(){
+  try{
+    const s=JSON.parse(localStorage.getItem(SAVE_KEY));
+    if(s&&s.modules) return s;
+  }catch(e){}
+  return{xp:0,xpNext:100,level:1,score:0,streak:0,certs:0,done:0,
+    modules:Object.fromEntries(MODS.map(m=>[m.id,{progress:0,completed:false}]))};
+}
+function saveState(){localStorage.setItem(SAVE_KEY,JSON.stringify(G));}
+
+let G=loadState();
+// ensure all modules exist
+MODS.forEach(m=>{if(!G.modules[m.id])G.modules[m.id]={progress:0,completed:false};});
+
+function isUnlocked(mod){return mod.req.every(r=>G.modules[r]&&G.modules[r].completed);}
+function getStatus(mod){
+  if(G.modules[mod.id].completed) return 'done';
+  return isUnlocked(mod)?'active':'locked';
+}
+function getBadgeHTML(status,type){
+  if(type==='cert')  return `<span class="mod-badge badge-cert">CERT</span>`;
+  if(type==='boss')  return `<span class="mod-badge badge-boss">BOSS</span>`;
+  if(status==='done')   return `<span class="mod-badge badge-done">✓</span>`;
+  if(status==='locked') return `<span class="mod-badge badge-lock">🔒</span>`;
+  return `<span class="mod-badge badge-open">▶</span>`;
+}
+function nodeClasses(status,type){
+  let c='mod-node';
+  if(status==='locked')  c+=' locked';
+  else if(status==='done') c+=' completed';
+  else c+=' unlocked';
+  if(type==='boss') c+=' boss-node';
+  if(type==='cert') c+=' cert-node';
+  return c;
+}
+
+function renderTree(){
+  const container=document.getElementById('tree-container');
+  container.innerHTML='';
+  TIERS.forEach((tier,ti)=>{
+    const mods=MODS.filter(m=>m.tier===tier.id);
+    if(!mods.length) return;
+    const block=document.createElement('div');
+    block.className='tier-block';
+    block.innerHTML=`<div class="tier-label">${tier.label}</div>`;
+    const row=document.createElement('div');
+    row.className='tier-row';
+    mods.forEach(mod=>{
+      const status=getStatus(mod);
+      const prog=G.modules[mod.id].progress||0;
+      const div=document.createElement('div');
+      div.className=nodeClasses(status,mod.type);
+      div.innerHTML=`
+        ${getBadgeHTML(status,mod.type)}
+        <div class="mod-icon">${mod.icon}</div>
+        <div class="mod-title">${mod.title}</div>
+        <div class="mod-sub">${mod.sub}</div>
+        <div class="mod-xp">+${mod.xp} XP</div>
+        <div class="mod-bar"><div class="mod-bar-fill" style="width:${status==='done'?100:prog}%"></div></div>`;
+      if(status!=='locked') div.onclick=()=>openModal(mod.id);
+      row.appendChild(div);
+    });
+    block.appendChild(row);
+    if(ti<TIERS.length-1){
+      const conn=document.createElement('div');
+      conn.className='tier-connector';
+      conn.innerHTML='<div class="connector-line"></div>';
+      block.appendChild(conn);
+    }
+    container.appendChild(block);
+  });
+}
+
+function openModal(id){
+  const mod=MODS.find(m=>m.id===id);
+  const status=getStatus(mod);
+  const prog=G.modules[id].progress||0;
+  const prereqHtml=mod.req.length?`
+    <div class="modal-prereqs">
+      <div class="modal-prereqs-label">Prerequisiti</div>
+      ${mod.req.map(r=>{const m=MODS.find(x=>x.id===r);const done=G.modules[r]&&G.modules[r].completed;return`<div class="prereq-item"><span class="prereq-check" style="color:${done?'var(--green)':'var(--muted)'}">${done?'✓':'○'}</span><span style="font-size:0.82rem;${done?'color:var(--green)':''}">${m?m.title:r}</span></div>`}).join('')}
+    </div>`:'';
+  const progressHtml=prog>0&&status!=='done'?`
+    <div style="margin-bottom:14px">
+      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:6px"><span>PROGRESSO</span><span>${prog}%</span></div>
+      <div class="lc-xp-track"><div class="lc-xp-fill" style="width:${prog}%"></div></div>
+    </div>`:'';
+  let actionHtml;
+  if(status==='locked'){
+    actionHtml=`<span class="btn-disabled">🔒 Completa i prerequisiti</span>`;
+  } else if(status==='done'){
+    actionHtml=`<a href="${mod.link}" class="btn-primary">▶ Rigioca</a><button class="btn-secondary" onclick="resetMod('${id}')">↺ Reset progresso</button>`;
+  } else {
+    actionHtml=`<a href="${mod.link}" class="btn-primary" onclick="markStarted('${id}')">▶ Inizia — +${mod.xp} XP</a><a href="ccna-schemas.html" class="btn-secondary">📖 Studia prima</a>`;
+  }
+  document.getElementById('modal-inner').innerHTML=`
+    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-icon">${mod.icon}</div>
+    <div class="modal-title">${mod.title}</div>
+    <div class="modal-meta">${mod.type==='boss'?'BOSS CHALLENGE':mod.type==='cert'?'CERTIFICAZIONE':'MODULO'} · TIER ${mod.tier} · ${mod.xp} XP · ${status==='done'?'COMPLETATO ✓':status==='locked'?'BLOCCATO':'DISPONIBILE'}</div>
+    <div class="modal-desc">${mod.desc}</div>
+    ${prereqHtml}
+    <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Attività incluse</div>
+    <div class="modal-games">${mod.games.map(g=>`<span class="modal-game-tag">${g}</span>`).join('')}</div>
+    ${progressHtml}
+    <div class="modal-actions">${actionHtml}</div>`;
+  document.getElementById('modal').classList.add('open');
+}
+
+function closeModal(){document.getElementById('modal').classList.remove('open');}
+
+function markStarted(id){
+  if(!G.modules[id].completed){
+    G.modules[id].progress=Math.max(G.modules[id].progress||0,10);
+    saveState();
+  }
+}
+
+function resetMod(id){
+  G.modules[id]={progress:0,completed:false};
+  const mod=MODS.find(m=>m.id===id);
+  if(mod&&mod.type==='cert') G.certs=Math.max(0,G.certs-1);
+  G.done=MODS.filter(m=>G.modules[m.id]&&G.modules[m.id].completed).length;
+  saveState();renderTree();updateUI();closeModal();
+  showToast('Progresso resettato per '+mod.title);
+}
+
+// Called by other pages via localStorage event
+window.addEventListener('storage',e=>{
+  if(e.key===SAVE_KEY){G=loadState();updateUI();renderTree();}
+});
+
+// ── XP & LEVEL ──
+function addXP(n){
+  G.xp+=n;G.score+=n;
+  while(G.xp>=G.xpNext){G.xp-=G.xpNext;G.level++;G.xpNext=Math.round(G.xpNext*1.35);}
+  saveState();updateUI();
+}
+
+function getRank(){
+  const r=RANKS.slice().reverse().find(r=>G.level>=r[0]);
+  return r||RANKS[0];
+}
+
+function updateUI(){
+  const rank=getRank();
+  const pct=(G.xp/G.xpNext*100).toFixed(1);
+  document.getElementById('lc-xp-fill').style.width=pct+'%';
+  document.getElementById('lc-xp-cur').textContent=G.xp+' XP';
+  document.getElementById('lc-xp-max').textContent=G.xpNext+' XP';
+  document.getElementById('lc-rank').textContent=rank[1];
+  document.getElementById('lc-lv').textContent='Livello '+G.level;
+  document.getElementById('lc-avatar').textContent=rank[2];
+  document.getElementById('lc-done').textContent=G.done;
+  document.getElementById('lc-score').textContent=G.score;
+  document.getElementById('lc-streak').textContent=G.streak+'🔥';
+  document.getElementById('lc-cert').textContent=G.certs;
+  document.getElementById('nav-lv').textContent=G.level;
+  document.getElementById('nav-bar').style.width=pct+'%';
+  document.getElementById('nav-pts').textContent=G.score+' XP';
+}
+
+let toastT;
+function showToast(msg,color){
+  const t=document.getElementById('toast');
+  t.textContent=msg;
+  t.style.borderLeftColor=color||'var(--green)';
+  t.classList.add('show');
+  clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),3000);
+}
+
+// ── DEMO: mark completable from other pages ──
+// Other pages call: localStorage.setItem('ccna_complete_mod', JSON.stringify({id, xp}))
+window.addEventListener('storage',e=>{
+  if(e.key==='ccna_complete_mod'){
+    try{
+      const {id,xp}=JSON.parse(e.newValue);
+      if(!G.modules[id]||G.modules[id].completed) return;
+      G.modules[id].completed=true;G.modules[id].progress=100;
+      G.done++;
+      const mod=MODS.find(m=>m.id===id);
+      if(mod&&mod.type==='cert') G.certs++;
+      G.streak++;
+      addXP(xp||50);
+      showToast('✓ '+((mod&&mod.title)||id)+' completato! +'+xp+' XP');
+      renderTree();
+    }catch(e){}
+  }
+});
+
+renderTree();
+updateUI();
+</script>
+</body>
+</html>
