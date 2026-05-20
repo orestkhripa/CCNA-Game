@@ -3,487 +3,1327 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>CCNA Lab — Home</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
+<title>CCNA Quest</title>
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
-:root{--bg:#07090f;--surface:#0d1117;--panel:#111827;--border:#1f2d3d;--accent:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;--red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--muted:#64748b;--dim:#334155}
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
+:root{
+  --bg:#07090f;--surface:#0d1117;--panel:#111827;--border:#1f2d3d;
+  --accent:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;
+  --red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--muted:#64748b;--dim:#334155;
+}
 *{margin:0;padding:0;box-sizing:border-box}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh}
-body::before{content:'';position:fixed;inset:0;background:repeating-linear-gradient(0deg,transparent,transparent 2px,rgba(0,0,0,0.025) 2px,rgba(0,0,0,0.025) 4px);pointer-events:none;z-index:9999}
 /* NAV */
-.top-nav{background:var(--surface);border-bottom:1px solid var(--border);padding:0;position:sticky;top:0;z-index:100}
-.nav-inner{max-width:1100px;margin:0 auto;display:flex;align-items:center;flex-wrap:wrap}
-.nav-brand{font-family:'Orbitron',monospace;font-size:1rem;font-weight:900;color:var(--accent);padding:14px 20px;text-decoration:none;letter-spacing:2px;border-right:1px solid var(--border)}
-.nav-link{display:inline-flex;align-items:center;padding:14px 16px;font-size:0.82rem;font-weight:600;color:var(--muted);text-decoration:none;border-right:1px solid var(--border);transition:all .15s}
-.nav-link:hover{color:var(--text);background:rgba(255,255,255,0.03)}
-.nav-link.active{color:var(--accent);border-bottom:2px solid var(--accent)}
-.nav-xp{margin-left:auto;display:flex;align-items:center;gap:6px;padding:8px 16px}
-.xp-lv{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted)}
-.xp-num{font-family:'JetBrains Mono',monospace;font-size:0.85rem;font-weight:700;color:var(--cyan)}
-.xp-mini-track{width:60px;height:4px;background:var(--border);border-radius:2px;overflow:hidden}
-.xp-mini-fill{height:100%;background:var(--accent);border-radius:2px;transition:width .4s}
-.xp-pts{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent)}
-/* HERO */
-.hero{max-width:1100px;margin:0 auto;padding:60px 32px 40px}
-.hero-top{display:flex;align-items:flex-start;gap:40px;flex-wrap:wrap;margin-bottom:48px}
-.hero-text{flex:1;min-width:280px}
-.hero-badge{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--accent);background:rgba(59,130,246,0.1);border:1px solid rgba(59,130,246,0.3);padding:4px 12px;border-radius:20px;letter-spacing:2px;display:inline-block;margin-bottom:16px}
-.hero h1{font-family:'Syne',sans-serif;font-size:clamp(2rem,5vw,3.2rem);font-weight:800;line-height:1.1;margin-bottom:16px}
-.hero h1 span{color:var(--accent)}
-.hero p{color:var(--muted);font-size:0.95rem;line-height:1.7;max-width:480px;margin-bottom:24px}
-/* LEVEL CARD */
-.level-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:24px;min-width:260px;flex-shrink:0}
-.lc-top{display:flex;align-items:center;gap:12px;margin-bottom:16px}
-.lc-avatar{width:52px;height:52px;border-radius:50%;background:rgba(59,130,246,0.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem}
-.lc-info{}
-.lc-rank{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;color:var(--text)}
-.lc-lv{font-family:'JetBrains Mono',monospace;font-size:0.7rem;color:var(--muted);margin-top:2px}
-.lc-xp-label{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:6px}
-.lc-xp-track{height:8px;background:var(--dim);border-radius:4px;overflow:hidden;margin-bottom:16px}
-.lc-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:4px;transition:width .6s ease}
-.lc-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.lc-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px;text-align:center}
-.lc-stat-val{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--cyan)}
-.lc-stat-label{font-size:0.65rem;color:var(--muted);letter-spacing:1px;margin-top:2px;text-transform:uppercase}
-/* PROGRESS TREE */
-.section{max-width:1100px;margin:0 auto;padding:0 32px 48px}
-.section-title{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:20px;display:flex;align-items:center;gap:10px}
-.section-title::after{content:'';flex:1;height:1px;background:var(--border)}
-/* TIER */
-.tier-block{margin-bottom:32px}
-.tier-label{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:6px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;display:inline-block;margin-bottom:12px}
+.topnav{background:var(--surface);border-bottom:1px solid var(--border);display:flex;align-items:center;flex-wrap:wrap;padding:0;position:sticky;top:0;z-index:200}
+.nav-brand{font-family:'JetBrains Mono',monospace;font-size:.9rem;font-weight:700;color:var(--accent);padding:14px 20px;border-right:1px solid var(--border);letter-spacing:2px;cursor:pointer}
+.nav-btn{padding:12px 16px;font-size:.8rem;font-weight:600;color:var(--muted);background:none;border:none;border-right:1px solid var(--border);border-bottom:3px solid transparent;cursor:pointer;transition:all .15s;font-family:'DM Sans',sans-serif}
+.nav-btn:hover{color:var(--text)}
+.nav-btn.active{color:var(--accent);border-bottom-color:var(--accent)}
+.nav-xp{margin-left:auto;display:flex;align-items:center;gap:8px;padding:0 16px}
+.nav-lv{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700;color:var(--cyan)}
+.nav-track{width:80px;height:5px;background:var(--dim);border-radius:3px;overflow:hidden}
+.nav-fill{height:100%;background:var(--accent);border-radius:3px;transition:width .5s ease}
+.nav-score{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+/* VIEWS */
+.view{display:none;padding:28px;max-width:1000px;margin:0 auto}
+.view.active{display:block}
+/* ─── HOME ─── */
+.home-hero{background:linear-gradient(135deg,rgba(59,130,246,.08),rgba(6,182,212,.04));border:1px solid var(--border);border-radius:12px;padding:36px;margin-bottom:28px}
+.home-hero h1{font-family:'Syne',sans-serif;font-size:clamp(1.8rem,4vw,2.6rem);font-weight:800;margin-bottom:10px}
+.home-hero h1 span{color:var(--accent)}
+.home-hero p{color:var(--muted);font-size:.9rem;line-height:1.7;max-width:520px}
+/* LEVEL CARD on home */
+.home-top{display:grid;grid-template-columns:1fr auto;gap:24px;align-items:start}
+@media(max-width:600px){.home-top{grid-template-columns:1fr}}
+.lv-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;min-width:220px}
+.lv-card-top{display:flex;align-items:center;gap:12px;margin-bottom:14px}
+.lv-avatar{width:48px;height:48px;border-radius:50%;background:rgba(59,130,246,.15);border:2px solid var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.4rem}
+.lv-rank{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700}
+.lv-sub{font-size:.7rem;color:var(--muted);margin-top:2px;font-family:'JetBrains Mono',monospace}
+.lv-xp-row{display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);margin-bottom:5px}
+.lv-xp-track{height:6px;background:var(--dim);border-radius:3px;overflow:hidden;margin-bottom:14px}
+.lv-xp-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:3px;transition:width .6s ease}
+.lv-stats{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.lv-stat{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:8px;text-align:center}
+.lv-stat b{display:block;font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--cyan)}
+.lv-stat span{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+/* TIER TREE */
+.sec-title{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:3px;text-transform:uppercase;margin-bottom:14px;display:flex;align-items:center;gap:10px}
+.sec-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.tier-block{margin-bottom:24px}
+.tier-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;padding:4px 12px;background:var(--surface);border:1px solid var(--border);border-radius:20px;display:inline-block;margin-bottom:10px}
 .tier-row{display:flex;gap:10px;flex-wrap:wrap}
-/* MODULE NODE */
-.mod-node{flex:1;min-width:140px;max-width:190px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
-.mod-node::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;background:var(--border);transition:background .2s}
-.mod-node:hover:not(.locked){transform:translateY(-2px);box-shadow:0 4px 20px rgba(0,0,0,0.3)}
-.mod-node.unlocked::before{background:var(--accent)}
-.mod-node.completed::before{background:var(--green)}
-.mod-node.boss-node::before{background:var(--red)}
-.mod-node.cert-node{border-color:var(--orange);border-width:2px}
-.mod-node.cert-node::before{background:var(--orange)}
-.mod-node.locked{opacity:.45;cursor:not-allowed}
-.mod-icon{font-size:1.4rem;margin-bottom:8px}
-.mod-title{font-size:0.82rem;font-weight:600;margin-bottom:3px;line-height:1.3}
-.mod-sub{font-size:0.72rem;color:var(--muted);line-height:1.4;margin-bottom:8px}
-.mod-xp{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:6px}
-.mod-bar{height:3px;background:var(--dim);border-radius:2px;overflow:hidden}
-.mod-bar-fill{height:100%;border-radius:2px;transition:width .4s}
-.unlocked .mod-bar-fill{background:var(--accent)}
-.completed .mod-bar-fill{background:var(--green)}
-.mod-badge{position:absolute;top:8px;right:8px;font-size:0.58rem;font-family:'JetBrains Mono',monospace;padding:2px 6px;border-radius:10px}
-.badge-lock{background:rgba(100,116,139,0.15);color:var(--muted)}
-.badge-open{background:rgba(59,130,246,0.15);color:var(--accent)}
-.badge-done{background:rgba(16,185,129,0.15);color:var(--green)}
-.badge-boss{background:rgba(239,68,68,0.15);color:var(--red)}
-.badge-cert{background:rgba(245,158,11,0.2);color:var(--orange)}
-/* CONNECTOR */
-.tier-connector{display:flex;justify-content:flex-start;padding:6px 16px}
-.connector-line{width:2px;height:24px;background:var(--border);border-radius:1px}
-/* APP CARDS */
-.app-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:14px;margin-bottom:48px}
-.app-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:22px;text-decoration:none;color:var(--text);transition:all .2s;display:block}
-.app-card:hover{border-color:var(--accent);transform:translateY(-3px);box-shadow:0 8px 30px rgba(59,130,246,0.1)}
-.app-card-icon{font-size:2rem;margin-bottom:12px}
-.app-card-title{font-family:'Syne',sans-serif;font-size:0.95rem;font-weight:700;margin-bottom:6px}
-.app-card-desc{font-size:0.78rem;color:var(--muted);line-height:1.5;margin-bottom:12px}
-.app-card-tags{display:flex;gap:6px;flex-wrap:wrap}
-.app-tag{font-family:'JetBrains Mono',monospace;font-size:0.58rem;padding:2px 8px;border-radius:4px}
-/* MODAL */
-.modal-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.7);z-index:200;display:flex;align-items:center;justify-content:center;padding:20px;display:none}
-.modal-overlay.open{display:flex}
-.modal{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:28px;max-width:480px;width:100%;position:relative;max-height:90vh;overflow-y:auto}
-.modal-close{position:absolute;top:12px;right:16px;background:none;border:none;color:var(--muted);font-size:1.2rem;cursor:pointer;padding:4px}
-.modal-close:hover{color:var(--text)}
-.modal-icon{font-size:2.5rem;margin-bottom:12px}
-.modal-title{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:700;margin-bottom:6px}
-.modal-meta{font-family:'JetBrains Mono',monospace;font-size:0.65rem;color:var(--muted);margin-bottom:14px;letter-spacing:1px}
-.modal-desc{font-size:0.85rem;color:var(--muted);line-height:1.7;margin-bottom:16px}
-.modal-prereqs{margin-bottom:16px}
-.modal-prereqs-label{font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px}
-.prereq-item{display:flex;align-items:center;gap:8px;font-size:0.82rem;padding:5px 0;border-bottom:1px solid var(--border)}
-.prereq-item:last-child{border-bottom:none}
-.prereq-check{font-size:0.8rem}
-.modal-games{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:16px}
-.modal-game-tag{font-family:'JetBrains Mono',monospace;font-size:0.62rem;padding:3px 10px;border-radius:4px;background:rgba(59,130,246,0.1);color:var(--accent);border:1px solid rgba(59,130,246,0.3)}
-.modal-actions{display:flex;gap:10px;flex-wrap:wrap}
-.btn-primary{background:var(--accent);color:#fff;border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:opacity .15s}
-.btn-primary:hover{opacity:.9}
-.btn-secondary{background:transparent;color:var(--muted);border:1px solid var(--border);padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:600;font-size:0.85rem;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:6px;transition:all .15s}
-.btn-secondary:hover{color:var(--text);border-color:var(--dim)}
-.btn-disabled{opacity:.4;cursor:not-allowed;background:var(--dim);color:var(--muted);border:none;padding:10px 20px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:0.85rem}
-/* TOAST */
-.toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:0.85rem;font-weight:600;z-index:300;transform:translateX(120%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:280px;box-shadow:0 4px 20px rgba(0,0,0,.4)}
-.toast.show{transform:translateX(0)}
-/* LEGEND */
-.legend{display:flex;gap:14px;flex-wrap:wrap;padding:16px 0;border-top:1px solid var(--border);border-bottom:1px solid var(--border);margin-bottom:32px}
-.legend-item{display:flex;align-items:center;gap:6px;font-size:0.72rem;color:var(--muted)}
-.legend-dot{width:10px;height:10px;border-radius:50%}
+.mod-card{flex:1;min-width:130px;max-width:180px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden}
+.mod-card::before{content:'';position:absolute;top:0;left:0;right:0;height:2px;transition:background .2s}
+.mod-card.unlocked::before{background:var(--accent)}
+.mod-card.done::before{background:var(--green)}
+.mod-card.boss-c::before{background:var(--red)}
+.mod-card.cert-c{border-color:var(--orange);border-width:2px}
+.mod-card.cert-c::before{background:var(--orange)}
+.mod-card.locked{opacity:.4;cursor:not-allowed}
+.mod-card:hover:not(.locked){transform:translateY(-2px);box-shadow:0 6px 24px rgba(0,0,0,.3)}
+.mod-icon{font-size:1.3rem;margin-bottom:6px}
+.mod-title{font-size:.78rem;font-weight:600;margin-bottom:2px;line-height:1.3}
+.mod-sub{font-size:.68rem;color:var(--muted);line-height:1.4;margin-bottom:6px}
+.mod-xp{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);margin-bottom:4px}
+.mod-pbar{height:2px;background:var(--dim);border-radius:1px;overflow:hidden}
+.mod-pfill{height:100%;border-radius:1px;transition:width .4s}
+.unlocked .mod-pfill,.done .mod-pfill{background:var(--accent)}
+.done .mod-pfill{background:var(--green);width:100%!important}
+.mod-badge{position:absolute;top:7px;right:7px;font-size:.55rem;font-family:'JetBrains Mono',monospace;padding:2px 5px;border-radius:8px}
+.tier-conn{padding:4px 12px}
+.tier-conn-line{width:2px;height:18px;background:var(--border);border-radius:1px}
+/* ─── QUIZ GAME ─── */
+.qg-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:20px;flex-wrap:wrap;gap:12px}
+.topic-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:8px;margin-bottom:20px}
+.topic-btn{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:12px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;text-align:left;transition:all .2s;font-family:'DM Sans',sans-serif}
+.topic-btn:hover,.topic-btn.sel{border-color:var(--accent);color:var(--accent);background:rgba(59,130,246,.06)}
+.mode-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.mode-btn{flex:1;min-width:100px;background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;transition:all .15s;font-family:'DM Sans',sans-serif}
+.mode-btn.sel{border-color:var(--orange);color:var(--orange);background:rgba(245,158,11,.07)}
+.start-btn{width:100%;padding:16px;background:transparent;border:2px solid var(--accent);color:var(--accent);font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:3px;cursor:pointer;border-radius:8px;transition:all .3s;margin-bottom:20px}
+.start-btn:hover{background:var(--accent);color:var(--bg)}
+/* quiz active */
+.quiz-wrap{max-width:680px;margin:0 auto}
+.q-topbar{display:flex;align-items:center;justify-content:space-between;margin-bottom:16px}
+.q-meta{font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted)}
+.q-timer{font-family:'JetBrains Mono',monospace;font-size:1.1rem;font-weight:700;color:var(--cyan);background:var(--panel);border:1px solid var(--border);padding:6px 14px;border-radius:8px;min-width:56px;text-align:center;transition:color .3s}
+.q-timer.warn{color:var(--red)}
+.prog-dots{display:flex;gap:5px;flex-wrap:wrap;margin-bottom:16px}
+.prog-dot{width:9px;height:9px;border-radius:50%;background:var(--dim);transition:all .3s}
+.prog-dot.cur{background:var(--accent);box-shadow:0 0 6px var(--accent)}
+.prog-dot.ok{background:var(--green)}
+.prog-dot.ko{background:var(--red)}
+.q-box{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:8px;padding:22px;margin-bottom:16px}
+.q-tag{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--orange);letter-spacing:2px;text-transform:uppercase;margin-bottom:10px}
+.q-text{font-size:.98rem;font-weight:600;line-height:1.6}
+.opts-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:14px}
+@media(max-width:540px){.opts-grid{grid-template-columns:1fr}}
+.opt{background:var(--panel);border:1px solid var(--border);color:var(--text);padding:13px 16px;cursor:pointer;border-radius:8px;font-size:.88rem;font-weight:500;text-align:left;transition:all .2s;display:flex;align-items:flex-start;gap:10px;font-family:'DM Sans',sans-serif}
+.opt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.opt.ok{border-color:var(--green);background:rgba(16,185,129,.08);color:var(--green)}
+.opt.ko{border-color:var(--red);background:rgba(239,68,68,.08);color:var(--red)}
+.opt:disabled{cursor:default}
+.opt-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);min-width:16px;margin-top:2px}
+.ok .opt-lbl,.ko .opt-lbl{color:inherit}
+.feedback{background:var(--panel);border-radius:8px;padding:14px 18px;margin-bottom:12px;font-size:.85rem;line-height:1.6;display:none}
+.feedback.show{display:block}
+.feedback.ok{border-left:3px solid var(--green)}
+.feedback.ko{border-left:3px solid var(--red)}
+.feedback-title{font-family:'JetBrains Mono',monospace;font-size:.65rem;font-weight:700;letter-spacing:2px;margin-bottom:6px;text-transform:uppercase}
+.feedback.ok .feedback-title{color:var(--green)}
+.feedback.ko .feedback-title{color:var(--red)}
+.next-btn{width:100%;padding:12px;background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .2s;display:none}
+.next-btn.show{display:block}
+.next-btn:hover{background:rgba(16,185,129,.1)}
+.loading-box{text-align:center;padding:40px 20px;display:none}
+.loading-box.show{display:block}
+.spinner{width:36px;height:36px;border:3px solid var(--dim);border-top-color:var(--accent);border-radius:50%;animation:spin .7s linear infinite;margin:0 auto 14px}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);letter-spacing:2px}
+.err-box{background:rgba(239,68,68,.07);border:1px solid rgba(239,68,68,.3);border-left:3px solid var(--red);border-radius:8px;padding:14px 18px;font-size:.85rem;color:#fca5a5;display:none;margin-bottom:12px}
+.err-box.show{display:block}
+/* RESULT */
+.result-wrap{text-align:center;padding:32px 0;max-width:500px;margin:0 auto}
+.result-pct{font-family:'JetBrains Mono',monospace;font-size:4rem;font-weight:700;margin:16px 0}
+.result-grade{font-family:'JetBrains Mono',monospace;font-size:.8rem;letter-spacing:3px;padding:6px 18px;border-radius:4px;display:inline-block;margin-bottom:24px}
+.result-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:24px}
+.rs{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:14px;text-align:center}
+.rs b{display:block;font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--cyan)}
+.rs span{font-size:.65rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px;margin-top:3px;display:block}
+.result-btns{display:flex;gap:10px;justify-content:center}
+.rbtn{padding:12px 24px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .2s}
+.rbtn-retry{background:transparent;border:1px solid var(--accent);color:var(--accent)}
+.rbtn-retry:hover{background:rgba(59,130,246,.1)}
+.rbtn-home{background:transparent;border:1px solid var(--dim);color:var(--muted)}
+.rbtn-home:hover{border-color:var(--text);color:var(--text)}
+/* XP TOAST */
+.xp-toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:.85rem;font-weight:600;z-index:9999;transform:translateX(140%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-width:280px}
+.xp-toast.show{transform:translateX(0)}
+/* SCHEMAS */
+.schema-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
+.schema-nav-btn{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;transition:all .15s;font-family:'DM Sans',sans-serif}
+.schema-nav-btn:hover{color:var(--text)}
+.schema-nav-btn.sel{background:rgba(59,130,246,.08);border-color:var(--accent);color:var(--accent)}
+.schema-sec{display:none}
+.schema-sec.active{display:block}
+.schema-card{background:var(--panel);border:1px solid var(--border);border-radius:12px;overflow:hidden;margin-bottom:20px}
+.schema-card-head{padding:14px 20px;border-bottom:1px solid var(--border);background:rgba(255,255,255,.015);display:flex;align-items:center;gap:10px}
+.schema-card-head h3{font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700}
+.schema-card-head span{font-family:'JetBrains Mono',monospace;font-size:.58rem;padding:2px 8px;border-radius:4px;margin-left:auto}
+.schema-card-body{padding:20px}
+.ref-table{width:100%;border-collapse:collapse;font-size:.8rem}
+.ref-table th{background:var(--surface);padding:9px 12px;text-align:left;font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;border-bottom:2px solid var(--border)}
+.ref-table td{padding:9px 12px;border-bottom:1px solid var(--border);vertical-align:top;line-height:1.5}
+.ref-table tr:last-child td{border-bottom:none}
+.ref-table tr:hover td{background:rgba(255,255,255,.02)}
+.cm{font-family:'JetBrains Mono',monospace;color:var(--cyan);font-size:.78rem}
+.cg{color:var(--green);font-family:'JetBrains Mono',monospace}
+.co{color:var(--orange);font-family:'JetBrains Mono',monospace}
+.ca{color:var(--accent);font-weight:600}
+.note{background:rgba(59,130,246,.06);border:1px solid rgba(59,130,246,.2);border-left:3px solid var(--accent);border-radius:8px;padding:12px 16px;font-size:.8rem;color:#93c5fd;line-height:1.7;margin-top:12px}
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+@media(max-width:620px){.two-col{grid-template-columns:1fr}}
+.code-block{background:#020408;border:1px solid var(--border);border-radius:8px;padding:14px 16px;font-family:'JetBrains Mono',monospace;font-size:.75rem;line-height:1.9;overflow-x:auto}
+.cc{color:var(--muted)}.cp{color:var(--green)}.ck{color:var(--cyan)}.cv{color:var(--orange)}.cs{color:#94a3b8}
+.formula-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:12px}
+.formula-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:14px}
+.formula-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px}
+.formula-val{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--cyan);font-weight:700}
+.formula-sub{font-size:.72rem;color:var(--muted);margin-top:4px;line-height:1.5}
+/* INTERACTIVE LAB */
+.lab-tabs{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:20px}
+.lab-tab{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:9px 16px;border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;transition:all .15s;font-family:'DM Sans',sans-serif}
+.lab-tab.sel{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lab-content{display:none}
+.lab-content.active{display:block}
+/* drag drop */
+.dd-arena{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:600px){.dd-arena{grid-template-columns:1fr}}
+.dd-pool{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:16px}
+.dd-pool h4{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:12px}
+.drag-item{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:9px 13px;cursor:grab;font-size:.82rem;font-weight:600;transition:all .15s;user-select:none;display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.drag-item:hover{border-color:var(--accent);color:var(--accent)}
+.drag-item.dragging{opacity:.3}
+.drag-item.ok-item{border-color:var(--green);color:var(--green);cursor:default}
+.drag-item.ko-item{border-color:var(--red);color:var(--red);animation:shake .3s}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+.drop-zone{background:var(--panel);border:2px dashed var(--dim);border-radius:8px;padding:11px 14px;min-height:48px;transition:all .15s;display:flex;align-items:center;gap:10px;margin-bottom:6px}
+.drop-zone.over{border-color:var(--accent);background:rgba(59,130,246,.04)}
+.drop-zone.ok-zone{border-color:var(--green);border-style:solid}
+.drop-zone.ko-zone{border-color:var(--red);border-style:solid}
+.zone-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);min-width:72px}
+.zone-ph{font-size:.72rem;color:var(--dim);font-style:italic}
+/* CLI */
+.cli-wrap{background:#020408;border:1px solid var(--border);border-radius:10px;overflow:hidden}
+.cli-bar{background:var(--surface);padding:9px 14px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:7px}
+.cli-dot{width:9px;height:9px;border-radius:50%}
+.cli-out{padding:14px;min-height:220px;max-height:340px;overflow-y:auto;font-family:'JetBrains Mono',monospace;font-size:.76rem;line-height:1.8}
+.cl{margin-bottom:1px}
+.cl-p{color:var(--green)}.cl-o{color:#94a3b8}.cl-e{color:var(--red)}.cl-s{color:var(--green)}.cl-i{color:var(--cyan)}.cl-w{color:var(--orange)}.cl-c{color:var(--muted);font-style:italic}
+.cli-inp{display:flex;align-items:center;padding:10px 14px;border-top:1px solid var(--border);gap:8px}
+.cli-ps{color:var(--green);font-family:'JetBrains Mono',monospace;font-size:.76rem;white-space:nowrap}
+.cli-field{flex:1;background:transparent;border:none;outline:none;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.76rem;caret-color:var(--green)}
+.cli-mission{background:rgba(6,182,212,.07);border:1px solid rgba(6,182,212,.2);border-radius:8px;padding:14px;margin-bottom:14px;font-size:.83rem;line-height:1.6}
+.cli-mission strong{color:var(--cyan);font-family:'JetBrains Mono',monospace}
+.hint-row{display:flex;gap:6px;flex-wrap:wrap;margin-top:10px}
+.hint-chip{background:var(--panel);border:1px solid var(--border);padding:3px 10px;border-radius:4px;font-family:'JetBrains Mono',monospace;font-size:.68rem;color:var(--muted);cursor:pointer;transition:all .15s}
+.hint-chip:hover{color:var(--text);border-color:var(--accent)}
+/* subnet */
+.sub-wrap{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+@media(max-width:600px){.sub-wrap{grid-template-columns:1fr}}
+.sub-panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:20px}
+.sub-ip{font-family:'JetBrains Mono',monospace;font-size:1.5rem;font-weight:700;color:var(--cyan);margin-bottom:4px}
+.sub-cidr{font-family:'JetBrains Mono',monospace;font-size:.95rem;color:var(--accent);margin-bottom:16px}
+.field-row{display:flex;align-items:center;gap:10px;margin-bottom:10px}
+.field-lbl{font-size:.78rem;color:var(--muted);min-width:130px;font-weight:500}
+.field-inp{flex:1;background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:7px 11px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.8rem;outline:none;transition:all .15s}
+.field-inp:focus{border-color:var(--accent)}
+.field-inp.ok{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.05)}
+.field-inp.ko{border-color:var(--red);color:var(--red)}
+.field-ck{font-size:.9rem;min-width:16px}
+.check-btn{width:100%;margin-top:12px;padding:10px;background:var(--accent);border:none;border-radius:8px;color:#fff;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s}
+.check-btn:hover{background:#2563eb}
+.bits-disp{font-family:'JetBrains Mono',monospace;font-size:.68rem;line-height:2.2;word-break:break-all}
+.bn{color:var(--accent)}.bh{color:var(--green)}.bs{color:var(--muted);margin:0 3px}
+/* feedback strip */
+.fb-strip{padding:10px 14px;border-radius:8px;margin-top:12px;font-size:.83rem;font-weight:600;display:none}
+.fb-strip.show{display:block}
+.fb-strip.ok{background:rgba(16,185,129,.1);border:1px solid rgba(16,185,129,.3);color:var(--green)}
+.fb-strip.ko{background:rgba(239,68,68,.1);border:1px solid rgba(239,68,68,.3);color:#fca5a5}
+.next-small{width:100%;padding:10px;margin-top:10px;background:transparent;border:1px solid var(--green);color:var(--green);border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;display:none;transition:all .15s}
+.next-small.show{display:block}
+.next-small:hover{background:rgba(16,185,129,.1)}
+/* ai question panel */
+.ai-panel{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;margin-top:16px}
+.ai-label{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--purple);letter-spacing:3px;text-transform:uppercase;margin-bottom:10px}
+.ai-q{font-size:.92rem;font-weight:600;line-height:1.6;margin-bottom:14px}
+.ai-opts{display:flex;flex-direction:column;gap:7px}
+.ai-opt{padding:9px 13px;border-radius:7px;border:1px solid var(--border);background:var(--surface);cursor:pointer;font-size:.83rem;transition:all .15s;display:flex;gap:9px;align-items:flex-start;font-family:'DM Sans',sans-serif}
+.ai-opt:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.ai-opt.ok{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.07)}
+.ai-opt.ko{border-color:var(--red);color:#fca5a5;background:rgba(239,68,68,.07)}
+.ai-opt:disabled{cursor:default}
+.opt-l{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);min-width:15px;margin-top:1px}
+.explainer{background:rgba(59,130,246,.07);border:1px solid rgba(59,130,246,.2);border-radius:7px;padding:12px 15px;font-size:.8rem;color:#93c5fd;line-height:1.7;margin-top:12px;display:none}
+.explainer.show{display:block}
+/* packet sim */
+.net-diag{display:flex;align-items:center;justify-content:space-around;gap:10px;margin:20px 0;flex-wrap:wrap}
+.net-dev{display:flex;flex-direction:column;align-items:center;gap:6px}
+.dev-ico{width:56px;height:56px;border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:1.6rem;border:2px solid var(--border);background:var(--surface);transition:all .3s}
+.dev-ico.active{border-color:var(--accent);box-shadow:0 0 16px rgba(59,130,246,.3)}
+.dev-ico.recv{border-color:var(--green);box-shadow:0 0 16px rgba(16,185,129,.3)}
+.dev-lbl{font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);text-align:center}
+.dev-ip{font-family:'JetBrains Mono',monospace;font-size:.58rem;color:var(--accent)}
+.link-seg{flex:1;height:2px;background:var(--dim);min-width:30px;position:relative}
+.link-lbl{position:absolute;top:-15px;left:50%;transform:translateX(-50%);font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted);white-space:nowrap}
+.pkt-dot{position:absolute;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 8px var(--cyan);display:none}
+.pkt-dot.go{display:block;animation:pkt-move .7s ease-in-out forwards}
+@keyframes pkt-move{from{left:0}to{left:calc(100% - 9px)}}
+.pkt-steps{display:flex;flex-direction:column;gap:7px;margin-top:16px}
+.pkt-step{display:flex;align-items:flex-start;gap:10px;padding:9px 13px;border-radius:7px;background:var(--surface);border:1px solid var(--border);font-size:.8rem;opacity:.35;transition:all .3s}
+.pkt-step.cur{opacity:1;border-color:var(--cyan)}
+.pkt-step.done{opacity:.65;border-color:var(--green)}
+.step-n{width:22px;height:22px;border-radius:50%;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;min-width:22px;transition:all .3s}
+.pkt-step.cur .step-n{background:var(--cyan);color:var(--bg)}
+.pkt-step.done .step-n{background:var(--green);color:var(--bg)}
+.sim-btns{display:flex;gap:10px;margin-top:16px}
+.sim-btn{flex:1;padding:10px;border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.8rem;cursor:pointer;transition:all .2s}
+.sim-btn-go{background:var(--accent);border:none;color:#fff}
+.sim-btn-go:hover{background:#2563eb}
+.sim-btn-rst{background:transparent;border:1px solid var(--border);color:var(--muted)}
+.sim-btn-rst:hover{border-color:var(--dim);color:var(--text)}
 </style>
 </head>
 <body>
 
 <!-- NAV -->
-<nav class="top-nav">
-  <div class="nav-inner">
-    <a class="nav-brand" href="index.html">CCNA LAB</a>
-    <a class="nav-link active" href="index.html">🏠 Home</a>
-    <a class="nav-link" href="ccna-game.html">🎮 Quiz Game</a>
-    <a class="nav-link" href="ccna-interactive.html">⚗️ Interactive Lab</a>
-    <a class="nav-link" href="ccna-schemas.html">📚 Schemi</a>
-    <div class="nav-xp">
-      <span class="xp-lv">LV</span>
-      <span class="xp-num" id="nav-lv">1</span>
-      <div class="xp-mini-track"><div class="xp-mini-fill" id="nav-bar" style="width:0%"></div></div>
-      <span class="xp-pts" id="nav-pts">0 XP</span>
-    </div>
+<nav class="topnav">
+  <div class="nav-brand" onclick="showView('home')">CCNA QUEST</div>
+  <button class="nav-btn active" id="nb-home"    onclick="showView('home')">🏠 Home</button>
+  <button class="nav-btn" id="nb-quiz"    onclick="showView('quiz')">🎮 Quiz</button>
+  <button class="nav-btn" id="nb-lab"     onclick="showView('lab')">⚗️ Lab</button>
+  <button class="nav-btn" id="nb-schemas" onclick="showView('schemas')">📚 Schemi</button>
+  <div class="nav-xp">
+    <span class="nav-lv" id="nav-lv">LV1</span>
+    <div class="nav-track"><div class="nav-fill" id="nav-fill" style="width:0%"></div></div>
+    <span class="nav-score" id="nav-score">0 XP</span>
   </div>
 </nav>
 
-<!-- HERO -->
-<div class="hero">
-  <div class="hero-top">
-    <div class="hero-text">
-      <div class="hero-badge">// CISCO CCNA 200-301 TRAINING PLATFORM</div>
-      <h1>Diventa un<br><span>Network Engineer</span></h1>
-      <p>Percorso strutturato da zero a CCNA. Ogni modulo sblocca il successivo. Impara con quiz AI, simulazioni CLI, drag & drop e calcoli subnet interattivi.</p>
-      <div style="display:flex;gap:10px;flex-wrap:wrap">
-        <a href="#tree" class="btn-primary" style="text-decoration:none">▶ Inizia percorso</a>
-        <a href="ccna-schemas.html" class="btn-secondary" style="text-decoration:none">📚 Studia gli schemi</a>
+<!-- ══════════════ HOME ══════════════ -->
+<div class="view active" id="view-home">
+  <div class="home-hero">
+    <div class="home-top">
+      <div>
+        <h1>Diventa un<br><span>Network Engineer</span></h1>
+        <p>Percorso a livelli da zero a CCNA. Sblocca moduli, completa giochi interattivi, guadagna XP.</p>
       </div>
-    </div>
-    <!-- LEVEL CARD -->
-    <div class="level-card">
-      <div class="lc-top">
-        <div class="lc-avatar" id="lc-avatar">🌐</div>
-        <div class="lc-info">
-          <div class="lc-rank" id="lc-rank">Network Apprentice</div>
-          <div class="lc-lv" id="lc-lv">Livello 1</div>
+      <div class="lv-card">
+        <div class="lv-card-top">
+          <div class="lv-avatar" id="lv-avatar">🌐</div>
+          <div>
+            <div class="lv-rank" id="lv-rank">Apprentice</div>
+            <div class="lv-sub" id="lv-sub">Livello 1</div>
+          </div>
+        </div>
+        <div class="lv-xp-row"><span id="lv-xp-cur">0 XP</span><span id="lv-xp-max">100 XP</span></div>
+        <div class="lv-xp-track"><div class="lv-xp-fill" id="lv-xp-fill" style="width:0%"></div></div>
+        <div class="lv-stats">
+          <div class="lv-stat"><b id="lv-done">0</b><span>Moduli</span></div>
+          <div class="lv-stat"><b id="lv-score">0</b><span>Punti</span></div>
+          <div class="lv-stat"><b id="lv-streak">0🔥</b><span>Streak</span></div>
+          <div class="lv-stat"><b id="lv-cert">0</b><span>Cert.</span></div>
         </div>
       </div>
-      <div class="lc-xp-label">
-        <span id="lc-xp-cur">0 XP</span><span id="lc-xp-max">100 XP</span>
-      </div>
-      <div class="lc-xp-track"><div class="lc-xp-fill" id="lc-xp-fill" style="width:0%"></div></div>
-      <div class="lc-stats">
-        <div class="lc-stat"><div class="lc-stat-val" id="lc-done">0</div><div class="lc-stat-label">Moduli</div></div>
-        <div class="lc-stat"><div class="lc-stat-val" id="lc-score">0</div><div class="lc-stat-label">Punti</div></div>
-        <div class="lc-stat"><div class="lc-stat-val" id="lc-streak">0🔥</div><div class="lc-stat-label">Streak</div></div>
-        <div class="lc-stat"><div class="lc-stat-val" id="lc-cert">0</div><div class="lc-stat-label">Cert.</div></div>
-      </div>
     </div>
   </div>
 
-  <!-- APP LINKS -->
-  <div class="section-title">Strumenti disponibili</div>
-  <div class="app-grid">
-    <a href="ccna-game.html" class="app-card">
-      <div class="app-card-icon">🎮</div>
-      <div class="app-card-title">Quiz Game</div>
-      <div class="app-card-desc">Domande AI su tutti gli argomenti CCNA. Modalità practice, speed run, hardcore e simulazione d'esame.</div>
-      <div class="app-card-tags">
-        <span class="app-tag" style="background:rgba(59,130,246,0.1);color:var(--accent);border:1px solid rgba(59,130,246,0.3)">QUIZ AI</span>
-        <span class="app-tag" style="background:rgba(245,158,11,0.1);color:var(--orange);border:1px solid rgba(245,158,11,0.3)">STREAK</span>
-      </div>
-    </a>
-    <a href="ccna-interactive.html" class="app-card">
-      <div class="app-card-icon">⚗️</div>
-      <div class="app-card-title">Interactive Lab</div>
-      <div class="app-card-desc">CLI Cisco simulato, drag & drop VLAN, subnet calculator, packet flow animator e quiz AI per ogni argomento.</div>
-      <div class="app-card-tags">
-        <span class="app-tag" style="background:rgba(16,185,129,0.1);color:var(--green);border:1px solid rgba(16,185,129,0.3)">CLI</span>
-        <span class="app-tag" style="background:rgba(139,92,246,0.1);color:var(--purple);border:1px solid rgba(139,92,246,0.3)">DRAG&DROP</span>
-      </div>
-    </a>
-    <a href="ccna-schemas.html" class="app-card">
-      <div class="app-card-icon">📚</div>
-      <div class="app-card-title">Schemi & Reference</div>
-      <div class="app-card-desc">Diagrammi OSI, tabelle subnetting, cheat sheet CLI, esempi NAT/ACL/IPv6 con codice Cisco commentato.</div>
-      <div class="app-card-tags">
-        <span class="app-tag" style="background:rgba(6,182,212,0.1);color:var(--cyan);border:1px solid rgba(6,182,212,0.3)">REFERENCE</span>
-        <span class="app-tag" style="background:rgba(245,158,11,0.1);color:var(--orange);border:1px solid rgba(245,158,11,0.3)">FORMULE</span>
-      </div>
-    </a>
-  </div>
-</div>
-
-<!-- PROGRESS TREE -->
-<div class="section" id="tree">
-  <div class="section-title">Percorso di apprendimento</div>
-  <div class="legend">
-    <div class="legend-item"><div class="legend-dot" style="background:var(--accent)"></div>Disponibile</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--muted)"></div>Bloccato</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--green)"></div>Completato</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--red)"></div>Boss challenge</div>
-    <div class="legend-item"><div class="legend-dot" style="background:var(--orange)"></div>Certificazione</div>
-  </div>
+  <!-- TREE -->
+  <div class="sec-title" style="margin-top:8px">Percorso di apprendimento</div>
   <div id="tree-container"></div>
 </div>
 
-<!-- MODAL -->
-<div class="modal-overlay" id="modal" onclick="if(event.target===this)closeModal()">
-  <div class="modal" id="modal-inner"></div>
+<!-- ══════════════ QUIZ ══════════════ -->
+<div class="view" id="view-quiz">
+  <!-- MENU -->
+  <div id="quiz-menu">
+    <div class="sec-title">Argomento</div>
+    <div class="topic-grid" id="topic-grid"></div>
+    <div class="sec-title">Modalità</div>
+    <div class="mode-row" id="mode-row">
+      <button class="mode-btn sel" data-mode="practice" onclick="selMode(this)">🎯 Practice</button>
+      <button class="mode-btn" data-mode="speed" onclick="selMode(this)">⚡ Speed Run</button>
+      <button class="mode-btn" data-mode="hardcore" onclick="selMode(this)">💀 Hardcore</button>
+      <button class="mode-btn" data-mode="exam" onclick="selMode(this)">📋 Esame Sim</button>
+    </div>
+    <button class="start-btn" onclick="startQuiz()">⚡ INIZIA</button>
+  </div>
+  <!-- ACTIVE -->
+  <div id="quiz-active" style="display:none" class="quiz-wrap">
+    <div class="q-topbar">
+      <div class="q-meta" id="q-meta">1/10</div>
+      <div class="q-timer" id="q-timer">30</div>
+    </div>
+    <div class="prog-dots" id="prog-dots"></div>
+    <div class="loading-box" id="q-loading"><div class="spinner"></div><div class="loading-txt">GENERANDO DOMANDA AI...</div></div>
+    <div class="err-box" id="q-err"></div>
+    <div id="q-question" style="display:none">
+      <div class="q-box"><div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div></div>
+      <div class="opts-grid" id="opts-grid"></div>
+      <div class="feedback" id="q-feedback"><div class="feedback-title" id="fb-title"></div><div id="fb-body"></div></div>
+      <button class="next-btn" id="next-btn" onclick="nextQuestion()">PROSSIMA →</button>
+    </div>
+  </div>
+  <!-- RESULT -->
+  <div id="quiz-result" style="display:none" class="result-wrap">
+    <div class="sec-title">Risultato</div>
+    <div class="result-pct" id="res-pct">0%</div>
+    <div class="result-grade" id="res-grade"></div>
+    <div class="result-stats">
+      <div class="rs"><b id="res-ok">0</b><span>Corrette</span></div>
+      <div class="rs"><b id="res-ko">0</b><span>Errate</span></div>
+      <div class="rs"><b id="res-xp">0</b><span>XP guadagnati</span></div>
+    </div>
+    <div class="result-btns">
+      <button class="rbtn rbtn-retry" onclick="startQuiz()">↺ Rigioca</button>
+      <button class="rbtn rbtn-home" onclick="showView('home')">🏠 Home</button>
+    </div>
+  </div>
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<!-- ══════════════ LAB ══════════════ -->
+<div class="view" id="view-lab">
+  <div class="lab-tabs">
+    <button class="lab-tab sel" onclick="selLabTab('osi',this)">📶 OSI Drag</button>
+    <button class="lab-tab" onclick="selLabTab('subnet',this)">🔢 Subnetting</button>
+    <button class="lab-tab" onclick="selLabTab('cli',this)">💻 CLI</button>
+    <button class="lab-tab" onclick="selLabTab('packet',this)">📦 Packet Flow</button>
+    <button class="lab-tab" onclick="selLabTab('vlan',this)">🔀 VLAN</button>
+    <button class="lab-tab" onclick="selLabTab('ailab',this)">🤖 Quiz AI</button>
+  </div>
+
+  <!-- OSI DRAG -->
+  <div class="lab-content active" id="lab-osi">
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:16px">Abbina ogni protocollo al suo layer OSI. Clicca sul layer corretto.</p>
+    <div style="display:grid;grid-template-columns:1fr 1.2fr;gap:20px;align-items:start" id="osi-arena">
+      <div>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:10px">STACK OSI</div>
+        <div id="osi-stack"></div>
+      </div>
+      <div>
+        <div id="prot-card" style="background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:18px;text-align:center;margin-bottom:14px">
+          <div style="font-family:'JetBrains Mono',monospace;font-size:1.3rem;font-weight:700;color:var(--cyan);margin-bottom:6px" id="prot-name">—</div>
+          <div style="font-size:.78rem;color:var(--muted)" id="prot-hint">—</div>
+        </div>
+        <div style="font-size:.78rem;color:var(--muted);margin-bottom:10px">A quale layer appartiene?</div>
+        <div id="osi-choices" style="display:grid;grid-template-columns:1fr 1fr;gap:7px"></div>
+        <div class="fb-strip" id="osi-fb"></div>
+        <div class="explainer" id="osi-expl"></div>
+        <button class="next-small" id="osi-next" onclick="nextProtocol()">Prossimo →</button>
+      </div>
+    </div>
+    <div style="display:flex;justify-content:space-between;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)">
+      <span>Corrette: <span id="osi-ok">0</span></span>
+      <span>Streak: <span id="osi-streak">0</span>🔥</span>
+    </div>
+  </div>
+
+  <!-- SUBNET -->
+  <div class="lab-content" id="lab-subnet">
+    <div class="sub-wrap">
+      <div class="sub-panel">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase">Sfida Subnetting</div>
+        <div class="sub-ip" id="sub-ip">192.168.1.0</div>
+        <div class="sub-cidr" id="sub-cidr">/24</div>
+        <div class="field-row"><span class="field-lbl">Subnet Mask</span><input class="field-inp" id="sf-mask" placeholder="255.255.255.0"><span class="field-ck" id="fc-mask"></span></div>
+        <div class="field-row"><span class="field-lbl">Network Address</span><input class="field-inp" id="sf-net"><span class="field-ck" id="fc-net"></span></div>
+        <div class="field-row"><span class="field-lbl">Broadcast</span><input class="field-inp" id="sf-bcast"><span class="field-ck" id="fc-bcast"></span></div>
+        <div class="field-row"><span class="field-lbl">Primo Host</span><input class="field-inp" id="sf-first"><span class="field-ck" id="fc-first"></span></div>
+        <div class="field-row"><span class="field-lbl">Ultimo Host</span><input class="field-inp" id="sf-last"><span class="field-ck" id="fc-last"></span></div>
+        <div class="field-row"><span class="field-lbl">Num. Host</span><input class="field-inp" id="sf-hosts"><span class="field-ck" id="fc-hosts"></span></div>
+        <button class="check-btn" onclick="checkSubnet()">Verifica</button>
+        <div class="fb-strip" id="sub-fb"></div>
+        <button class="next-small" id="sub-next" onclick="newSubnet()">Nuova sfida →</button>
+      </div>
+      <div class="sub-panel">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:12px;text-transform:uppercase">Bit Visualizer</div>
+        <div class="bits-disp" id="bits-disp">—</div>
+        <div style="display:flex;gap:14px;margin-top:10px;font-size:.7rem">
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--accent);display:inline-block"></span>Rete</span>
+          <span style="display:flex;align-items:center;gap:5px"><span style="width:8px;height:8px;border-radius:50%;background:var(--green);display:inline-block"></span>Host</span>
+        </div>
+        <div id="sub-info" style="margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:.72rem;line-height:2;color:var(--muted)"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CLI -->
+  <div class="lab-content" id="lab-cli">
+    <div class="cli-mission" id="cli-mission">
+      <strong>MISSIONE 1:</strong> Entra in modalità privilegiata poi imposta l'hostname "R1-LAB".
+      <div class="hint-row">
+        <span class="hint-chip" onclick="cliHint('enable')">enable</span>
+        <span class="hint-chip" onclick="cliHint('configure terminal')">configure terminal</span>
+        <span class="hint-chip" onclick="cliHint('hostname R1-LAB')">hostname R1-LAB</span>
+      </div>
+    </div>
+    <div class="cli-wrap">
+      <div class="cli-bar">
+        <div class="cli-dot" style="background:#ff5f57"></div>
+        <div class="cli-dot" style="background:#ffbd2e"></div>
+        <div class="cli-dot" style="background:#28c840"></div>
+        <span style="font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);margin-left:8px;letter-spacing:2px">CISCO IOS SIMULATOR</span>
+      </div>
+      <div class="cli-out" id="cli-out"></div>
+      <div class="cli-inp">
+        <span class="cli-ps" id="cli-ps">Router&gt;</span>
+        <input class="cli-field" id="cli-inp" placeholder="digita un comando..." autocomplete="off" spellcheck="false">
+      </div>
+    </div>
+    <div class="fb-strip" id="cli-fb"></div>
+  </div>
+
+  <!-- PACKET -->
+  <div class="lab-content" id="lab-packet">
+    <div style="font-family:'JetBrains Mono',monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:16px;text-transform:uppercase">Scenario: PC → Server remoto</div>
+    <div class="net-diag" id="net-diag">
+      <div class="net-dev"><div class="dev-ico" id="dev-pc">💻</div><div class="dev-lbl">PC</div><div class="dev-ip">192.168.1.10</div></div>
+      <div class="link-seg"><div class="link-lbl">Ethernet</div><div class="pkt-dot" id="pkt0"></div></div>
+      <div class="net-dev"><div class="dev-ico" id="dev-sw">🔀</div><div class="dev-lbl">Switch</div><div class="dev-ip">—</div></div>
+      <div class="link-seg"><div class="link-lbl">FastEth</div><div class="pkt-dot" id="pkt1"></div></div>
+      <div class="net-dev"><div class="dev-ico" id="dev-rt">📡</div><div class="dev-lbl">Router</div><div class="dev-ip">192.168.1.1</div></div>
+      <div class="link-seg"><div class="link-lbl">Internet</div><div class="pkt-dot" id="pkt2"></div></div>
+      <div class="net-dev"><div class="dev-ico" id="dev-srv">🖥️</div><div class="dev-lbl">Server</div><div class="dev-ip">8.8.8.8</div></div>
+    </div>
+    <div class="pkt-steps" id="pkt-steps"></div>
+    <div class="sim-btns">
+      <button class="sim-btn sim-btn-go" onclick="startPacket()">▶ Avvia</button>
+      <button class="sim-btn sim-btn-rst" onclick="resetPacket()">↺ Reset</button>
+    </div>
+  </div>
+
+  <!-- VLAN -->
+  <div class="lab-content" id="lab-vlan">
+    <p style="font-size:.83rem;color:var(--muted);margin-bottom:16px">Trascina ogni dispositivo sulla porta corretta. VLAN 10=Sales 🔴 VLAN 20=IT 🟢 VLAN 30=Mgmt 🟡</p>
+    <div class="dd-arena">
+      <div class="dd-pool"><h4>Dispositivi</h4><div id="vlan-devs"></div></div>
+      <div class="dd-pool"><h4>Porte Switch</h4><div id="vlan-ports"></div></div>
+    </div>
+    <div class="fb-strip" id="vlan-fb"></div>
+    <button class="next-small" id="vlan-next" onclick="initVlan()">Nuova sfida →</button>
+  </div>
+
+  <!-- AI QUIZ LAB -->
+  <div class="lab-content" id="lab-ailab">
+    <div class="sec-title">Argomento</div>
+    <div class="topic-grid" id="lab-topic-grid" style="margin-bottom:16px"></div>
+    <button class="check-btn" onclick="loadLabAI()" id="lab-ai-start">🤖 Genera domanda AI</button>
+    <div class="loading-box" id="lab-loading"><div class="spinner"></div><div class="loading-txt">GENERANDO...</div></div>
+    <div class="ai-panel" id="lab-ai-panel" style="display:none">
+      <div class="ai-label">🤖 AI QUESTION</div>
+      <div class="ai-q" id="lab-ai-q"></div>
+      <div class="ai-opts" id="lab-ai-opts"></div>
+      <div class="explainer" id="lab-ai-expl"></div>
+      <button class="next-small" id="lab-ai-next" onclick="loadLabAI()" style="margin-top:12px">Prossima →</button>
+    </div>
+    <div class="err-box" id="lab-ai-err"></div>
+  </div>
+</div>
+
+<!-- ══════════════ SCHEMAS ══════════════ -->
+<div class="view" id="view-schemas">
+  <div class="schema-nav">
+    <button class="schema-nav-btn sel" onclick="selSchema('osi',this)">📶 OSI</button>
+    <button class="schema-nav-btn" onclick="selSchema('subnet',this)">🔢 Subnetting</button>
+    <button class="schema-nav-btn" onclick="selSchema('cli',this)">💻 CLI</button>
+    <button class="schema-nav-btn" onclick="selSchema('vlan',this)">🔀 VLAN</button>
+    <button class="schema-nav-btn" onclick="selSchema('nat',this)">🔄 NAT</button>
+    <button class="schema-nav-btn" onclick="selSchema('acl',this)">🛡️ ACL</button>
+    <button class="schema-nav-btn" onclick="selSchema('ipv6',this)">6️⃣ IPv6</button>
+  </div>
+  <div id="schema-content"></div>
+</div>
+
+<div class="xp-toast" id="xp-toast"></div>
 
 <script>
-// ── RANKS ──
+// ══════════════════════════════════════
+// GLOBAL STATE
+// ══════════════════════════════════════
+const SAVE='ccna_v3';
 const RANKS=[
-  [1,'Network Apprentice','🌐'],
-  [3,'Packet Analyst','📡'],
-  [5,'Subnet Specialist','🔢'],
-  [8,'VLAN Engineer','🔀'],
-  [11,'Routing Architect','🗺️'],
-  [14,'Security Expert','🛡️'],
-  [17,'CCNA Candidate','📋'],
-  [20,'CCNA Champion','🏆'],
+  [1,'Apprentice','🌐'],[3,'Packet Analyst','📡'],[5,'Subnet Specialist','🔢'],
+  [8,'VLAN Engineer','🔀'],[11,'Routing Architect','🗺️'],[14,'Security Expert','🛡️'],
+  [17,'CCNA Candidate','📋'],[20,'CCNA Champion','🏆'],
 ];
+function loadG(){try{const s=JSON.parse(localStorage.getItem(SAVE));if(s&&s.modules)return s;}catch(e){}
+  return{xp:0,xpNext:100,level:1,score:0,streak:0,certs:0,done:0,
+    modules:{}};
+}
+let G=loadG();
+function saveG(){try{localStorage.setItem(SAVE,JSON.stringify(G));}catch(e){}}
+function getRank(){return RANKS.slice().reverse().find(r=>G.level>=r[0])||RANKS[0];}
+function addXP(n){
+  G.xp+=n;G.score+=n;G.streak++;
+  while(G.xp>=G.xpNext){G.xp-=G.xpNext;G.level++;G.xpNext=Math.round(G.xpNext*1.35);}
+  saveG();updateUI();
+  showToast('+'+n+' XP 🎯');
+}
+function updateUI(){
+  const r=getRank();const pct=(G.xp/G.xpNext*100).toFixed(1);
+  _id('nav-lv').textContent='LV'+G.level;
+  _id('nav-fill').style.width=pct+'%';
+  _id('nav-score').textContent=G.score+' XP';
+  _id('lv-avatar').textContent=r[2];
+  _id('lv-rank').textContent=r[1];
+  _id('lv-sub').textContent='Livello '+G.level;
+  _id('lv-xp-cur').textContent=G.xp+' XP';
+  _id('lv-xp-max').textContent=G.xpNext+' XP';
+  _id('lv-xp-fill').style.width=pct+'%';
+  _id('lv-done').textContent=G.done;
+  _id('lv-score').textContent=G.score;
+  _id('lv-streak').textContent=G.streak+'🔥';
+  _id('lv-cert').textContent=G.certs;
+}
+function _id(id){return document.getElementById(id);}
+let toastT;
+function showToast(msg,col){
+  const t=_id('xp-toast');t.textContent=msg;
+  t.style.borderLeftColor=col||'var(--green)';
+  t.classList.add('show');clearTimeout(toastT);
+  toastT=setTimeout(()=>t.classList.remove('show'),2500);
+}
 
-// ── MODULE DEFINITIONS ──
+// ── VIEWS ──
+function showView(v){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  _id('view-'+v).classList.add('active');
+  _id('nb-'+v).classList.add('active');
+  if(v==='home') renderTree();
+  if(v==='quiz') initQuizMenu();
+  if(v==='lab')  {initOsi();initSubnet();initCli();initPacket();initVlan();initLabTopics();}
+  if(v==='schemas') renderSchema('osi');
+}
+
+// ══════════════════════════════════════
+// TIER TREE
+// ══════════════════════════════════════
 const TIERS=[
-  {id:0,label:'Tier 0 — Fondamenta (zero assoluto)'},
+  {id:0,label:'Tier 0 — Zero assoluto'},
   {id:1,label:'Tier 1 — Modelli di rete'},
-  {id:2,label:'Tier 2 — Indirizzamento IP'},
+  {id:2,label:'Tier 2 — IP & Subnetting'},
   {id:3,label:'Tier 3 — Switching'},
   {id:4,label:'Tier 4 — Routing'},
   {id:5,label:'Tier 5 — Sicurezza'},
   {id:6,label:'Tier 6 — Avanzato'},
   {id:7,label:'Tier 7 — Certificazione'},
 ];
-
 const MODS=[
-  // T0
-  {id:'net_basics',tier:0,icon:'🌐',title:'Fondamenta di rete',sub:'LAN, WAN, topologie, cavi',xp:50,req:[],type:'normal',games:['Quiz AI','Drag & Drop'],desc:'Il punto di partenza assoluto. Cos\'è una rete, topologie (bus, star, ring, mesh), cavi UTP e fibra, dispositivi base (hub, switch, router). Nessun prerequisito.',link:'ccna-interactive.html'},
-  {id:'binary',tier:0,icon:'🔢',title:'Binario & Esadecimale',sub:'Conversioni, bit, byte, hex',xp:60,req:[],type:'normal',games:['Calcolatore','Quiz AI'],desc:'Conversione decimale↔binario↔esadecimale. Fondamentale per capire indirizzi IP e subnet mask a livello bit. Base di tutta la matematica di rete.',link:'ccna-schemas.html'},
-  // T1
-  {id:'osi',tier:1,icon:'📶',title:'Modello OSI',sub:'7 layer, PDU, protocolli',xp:80,req:['net_basics'],type:'normal',games:['Drag & Drop','Quiz AI','Simulazione'],desc:'I 7 layer OSI con PDU, protocolli e dispositivi. Incapsulamento e decapsulamento. Mnemonico "All People Seem To Need Data Processing".',link:'ccna-interactive.html'},
-  {id:'tcpip',tier:1,icon:'🤝',title:'Stack TCP/IP',sub:'TCP, UDP, 3-way handshake, porte',xp:80,req:['net_basics'],type:'normal',games:['Simulazione','Quiz AI'],desc:'Il modello reale di Internet. TCP vs UDP, 3-way handshake SYN/SYN-ACK/ACK, porte standard (HTTP 80, HTTPS 443, SSH 22, DNS 53).',link:'ccna-schemas.html'},
-  // T2
-  {id:'ip_addr',tier:2,icon:'🏠',title:'Indirizzi IP v4',sub:'Classi A/B/C, privati, RFC 1918',xp:90,req:['binary','osi'],type:'normal',games:['Quiz AI','Tabelle'],desc:'Classi A/B/C, indirizzi privati RFC 1918, loopback 127.0.0.1, APIPA 169.254.x.x, broadcast. Il vocabolario base dell\'indirizzamento.',link:'ccna-schemas.html'},
-  {id:'subnetting',tier:2,icon:'📐',title:'Subnetting CIDR',sub:'Calcoli, VLSM, block size',xp:120,req:['ip_addr'],type:'normal',games:['Calcolatore','Sfide a tempo','Quiz AI'],desc:'Il cuore del CCNA. Subnet mask, CIDR, calcolo network/broadcast/host range, VLSM per dividere reti in modo efficiente. Formule 2ʰ−2.',link:'ccna-interactive.html'},
-  // BOSS 1
-  {id:'boss1',tier:2,icon:'💀',title:'BOSS: Subnet Gauntlet',sub:'10 sfide CIDR in 5 minuti',xp:200,req:['subnetting'],type:'boss',games:['Speed Subnetting'],desc:'Sfida cronometrata: 10 calcoli di subnet in 5 minuti. Velocità e precisione. Sblocca il modulo VLAN e l\'accesso ai lab di switching.',link:'ccna-interactive.html'},
-  // T3
-  {id:'switching',tier:3,icon:'🔀',title:'Switching & Ethernet',sub:'MAC, CAM table, STP, RSTP',xp:100,req:['osi'],type:'normal',games:['Simulazione','Quiz AI'],desc:'Come funziona uno switch: MAC address, CAM table, flooding vs unicast, Spanning Tree Protocol per prevenire loop in topologie ridondanti.',link:'ccna-interactive.html'},
-  {id:'vlan',tier:3,icon:'🏢',title:'VLANs & 802.1Q',sub:'Access, trunk, inter-VLAN routing',xp:110,req:['switching','boss1'],type:'normal',games:['Drag & Drop','CLI','Quiz AI'],desc:'VLAN per segmentare logicamente la rete. Access port vs trunk port, tagging 802.1Q, inter-VLAN routing con router-on-a-stick e Layer 3 switch.',link:'ccna-interactive.html'},
-  // T4
-  {id:'routing_static',tier:4,icon:'🗺️',title:'Routing statico',sub:'Route table, default gateway, floating',xp:100,req:['ip_addr'],type:'normal',games:['CLI','Simulazione'],desc:'Configurare rotte statiche su router Cisco. Routing table, gateway di ultima istanza (default route 0.0.0.0/0), floating static routes per ridondanza.',link:'ccna-interactive.html'},
-  {id:'ospf',tier:4,icon:'🌐',title:'OSPF',sub:'Link-state, SPF, aree, DR/BDR',xp:130,req:['routing_static','vlan'],type:'normal',games:['CLI','Quiz AI','Simulazione'],desc:'Open Shortest Path First: protocollo link-state con algoritmo Dijkstra. Concetti chiave: Area 0 backbone, LSA, LSDB, DR/BDR election, costo interfacce.',link:'ccna-interactive.html'},
-  {id:'eigrp',tier:4,icon:'⚡',title:'EIGRP',sub:'Hybrid Cisco, DUAL, successor/FS',xp:120,req:['routing_static'],type:'normal',games:['CLI','Quiz AI'],desc:'Enhanced IGRP di Cisco: protocollo ibrido con algoritmo DUAL. Successor e Feasible Successor per convergenza rapida. Metrica composita BW+Delay.',link:'ccna-interactive.html'},
-  // BOSS 2
-  {id:'boss2',tier:4,icon:'💀',title:'BOSS: Routing Lab',sub:'Topologia 4 router da zero',xp:250,req:['ospf','eigrp'],type:'boss',games:['CLI Challenge'],desc:'Configura una topologia a 4 router con OSPF multi-area e redistribuzione EIGRP. Ogni rete deve essere raggiungibile da ogni router.',link:'ccna-interactive.html'},
-  // T5
-  {id:'acl',tier:5,icon:'🛡️',title:'ACL',sub:'Standard, extended, named, wildcard',xp:110,req:['routing_static'],type:'normal',games:['CLI','Quiz AI'],desc:'Access Control Lists per filtrare traffico. Standard (solo src IP, vicino destinazione) vs Extended (src/dst IP, proto, porta, vicino sorgente). Implicit deny.',link:'ccna-schemas.html'},
-  {id:'nat_pat',tier:5,icon:'🔄',title:'NAT & PAT',sub:'Static, dynamic, overload/PAT',xp:110,req:['ip_addr','routing_static'],type:'normal',games:['Simulazione','CLI','Quiz AI'],desc:'Network Address Translation. Static NAT 1:1 per server pubblici, Dynamic NAT con pool, PAT (overload) per condividere un IP pubblico tra molti host interni.',link:'ccna-schemas.html'},
-  {id:'ssh_sec',tier:5,icon:'🔒',title:'Sicurezza dispositivi',sub:'SSH, AAA, enable secret, port security',xp:100,req:['vlan'],type:'normal',games:['CLI','Quiz AI'],desc:'Best practice per securizzare router e switch Cisco: SSH al posto di Telnet, enable secret (non enable password), AAA, port security sullo switch, banner MOTD.',link:'ccna-interactive.html'},
-  // T6
-  {id:'ipv6',tier:6,icon:'6️⃣',title:'IPv6',sub:'128-bit, SLAAC, NDP, tipi',xp:130,req:['subnetting'],type:'normal',games:['Quiz AI','Calcolatore'],desc:'Il protocollo del futuro. Struttura 128-bit, tipi di indirizzo (global unicast, link-local FE80, multicast FF), SLAAC per autoconfigurazione, NDP al posto di ARP.',link:'ccna-schemas.html'},
-  {id:'wan',tier:6,icon:'🌍',title:'WAN & VPN',sub:'MPLS, PPP, GRE, IPSec, DMVPN',xp:120,req:['ospf'],type:'normal',games:['Quiz AI','Schema'],desc:'Tecnologie WAN: MPLS Label Switching, PPP authentication (PAP/CHAP), leased lines. Tunnel VPN: GRE per multiprotocollo, IPSec per cifratura, DMVPN per scalabilità.',link:'ccna-schemas.html'},
-  {id:'automation',tier:6,icon:'🤖',title:'Network Automation',sub:'SDN, REST API, Ansible, Python',xp:140,req:['boss2'],type:'normal',games:['Quiz AI','Demo'],desc:'Il futuro del networking. Software-Defined Networking, Cisco DNA Center, NETCONF/YANG, REST API con JSON, Ansible playbook e Python Netmiko per automatizzare config.',link:'ccna-interactive.html'},
-  // BOSS 3
-  {id:'boss3',tier:5,icon:'💀',title:'BOSS: Security Audit',sub:'Trova e correggi 8 vulnerabilità',xp:300,req:['acl','nat_pat','ssh_sec'],type:'boss',games:['Lab Challenge'],desc:'Ti viene data una config con 8 problemi di sicurezza. Identificali tutti e applica le correzioni con comandi CLI corretti. ACL mancanti, Telnet attivo, password deboli.',link:'ccna-interactive.html'},
-  // CERT
-  {id:'ccna_cert',tier:7,icon:'🏆',title:'CCNA 200-301 Exam Sim',sub:'120 domande — 120 minuti',xp:500,req:['boss1','boss2','boss3','ipv6','wan','automation'],type:'cert',games:['Esame Completo AI'],desc:'La simulazione d\'esame finale basata sul curriculo CCNA 200-301. 120 domande AI in 120 minuti, copertura completa di tutti gli argomenti del percorso.',link:'ccna-game.html'},
+  {id:'net_basics',tier:0,icon:'🌐',title:'Fondamenta di rete',sub:'LAN, WAN, topologie',xp:50,req:[],type:'normal',game:'osi'},
+  {id:'binary',tier:0,icon:'🔢',title:'Binario & Hex',sub:'Conversioni, bit, byte',xp:60,req:[],type:'normal',game:'subnet'},
+  {id:'osi_mod',tier:1,icon:'📶',title:'Modello OSI',sub:'7 layer, PDU, protocolli',xp:80,req:['net_basics'],type:'normal',game:'osi'},
+  {id:'tcpip_mod',tier:1,icon:'🤝',title:'Stack TCP/IP',sub:'TCP, UDP, 3-way handshake',xp:80,req:['net_basics'],type:'normal',game:'ailab'},
+  {id:'ip_addr',tier:2,icon:'🏠',title:'Indirizzi IP',sub:'Classi, privati, RFC 1918',xp:90,req:['binary','osi_mod'],type:'normal',game:'subnet'},
+  {id:'subnetting',tier:2,icon:'📐',title:'Subnetting CIDR',sub:'Calcoli, VLSM, block size',xp:120,req:['ip_addr'],type:'normal',game:'subnet'},
+  {id:'boss1',tier:2,icon:'💀',title:'BOSS: Subnet Gauntlet',sub:'10 sfide in 5 minuti',xp:200,req:['subnetting'],type:'boss',game:'subnet'},
+  {id:'switching',tier:3,icon:'🔀',title:'Switching & Ethernet',sub:'MAC, CAM table, STP',xp:100,req:['osi_mod'],type:'normal',game:'osi'},
+  {id:'vlan_mod',tier:3,icon:'🏢',title:'VLANs & 802.1Q',sub:'Access, trunk, inter-VLAN',xp:110,req:['switching','boss1'],type:'normal',game:'vlan'},
+  {id:'routing_s',tier:4,icon:'🗺️',title:'Routing statico',sub:'Route table, default gw',xp:100,req:['ip_addr'],type:'normal',game:'cli'},
+  {id:'ospf_mod',tier:4,icon:'🌐',title:'OSPF',sub:'Link-state, SPF, aree',xp:130,req:['routing_s','vlan_mod'],type:'normal',game:'ailab'},
+  {id:'eigrp_mod',tier:4,icon:'⚡',title:'EIGRP',sub:'Hybrid, DUAL, Cisco',xp:120,req:['routing_s'],type:'normal',game:'cli'},
+  {id:'boss2',tier:4,icon:'💀',title:'BOSS: Routing Lab',sub:'4 router da configurare',xp:250,req:['ospf_mod','eigrp_mod'],type:'boss',game:'cli'},
+  {id:'acl_mod',tier:5,icon:'🛡️',title:'ACL',sub:'Standard, extended, named',xp:110,req:['routing_s'],type:'normal',game:'ailab'},
+  {id:'nat_mod',tier:5,icon:'🔄',title:'NAT & PAT',sub:'Static, dynamic, overload',xp:110,req:['ip_addr','routing_s'],type:'normal',game:'ailab'},
+  {id:'ssh_sec',tier:5,icon:'🔒',title:'Sicurezza dispositivi',sub:'SSH, AAA, port security',xp:100,req:['vlan_mod'],type:'normal',game:'cli'},
+  {id:'boss3',tier:5,icon:'💀',title:'BOSS: Security Audit',sub:'8 vulnerabilità da trovare',xp:300,req:['acl_mod','nat_mod','ssh_sec'],type:'boss',game:'cli'},
+  {id:'ipv6_mod',tier:6,icon:'6️⃣',title:'IPv6',sub:'128-bit, SLAAC, NDP',xp:130,req:['subnetting'],type:'normal',game:'ailab'},
+  {id:'wan_mod',tier:6,icon:'🌍',title:'WAN & VPN',sub:'MPLS, GRE, IPSec',xp:120,req:['ospf_mod'],type:'normal',game:'ailab'},
+  {id:'auto_mod',tier:6,icon:'🤖',title:'Network Automation',sub:'SDN, REST, Python',xp:140,req:['boss2'],type:'normal',game:'ailab'},
+  {id:'ccna_cert',tier:7,icon:'🏆',title:'CCNA 200-301 Sim',sub:'120 domande — 120 min',xp:500,req:['boss1','boss2','boss3','ipv6_mod','wan_mod'],type:'cert',game:'quiz'},
 ];
-
-// ── STATE ──
-const SAVE_KEY='ccna_progress_v2';
-function loadState(){
-  try{
-    const s=JSON.parse(localStorage.getItem(SAVE_KEY));
-    if(s&&s.modules) return s;
-  }catch(e){}
-  return{xp:0,xpNext:100,level:1,score:0,streak:0,certs:0,done:0,
-    modules:Object.fromEntries(MODS.map(m=>[m.id,{progress:0,completed:false}]))};
-}
-function saveState(){localStorage.setItem(SAVE_KEY,JSON.stringify(G));}
-
-let G=loadState();
-// ensure all modules exist
+// ensure modules
 MODS.forEach(m=>{if(!G.modules[m.id])G.modules[m.id]={progress:0,completed:false};});
 
-function isUnlocked(mod){return mod.req.every(r=>G.modules[r]&&G.modules[r].completed);}
-function getStatus(mod){
-  if(G.modules[mod.id].completed) return 'done';
-  return isUnlocked(mod)?'active':'locked';
+function isUnlocked(m){return m.req.every(r=>G.modules[r]&&G.modules[r].completed);}
+function getStatus(m){
+  if(G.modules[m.id].completed) return 'done';
+  return isUnlocked(m)?'active':'locked';
 }
-function getBadgeHTML(status,type){
-  if(type==='cert')  return `<span class="mod-badge badge-cert">CERT</span>`;
-  if(type==='boss')  return `<span class="mod-badge badge-boss">BOSS</span>`;
-  if(status==='done')   return `<span class="mod-badge badge-done">✓</span>`;
-  if(status==='locked') return `<span class="mod-badge badge-lock">🔒</span>`;
-  return `<span class="mod-badge badge-open">▶</span>`;
-}
-function nodeClasses(status,type){
-  let c='mod-node';
-  if(status==='locked')  c+=' locked';
-  else if(status==='done') c+=' completed';
-  else c+=' unlocked';
-  if(type==='boss') c+=' boss-node';
-  if(type==='cert') c+=' cert-node';
-  return c;
-}
-
 function renderTree(){
-  const container=document.getElementById('tree-container');
-  container.innerHTML='';
+  const c=_id('tree-container');c.innerHTML='';
   TIERS.forEach((tier,ti)=>{
     const mods=MODS.filter(m=>m.tier===tier.id);
     if(!mods.length) return;
-    const block=document.createElement('div');
-    block.className='tier-block';
-    block.innerHTML=`<div class="tier-label">${tier.label}</div>`;
-    const row=document.createElement('div');
-    row.className='tier-row';
+    const block=document.createElement('div');block.className='tier-block';
+    block.innerHTML='<div class="tier-lbl">'+tier.label+'</div>';
+    const row=document.createElement('div');row.className='tier-row';
     mods.forEach(mod=>{
-      const status=getStatus(mod);
-      const prog=G.modules[mod.id].progress||0;
-      const div=document.createElement('div');
-      div.className=nodeClasses(status,mod.type);
-      div.innerHTML=`
-        ${getBadgeHTML(status,mod.type)}
-        <div class="mod-icon">${mod.icon}</div>
-        <div class="mod-title">${mod.title}</div>
-        <div class="mod-sub">${mod.sub}</div>
-        <div class="mod-xp">+${mod.xp} XP</div>
-        <div class="mod-bar"><div class="mod-bar-fill" style="width:${status==='done'?100:prog}%"></div></div>`;
-      if(status!=='locked') div.onclick=()=>openModal(mod.id);
-      row.appendChild(div);
+      const st=getStatus(mod);const prog=G.modules[mod.id].progress||0;
+      const isBoss=mod.type==='boss';const isCert=mod.type==='cert';
+      let cls='mod-card';
+      if(st==='locked') cls+=' locked';
+      else if(st==='done') cls+=' done';
+      else cls+=' unlocked';
+      if(isBoss) cls+=' boss-c';
+      if(isCert) cls+=' cert-c';
+      let badge='';
+      if(isCert) badge='<span class="mod-badge" style="background:rgba(245,158,11,.2);color:var(--orange)">CERT</span>';
+      else if(isBoss) badge='<span class="mod-badge" style="background:rgba(239,68,68,.15);color:var(--red)">BOSS</span>';
+      else if(st==='done') badge='<span class="mod-badge" style="background:rgba(16,185,129,.15);color:var(--green)">✓</span>';
+      else if(st==='locked') badge='<span class="mod-badge" style="background:rgba(100,116,139,.15);color:var(--muted)">🔒</span>';
+      else badge='<span class="mod-badge" style="background:rgba(59,130,246,.15);color:var(--accent)">▶</span>';
+      const d=document.createElement('div');d.className=cls;
+      d.innerHTML=badge+'<div class="mod-icon">'+mod.icon+'</div><div class="mod-title">'+mod.title+'</div><div class="mod-sub">'+mod.sub+'</div><div class="mod-xp">+'+mod.xp+' XP</div><div class="mod-pbar"><div class="mod-pfill" style="width:'+(st==='done'?100:prog)+'%"></div></div>';
+      if(st!=='locked'){
+        d.onclick=()=>launchModuleGame(mod);
+      }
+      row.appendChild(d);
     });
     block.appendChild(row);
-    if(ti<TIERS.length-1){
-      const conn=document.createElement('div');
-      conn.className='tier-connector';
-      conn.innerHTML='<div class="connector-line"></div>';
-      block.appendChild(conn);
+    if(ti<TIERS.length-1){const conn=document.createElement('div');conn.className='tier-conn';conn.innerHTML='<div class="tier-conn-line"></div>';block.appendChild(conn);}
+    c.appendChild(block);
+  });
+}
+function launchModuleGame(mod){
+  // mark progress
+  if(!G.modules[mod.id].completed) G.modules[mod.id].progress=Math.max(G.modules[mod.id].progress||0,5);
+  saveG();
+  // jump to right game
+  const gameMap={
+    quiz:'quiz', osi:'lab', subnet:'lab', cli:'lab', vlan:'lab',
+    packet:'lab', ailab:'lab',
+  };
+  const view=gameMap[mod.game]||'lab';
+  showView(view);
+  if(view==='lab'){
+    selLabTab(mod.game,null);
+    // pre-select relevant topic in AI quiz
+    if(mod.game==='ailab'){
+      labTopic=mod.title;
     }
-    container.appendChild(block);
+  }
+  if(view==='quiz'){
+    // pre-select relevant topic for CCNA cert
+    quizTopic=mod.title==='CCNA 200-301 Sim'?'CCNA 200-301 completo — tutti gli argomenti':mod.title;
+    startQuiz();
+  }
+  // Show toast
+  showToast('▶ '+mod.title+' — +'+mod.xp+' XP al completamento','var(--accent)');
+}
+function completeModule(id){
+  if(G.modules[id]&&G.modules[id].completed) return;
+  const mod=MODS.find(m=>m.id===id);if(!mod) return;
+  G.modules[id].completed=true;G.modules[id].progress=100;
+  G.done=MODS.filter(m=>G.modules[m.id]&&G.modules[m.id].completed).length;
+  if(mod.type==='cert') G.certs++;
+  addXP(mod.xp);
+  showToast('🏆 '+mod.title+' completato! +'+mod.xp+' XP','var(--orange)');
+  renderTree();
+}
+
+// ══════════════════════════════════════
+// QUIZ GAME
+// ══════════════════════════════════════
+const TOPICS=[
+  'OSI & TCP/IP Model','IP Addressing & Subnetting','VLANs & Switching',
+  'Routing (OSPF, EIGRP, RIP)','NAT & PAT','ACLs','WAN & VPN',
+  'Network Security','IPv6','Network Automation & SDN',
+];
+const MODE_CFG={practice:{q:10,t:60,mult:1},speed:{q:15,t:20,mult:1.5},hardcore:{q:10,t:30,mult:2},exam:{q:30,t:90,mult:1.2}};
+let quizTopic=TOPICS[0],quizMode='practice',quizState={};
+
+function initQuizMenu(){
+  const tg=_id('topic-grid');tg.innerHTML='';
+  TOPICS.forEach(t=>{
+    const b=document.createElement('button');b.className='topic-btn'+(t===quizTopic?' sel':'');
+    b.textContent=t;b.onclick=()=>{document.querySelectorAll('#topic-grid .topic-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');quizTopic=t;};
+    tg.appendChild(b);
+  });
+  _id('quiz-menu').style.display='block';
+  _id('quiz-active').style.display='none';
+  _id('quiz-result').style.display='none';
+}
+function selMode(btn){
+  document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('sel'));
+  btn.classList.add('sel');quizMode=btn.dataset.mode;
+}
+async function startQuiz(){
+  const cfg=MODE_CFG[quizMode];
+  quizState={topic:quizTopic,mode:quizMode,cfg,cur:0,total:cfg.q,results:[],xpEarned:0,timer:null,timeLeft:cfg.t,answered:false};
+  _id('quiz-menu').style.display='none';
+  _id('quiz-active').style.display='block';
+  _id('quiz-result').style.display='none';
+  buildDots();
+  await loadQuestion();
+}
+function buildDots(){
+  const el=_id('prog-dots');el.innerHTML='';
+  for(let i=0;i<quizState.total;i++){
+    const d=document.createElement('div');d.className='prog-dot'+(i===0?' cur':'');d.id='dot-'+i;el.appendChild(d);
+  }
+}
+async function loadQuestion(){
+  quizState.answered=false;
+  clearInterval(quizState.timer);
+  _id('q-loading').classList.add('show');
+  _id('q-question').style.display='none';
+  _id('q-err').classList.remove('show');
+  _id('q-feedback').classList.remove('show','ok','ko');
+  _id('next-btn').classList.remove('show');
+  _id('opts-grid').innerHTML='';
+
+  const prev=quizState.results.slice(-3).map(r=>r.q).join('", "');
+  const avoidStr=prev?`Non ripetere: "${prev}"`:'';
+  const diff=quizMode==='exam'?'medium':quizMode==='hardcore'?'hard':'mixed';
+
+  const prompt=`Sei un trainer CCNA. Genera UNA domanda a risposta multipla (4 opzioni, 1 corretta) su: "${quizState.topic}". Difficoltà: ${diff}. ${avoidStr}
+Rispondi SOLO con JSON valido senza markdown:
+{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":0,"explanation":"Spiegazione in italiano 2-3 frasi.","subtopic":"..."}`;
+
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-ipc':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    if(!res.ok) throw new Error('HTTP '+res.status+': '+(data?.error?.message||'errore API'));
+    const txt=data?.content?.[0]?.text;
+    if(!txt) throw new Error('Risposta AI vuota');
+    const m=txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+    if(!m) throw new Error('JSON non trovato');
+    const q=JSON.parse(m[0]);
+    if(!q.question||!Array.isArray(q.options)) throw new Error('Struttura non valida');
+    quizState.currentQ=q;
+    renderQuestion(q);
+  }catch(e){
+    _id('q-loading').classList.remove('show');
+    _id('q-err').classList.add('show');
+    _id('q-err').innerHTML='⚠️ '+e.message+' <button onclick="loadQuestion()" style="background:none;border:1px solid var(--red);color:#fca5a5;padding:3px 10px;cursor:pointer;border-radius:4px;margin-left:8px;font-size:.78rem">Riprova</button>';
+  }
+}
+function renderQuestion(q){
+  _id('q-loading').classList.remove('show');
+  _id('q-question').style.display='block';
+  _id('q-meta').textContent='Domanda '+(quizState.cur+1)+'/'+quizState.total;
+  _id('q-tag').textContent=(q.subtopic||quizState.topic).toUpperCase();
+  _id('q-text').textContent=q.question;
+  const grid=_id('opts-grid');grid.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement('button');b.className='opt';
+    b.innerHTML='<span class="opt-lbl">'+['A','B','C','D'][i]+'</span><span>'+opt.replace(/^[A-D]\)\s*/,'')+'</span>';
+    b.onclick=()=>{if(!quizState.answered)answerQ(i,b);};
+    grid.appendChild(b);
+  });
+  startTimer();
+}
+function startTimer(){
+  quizState.timeLeft=quizState.cfg.t;
+  const el=_id('q-timer');el.classList.remove('warn');
+  const tick=()=>{
+    quizState.timeLeft--;
+    el.textContent=quizState.timeLeft;
+    if(quizState.timeLeft<=10) el.classList.add('warn');
+    if(quizState.timeLeft<=0){clearInterval(quizState.timer);if(!quizState.answered)timeoutQ();}
+  };
+  el.textContent=quizState.timeLeft;
+  quizState.timer=setInterval(tick,1000);
+}
+function timeoutQ(){
+  quizState.answered=true;
+  document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===quizState.currentQ.correct)b.classList.add('ok');});
+  quizState.results.push({q:quizState.currentQ.question,ok:false});
+  G.streak=0;saveG();updateUI();
+  showFeedback(false,'⏱ Tempo scaduto',quizState.currentQ.explanation);
+  dotMark(false);_id('next-btn').classList.add('show');
+}
+function answerQ(idx,btn){
+  if(quizState.answered) return;
+  quizState.answered=true;
+  clearInterval(quizState.timer);
+  const ok=idx===quizState.currentQ.correct;
+  document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===quizState.currentQ.correct)b.classList.add('ok');});
+  if(!ok) btn.classList.add('ko');
+  quizState.results.push({q:quizState.currentQ.question,ok});
+  if(ok){
+    const baseXP=20;const speedBonus=Math.floor(quizState.timeLeft*.4);
+    const streakBonus=G.streak>2?(G.streak-2)*5:0;
+    const pts=Math.round((baseXP+speedBonus+streakBonus)*quizState.cfg.mult);
+    quizState.xpEarned+=pts;addXP(pts);
+    showFeedback(true,'✓ Corretto! +'+pts+' XP',quizState.currentQ.explanation);
+  } else {
+    G.streak=0;saveG();updateUI();
+    showFeedback(false,'✗ Risposta errata',quizState.currentQ.explanation);
+  }
+  dotMark(ok);_id('next-btn').classList.add('show');
+  if(quizMode==='hardcore'&&!ok){
+    _id('next-btn').textContent='VER RISULTATI';
+    _id('next-btn').onclick=showQuizResult;
+  }
+}
+function showFeedback(ok,title,body){
+  const fb=_id('q-feedback');fb.className='feedback show '+(ok?'ok':'ko');
+  _id('fb-title').textContent=title;_id('fb-body').textContent=body;
+}
+function dotMark(ok){
+  const d=_id('dot-'+quizState.cur);if(d){d.classList.remove('cur');d.classList.add(ok?'ok':'ko');}
+  const next=_id('dot-'+(quizState.cur+1));if(next) next.classList.add('cur');
+}
+async function nextQuestion(){
+  quizState.cur++;
+  _id('next-btn').textContent='PROSSIMA →';_id('next-btn').onclick=nextQuestion;
+  if(quizState.cur>=quizState.total){showQuizResult();return;}
+  await loadQuestion();
+}
+function showQuizResult(){
+  clearInterval(quizState.timer);
+  _id('quiz-active').style.display='none';_id('quiz-result').style.display='block';
+  const ok=quizState.results.filter(r=>r.ok).length;
+  const tot=quizState.results.length;
+  const pct=Math.round(ok/tot*100);
+  _id('res-pct').textContent=pct+'%';
+  _id('res-ok').textContent=ok;_id('res-ko').textContent=tot-ok;_id('res-xp').textContent=quizState.xpEarned;
+  let grade,col;
+  if(pct>=90){grade='🏆 ECCELLENTE';col='var(--orange)';}
+  else if(pct>=75){grade='✅ PROMOSSO';col='var(--green)';}
+  else if(pct>=60){grade='⚠️ BORDERLINE';col='var(--accent)';}
+  else{grade='❌ RIPASSA';col='var(--red)';}
+  const ge=_id('res-grade');ge.textContent=grade;ge.style.color=col;ge.style.background=col+'22';
+  _id('res-pct').style.color=col;
+}
+
+// ══════════════════════════════════════
+// LAB
+// ══════════════════════════════════════
+function selLabTab(name,btn){
+  document.querySelectorAll('.lab-content').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.lab-tab').forEach(x=>x.classList.remove('sel'));
+  _id('lab-'+name).classList.add('active');
+  if(btn) btn.classList.add('sel');
+  else{document.querySelectorAll('.lab-tab').forEach(b=>{if(b.getAttribute('onclick')&&b.getAttribute('onclick').includes("'"+name+"'"))b.classList.add('sel');});}
+}
+
+// ── OSI DRAG ──
+const OSI_PROTS=[
+  {name:'HTTP',hint:'Protocollo web',layer:7,explain:'HTTP è al Layer 7 (Application). Porta 80, gestisce comunicazione browser↔server.'},
+  {name:'FTP',hint:'Trasferimento file',layer:7,explain:'FTP è al Layer 7. Usa TCP porte 20/21 per trasferire file.'},
+  {name:'DNS',hint:'Risoluzione nomi',layer:7,explain:'DNS è al Layer 7, traduce nomi di dominio in IP. UDP porta 53.'},
+  {name:'SMTP',hint:'Invio email',layer:7,explain:'SMTP è al Layer 7. Porta 25 per invio email tra server.'},
+  {name:'SSL/TLS',hint:'Cifratura',layer:6,explain:'SSL/TLS opera al Layer 6 (Presentation), gestisce cifratura e compressione.'},
+  {name:'JPEG/GIF',hint:'Formato immagini',layer:6,explain:'I formati immagini come JPEG e GIF sono gestiti al Layer 6 (Presentation).'},
+  {name:'TCP',hint:'Trasporto affidabile',layer:4,explain:'TCP è al Layer 4 (Transport). Garantisce consegna con numeri di sequenza e ACK.'},
+  {name:'UDP',hint:'Trasporto veloce',layer:4,explain:'UDP è al Layer 4 (Transport). Più veloce di TCP, nessuna garanzia di consegna.'},
+  {name:'IP',hint:'Indirizzamento logico',layer:3,explain:'IP è al Layer 3 (Network). Gestisce indirizzamento logico e routing tra reti.'},
+  {name:'ICMP',hint:'Ping e traceroute',layer:3,explain:'ICMP è al Layer 3. Usato per diagnostica (ping, traceroute) e messaggi di errore.'},
+  {name:'OSPF',hint:'Routing dinamico',layer:3,explain:'OSPF è al Layer 3. Protocollo di routing link-state con algoritmo Dijkstra.'},
+  {name:'Ethernet',hint:'Rete locale',layer:2,explain:'Ethernet è al Layer 2 (Data Link). Usa indirizzi MAC per consegna nella LAN.'},
+  {name:'MAC Address',hint:'Indirizzo fisico',layer:2,explain:'I MAC address sono al Layer 2. Identificatori fisici a 48 bit scritti sull\'hardware.'},
+  {name:'Wi-Fi 802.11',hint:'Wireless LAN',layer:2,explain:'Wi-Fi 802.11 opera al Layer 2 (Data Link) con elementi fisici al Layer 1.'},
+  {name:'Cavo UTP',hint:'Mezzo fisico',layer:1,explain:'I cavi UTP sono al Layer 1 (Physical). Trasmettono bit come segnali elettrici.'},
+  {name:'Fibra ottica',hint:'Segnale luminoso',layer:1,explain:'La fibra ottica è al Layer 1. Trasmette bit come impulsi di luce.'},
+];
+const LAYER_NAMES={7:'Application',6:'Presentation',5:'Session',4:'Transport',3:'Network',2:'Data Link',1:'Physical'};
+const LAYER_COLORS={7:'#fca5a5',6:'#fcd34d',5:'#fde047',4:'#6ee7b7',3:'#67e8f9',2:'#93c5fd',1:'#c4b5fd'};
+let osiProts=[...OSI_PROTS],osiIdx=0,osiOk=0,osiStreak=0,osiAnswered=false;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function initOsi(){
+  shuffle(osiProts);osiIdx=0;osiOk=0;osiStreak=0;
+  // build stack
+  const stack=_id('osi-stack');stack.innerHTML='';
+  [7,6,5,4,3,2,1].forEach(l=>{
+    const d=document.createElement('div');
+    d.style.cssText='background:rgba('+hexToRgb(LAYER_COLORS[l])+',.1);border:1px solid rgba('+hexToRgb(LAYER_COLORS[l])+',.3);border-radius:6px;padding:9px 13px;margin-bottom:5px;display:flex;align-items:center;gap:10px;font-size:.8rem;font-weight:600;color:'+LAYER_COLORS[l]+';transition:all .2s';
+    d.id='osi-layer-'+l;
+    const pdu={7:'Data',6:'Data',5:'Data',4:'Segment',3:'Packet',2:'Frame',1:'Bits'}[l];
+    d.innerHTML='<span style="font-family:JetBrains Mono,monospace;font-size:.62rem;opacity:.6;min-width:14px">'+l+'</span><span style="flex:1">'+LAYER_NAMES[l]+'</span><span style="font-family:JetBrains Mono,monospace;font-size:.6rem;opacity:.6;background:rgba(0,0,0,.3);padding:2px 6px;border-radius:3px">'+pdu+'</span>';
+    stack.appendChild(d);
+  });
+  renderOsiProt();
+}
+function hexToRgb(hex){const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16);return r+','+g+','+b;}
+function renderOsiProt(){
+  osiAnswered=false;
+  document.querySelectorAll('[id^="osi-layer-"]').forEach(l=>l.style.transform='scaleX(1)');
+  const p=osiProts[osiIdx%osiProts.length];
+  _id('prot-name').textContent=p.name;_id('prot-hint').textContent=p.hint;
+  _id('osi-fb').classList.remove('show','ok','ko');
+  _id('osi-expl').classList.remove('show');_id('osi-next').classList.remove('show');
+  const choices=new Set([p.layer]);
+  while(choices.size<4) choices.add(Math.floor(Math.random()*7)+1);
+  const arr=shuffle([...choices]);
+  const grid=_id('osi-choices');grid.innerHTML='';
+  arr.forEach(l=>{
+    const b=document.createElement('button');
+    b.style.cssText='padding:8px 12px;border-radius:6px;border:1px solid var(--border);background:var(--panel);color:var(--text);cursor:pointer;font-size:.8rem;font-weight:600;transition:all .15s;font-family:DM Sans,sans-serif;width:100%';
+    b.textContent='L'+l+' — '+LAYER_NAMES[l];
+    b.onmouseover=()=>{if(!osiAnswered)b.style.borderColor='var(--accent)';};
+    b.onmouseout=()=>{if(!osiAnswered)b.style.borderColor='var(--border)';};
+    b.onclick=()=>{if(!osiAnswered)checkOsi(l,p,b);};
+    grid.appendChild(b);
+  });
+  _id('osi-ok').textContent=osiOk;_id('osi-streak').textContent=osiStreak;
+}
+function checkOsi(chosen,prot,btn){
+  osiAnswered=true;const ok=chosen===prot.layer;
+  _id('osi-choices').querySelectorAll('button').forEach(b=>{
+    b.onclick=null;const l=parseInt(b.textContent.match(/L(\d)/)[1]);
+    if(l===prot.layer){b.style.background='rgba(16,185,129,.15)';b.style.borderColor='var(--green)';b.style.color='var(--green)';}
+  });
+  if(!ok){btn.style.background='rgba(239,68,68,.15)';btn.style.borderColor='var(--red)';btn.style.color='var(--red)';}
+  const layerEl=_id('osi-layer-'+prot.layer);
+  if(layerEl) layerEl.style.transform='scaleX(1.03)';
+  const fb=_id('osi-fb');
+  fb.className='fb-strip show '+(ok?'ok':'ko');
+  fb.textContent=ok?'✓ Corretto! '+prot.name+' è al Layer '+prot.layer+' — '+LAYER_NAMES[prot.layer]:'✗ '+prot.name+' è al Layer '+prot.layer+' — '+LAYER_NAMES[prot.layer];
+  _id('osi-expl').textContent=prot.explain;_id('osi-expl').classList.add('show');
+  _id('osi-next').classList.add('show');
+  if(ok){osiOk++;osiStreak++;addXP(10);}
+  else{osiStreak=0;}
+  _id('osi-ok').textContent=osiOk;_id('osi-streak').textContent=osiStreak;
+  if(osiOk>=5&&!G.modules['osi_mod'].completed) completeModule('osi_mod');
+}
+function nextProtocol(){osiIdx++;renderOsiProt();}
+
+// ── SUBNET ──
+let curSubnet=null,subTimerInt=null,subElapsed=0;
+function initSubnet(){newSubnet();}
+function newSubnet(){
+  clearInterval(subTimerInt);subElapsed=0;
+  _id('sub-fb').classList.remove('show','ok','ko');_id('sub-next').classList.remove('show');
+  ['mask','net','bcast','first','last','hosts'].forEach(f=>{
+    const el=_id('sf-'+f);el.value='';el.className='field-inp';_id('fc-'+f).textContent='';
+  });
+  const pools=[[10,0],[172,16],[192,168]];
+  const [o1,o2]=pools[Math.floor(Math.random()*3)];
+  const o3=Math.floor(Math.random()*254);
+  const ip=o1+'.'+o2+'.'+o3+'.0';
+  const cidrs=[8,16,20,24,25,26,27,28];
+  const cidr=cidrs[Math.floor(Math.random()*cidrs.length)];
+  curSubnet=calcSubnet(ip,cidr);
+  _id('sub-ip').textContent=ip;_id('sub-cidr').textContent='/'+cidr;
+  renderBits(ip,cidr);
+  subTimerInt=setInterval(()=>{subElapsed++;},1000);
+}
+function cidrToMask(c){const m=[];for(let i=0;i<4;i++){const b=Math.min(8,Math.max(0,c-i*8));m.push(256-Math.pow(2,8-b));}return m.join('.');}
+function calcSubnet(ip,cidr){
+  const p=ip.split('.').map(Number);const mp=cidrToMask(cidr).split('.').map(Number);
+  const net=p.map((o,i)=>o&mp[i]);const bcast=net.map((o,i)=>o|(~mp[i]&0xFF));
+  const first=[...net];first[3]++;const last=[...bcast];last[3]--;
+  return{ip,cidr,mask:cidrToMask(cidr),network:net.join('.'),broadcast:bcast.join('.'),
+    first:cidr>=31?net.join('.'):first.join('.'),last:cidr>=31?bcast.join('.'):last.join('.'),
+    hosts:Math.max(0,Math.pow(2,32-cidr)-2)};
+}
+function renderBits(ip,cidr){
+  const parts=ip.split('.').map(Number);let html='';
+  parts.forEach((oct,i)=>{
+    oct.toString(2).padStart(8,'0').split('').forEach((b,j)=>{
+      const abs=i*8+j;html+='<span class="'+(abs<cidr?'bn':'bh')+'">'+b+'</span>';
+    });
+    if(i<3) html+='<span class="bs">.</span>';
+  });
+  _id('bits-disp').innerHTML=html;
+  const s=calcSubnet(ip,cidr);
+  _id('sub-info').innerHTML=
+    '<span style="color:var(--muted)">Mask:</span> <span style="color:var(--cyan)">'+s.mask+'</span><br>'+
+    '<span style="color:var(--muted)">Network:</span> <span style="color:var(--accent)">'+s.network+'/'+cidr+'</span><br>'+
+    '<span style="color:var(--muted)">Host disponibili:</span> <span style="color:var(--green)">'+s.hosts+'</span>';
+}
+function checkSubnet(){
+  clearInterval(subTimerInt);const s=curSubnet;
+  const checks=[['mask',s.mask],['net',s.network],['bcast',s.broadcast],['first',s.first],['last',s.last],['hosts',String(s.hosts)]];
+  let allOk=true;
+  checks.forEach(([f,correct])=>{
+    const val=_id('sf-'+f).value.trim();const ok=val===correct;
+    if(!ok){allOk=false;_id('sf-'+f).placeholder=correct;}
+    _id('sf-'+f).className='field-inp '+(ok?'ok':'ko');
+    _id('fc-'+f).textContent=ok?'✓':'✗';
+  });
+  const fb=_id('sub-fb');
+  if(allOk){
+    const pts=Math.max(20,100-subElapsed);
+    fb.className='fb-strip show ok';fb.textContent='✓ Perfetto! +'+pts+' pts ('+subElapsed+'s)';
+    addXP(pts);
+    if(!G.modules['subnetting'].completed) completeModule('subnetting');
+  } else {
+    fb.className='fb-strip show ko';fb.textContent='✗ Alcuni valori errati — vedi in rosso. Placeholder = risposta corretta.';
+  }
+  _id('sub-next').classList.add('show');
+}
+
+// ── CLI ──
+const CLI_MISSIONS=[
+  {title:'Missione 1',desc:'Entra in modalità privilegiata poi imposta l\'hostname "R1-LAB".',hints:['enable','configure terminal','hostname R1-LAB'],check:s=>s.hostname==='R1-LAB'},
+  {title:'Missione 2',desc:'Configura password "cisco123" sulla console (line console 0, password cisco123, login).',hints:['enable','configure terminal','line console 0','password cisco123','login'],check:s=>s.conPass==='cisco123'},
+  {title:'Missione 3',desc:'Assegna IP 192.168.1.1/24 a GigabitEthernet0/0 e attivala (no shutdown).',hints:['enable','configure terminal','interface GigabitEthernet0/0','ip address 192.168.1.1 255.255.255.0','no shutdown'],check:s=>s.g00ip==='192.168.1.1'},
+];
+let cliSt={mode:'user',hostname:'Router',conPass:null,g00ip:null,curLine:null,curIface:null};
+let cliMissionIdx=0;
+function initCli(){
+  cliSt={mode:'user',hostname:'Router',conPass:null,g00ip:null,curLine:null,curIface:null};
+  cliMissionIdx=0;
+  _id('cli-out').innerHTML='';
+  cliPrint('i','████████████████████████\n  Cisco IOS — Simulator\n  CCNA Quest v1.0\n████████████████████████');
+  cliPrint('o','');
+  cliPromptUpdate();loadCliMission(0);
+  const inp=_id('cli-inp');
+  inp.onkeydown=e=>{if(e.key==='Enter'&&inp.value.trim()){cliRun(inp.value.trim());inp.value='';}};
+}
+function cliPrint(type,text){
+  const out=_id('cli-out');
+  text.split('\n').forEach(line=>{
+    const d=document.createElement('div');d.className='cl cl-'+type;d.textContent=line;out.appendChild(d);
+  });
+  out.scrollTop=out.scrollHeight;
+}
+function cliPromptUpdate(){
+  const h=cliSt.hostname;
+  const p={user:h+'>',privileged:h+'#',config:h+'(config)#','config-if':h+'(config-if)#','config-line':h+'(config-line)#'}[cliSt.mode]||h+'>';
+  _id('cli-ps').textContent=p;
+}
+function cliRun(raw){
+  const cmd=raw.toLowerCase().trim();
+  cliPrint('p',_id('cli-ps').textContent+' '+raw);
+  if(cmd==='exit'||cmd==='end'){
+    if(['config-if','config-line'].includes(cliSt.mode)){cliSt.mode='config';cliSt.curLine=null;}
+    else if(cliSt.mode==='config'){cliSt.mode='privileged';}
+    else if(cliSt.mode==='privileged'){cliSt.mode='user';}
+    cliPromptUpdate();return;
+  }
+  if(cmd==='enable'&&cliSt.mode==='user'){cliSt.mode='privileged';cliPromptUpdate();return;}
+  if((cmd==='configure terminal'||cmd==='conf t')&&cliSt.mode==='privileged'){
+    cliSt.mode='config';cliPrint('o','Enter configuration commands. End with CNTL/Z.');cliPromptUpdate();return;
+  }
+  if(cliSt.mode==='config'){
+    if(cmd.startsWith('hostname ')){cliSt.hostname=raw.substring(9).trim();cliPromptUpdate();cliCheckMission();return;}
+    if(cmd.match(/^int(erface)?\s+/i)){cliSt.mode='config-if';cliSt.curIface=raw.replace(/^int(erface)?\s+/i,'').trim().toLowerCase();cliPromptUpdate();return;}
+    if(cmd.startsWith('line ')){cliSt.mode='config-line';cliSt.curLine=raw.split(' ').slice(1).join(' ');cliPromptUpdate();return;}
+    if(cmd.startsWith('ip route ')){cliPrint('s','% Static route configured.');cliCheckMission();return;}
+  }
+  if(cliSt.mode==='config-line'){
+    if(cmd.startsWith('password ')){if(cliSt.curLine==='console 0')cliSt.conPass=raw.substring(9).trim();cliCheckMission();return;}
+    if(cmd==='login') return;
+  }
+  if(cliSt.mode==='config-if'){
+    if(cmd.startsWith('ip address ')){
+      const pts=raw.split(' ');if(cliSt.curIface&&(cliSt.curIface.includes('gig')||cliSt.curIface.includes('g0')))cliSt.g00ip=pts[2];
+      cliCheckMission();return;
+    }
+    if(cmd==='no shutdown'||cmd==='no shut'){
+      cliPrint('i','%LINK-5-CHANGED: Interface '+cliSt.curIface+', changed state to up');
+      cliPrint('i','%LINEPROTO-5-UPDOWN: Line protocol on '+cliSt.curIface+', changed state to up');
+      cliCheckMission();return;
+    }
+  }
+  if(cliSt.mode==='privileged'){
+    if(cmd==='show running-config'||cmd==='sh run'){
+      cliPrint('o','!\nhostname '+cliSt.hostname);
+      if(cliSt.g00ip)cliPrint('o','!\ninterface GigabitEthernet0/0\n ip address '+cliSt.g00ip+' 255.255.255.0\n no shutdown');
+      cliPrint('o','!\nend');return;
+    }
+    if(cmd==='show ip interface brief'||cmd==='sh ip int br'){
+      cliPrint('o','Interface              IP-Address      OK? Status');
+      cliPrint('o','GigabitEthernet0/0     '+(cliSt.g00ip||'unassigned')+'   YES '+(cliSt.g00ip?'up':'down'));return;
+    }
+  }
+  if(cmd==='cls'||cmd==='clear'){_id('cli-out').innerHTML='';return;}
+  cliPrint('e','% Unknown command: "'+raw+'"');
+  cliPrint('c','  Hint: controlla la modalità corrente e la sintassi.');
+}
+function cliCheckMission(){
+  const m=CLI_MISSIONS[cliMissionIdx];
+  if(m&&m.check(cliSt)){
+    cliPrint('s','\n✓ MISSIONE '+( cliMissionIdx+1)+' COMPLETATA! +50 XP\n');
+    addXP(50);
+    const fb=_id('cli-fb');fb.className='fb-strip show ok';fb.textContent='✓ Missione '+(cliMissionIdx+1)+' completata!';
+    if(cliMissionIdx<CLI_MISSIONS.length-1){setTimeout(()=>loadCliMission(cliMissionIdx+1),1200);}
+    else{if(!G.modules['routing_s'].completed)completeModule('routing_s');}
+  }
+}
+function loadCliMission(idx){
+  cliMissionIdx=idx;const m=CLI_MISSIONS[idx];if(!m) return;
+  _id('cli-mission').innerHTML='<strong>'+m.title+':</strong> '+m.desc+
+    '<div class="hint-row">'+m.hints.map(h=>'<span class="hint-chip" onclick="cliHint(\''+h+'\')">'+h+'</span>').join('')+'</div>';
+}
+function cliHint(cmd){_id('cli-inp').value=cmd;_id('cli-inp').focus();}
+
+// ── PACKET SIM ──
+const PKT_STEPS=[
+  {label:'PC crea il pacchetto',detail:'L\'app genera dati. TCP/IP incapsula: header IP (src/dst), header TCP con porte, frame Ethernet con MAC del gateway.'},
+  {label:'Switch riceve il frame',detail:'Lo switch legge il MAC di destinazione. Cerca nella CAM table. Se non trovato: flooding su tutte le porte tranne quella di ingresso.'},
+  {label:'Router elabora il pacchetto',detail:'Il router decapsula fino al Layer 3, legge l\'IP destinazione, consulta la routing table per il next-hop. TTL−1.'},
+  {label:'Routing verso Internet',detail:'Il router trova una default route. Crea nuovo frame Ethernet col MAC del provider. Il pacchetto continua verso il server.'},
+  {label:'Server riceve e risponde',detail:'Il server risale tutti i layer OSI dal fisico all\'applicazione. I dati arrivano all\'app. Risposta in senso inverso.'},
+];
+let pktRunning=false;
+function initPacket(){buildPktSteps();}
+function buildPktSteps(){
+  const el=_id('pkt-steps');el.innerHTML='';
+  PKT_STEPS.forEach((s,i)=>{
+    const d=document.createElement('div');d.className='pkt-step';d.id='ps-'+i;
+    d.innerHTML='<div class="step-n">'+(i+1)+'</div><div><div style="font-weight:600;margin-bottom:2px;font-size:.82rem">'+s.label+'</div><div style="font-size:.75rem;color:var(--muted)">'+s.detail+'</div></div>';
+    el.appendChild(d);
+  });
+}
+function startPacket(){
+  if(pktRunning) return;pktRunning=true;resetPacket(true);
+  const devs=['dev-pc','dev-sw','dev-rt','dev-srv'];
+  const pkts=['pkt0','pkt1','pkt2'];
+  let phase=0;
+  const run=()=>{
+    if(phase>=5){pktRunning=false;addXP(20);if(!G.modules['osi_mod'].completed)completeModule('osi_mod');return;}
+    document.querySelectorAll('.pkt-step').forEach(x=>{x.classList.remove('cur');});
+    const step=_id('ps-'+phase);if(step)step.classList.add('cur');
+    if(phase<devs.length){
+      _id(devs[phase]).classList.add(phase>0?'recv':'active');
+      if(phase>0&&pkts[phase-1]){
+        const p=_id(pkts[phase-1]);if(p){p.classList.remove('go');void p.offsetWidth;p.classList.add('go');}
+      }
+    }
+    setTimeout(()=>{
+      if(step){step.classList.remove('cur');step.classList.add('done');}
+      phase++;setTimeout(run,200);
+    },1600);
+  };run();
+}
+function resetPacket(keepSteps){
+  pktRunning=false;
+  ['dev-pc','dev-sw','dev-rt','dev-srv'].forEach(d=>{const el=_id(d);if(el)el.className='dev-ico';});
+  ['pkt0','pkt1','pkt2'].forEach(p=>{const el=_id(p);if(el)el.className='pkt-dot';});
+  if(!keepSteps)buildPktSteps();
+}
+
+// ── VLAN ──
+const VLAN_DEVS=[
+  {name:'PC Vendite 1',vlan:10,icon:'💼'},{name:'PC Vendite 2',vlan:10,icon:'💼'},
+  {name:'Server IT',vlan:20,icon:'🖥️'},{name:'PC Admin IT',vlan:20,icon:'⚙️'},
+  {name:'Router Mgmt',vlan:30,icon:'📡'},{name:'SW Mgmt',vlan:30,icon:'🔀'},
+];
+const VLAN_PORTS=[
+  {port:'Fa0/1',vlan:10},{port:'Fa0/2',vlan:10},
+  {port:'Fa0/3',vlan:20},{port:'Fa0/4',vlan:20},
+  {port:'Fa0/5',vlan:30},{port:'Fa0/6',vlan:30},
+];
+const VCOLS={10:'var(--red)',20:'var(--green)',30:'var(--orange)'};
+const VNAMES={10:'Sales',20:'IT',30:'Mgmt'};
+let vlanCorrect=0;
+function initVlan(){
+  vlanCorrect=0;
+  _id('vlan-fb').classList.remove('show','ok','ko');
+  _id('vlan-next').classList.remove('show');
+  const devPool=_id('vlan-devs');const portPool=_id('vlan-ports');
+  devPool.innerHTML='';portPool.innerHTML='';
+  shuffle([...VLAN_DEVS]).forEach(dev=>{
+    const item=document.createElement('div');item.className='drag-item';
+    item.draggable=true;item.dataset.vlan=dev.vlan;item.dataset.name=dev.name;
+    item.innerHTML=dev.icon+' '+dev.name+' <span style="margin-left:auto;font-family:JetBrains Mono,monospace;font-size:.6rem;padding:2px 6px;border-radius:3px;background:rgba(0,0,0,.3);color:'+VCOLS[dev.vlan]+'">V'+dev.vlan+'</span>';
+    item.addEventListener('dragstart',e=>{e.dataTransfer.setData('vlan',dev.vlan);e.dataTransfer.setData('name',dev.name);item.classList.add('dragging');});
+    item.addEventListener('dragend',()=>item.classList.remove('dragging'));
+    devPool.appendChild(item);
+  });
+  VLAN_PORTS.forEach(p=>{
+    const zone=document.createElement('div');zone.className='drop-zone';
+    zone.dataset.vlan=p.vlan;zone.dataset.port=p.port;
+    zone.innerHTML='<span class="zone-lbl" style="color:'+VCOLS[p.vlan]+'">'+p.port+' <small style="font-size:.56rem;display:block;color:var(--muted)">VLAN '+p.vlan+' '+VNAMES[p.vlan]+'</small></span><div class="zone-content"><span class="zone-ph">Trascina qui…</span></div>';
+    zone.addEventListener('dragover',e=>{e.preventDefault();zone.classList.add('over');});
+    zone.addEventListener('dragleave',()=>zone.classList.remove('over'));
+    zone.addEventListener('drop',e=>{
+      e.preventDefault();zone.classList.remove('over');
+      if(zone.querySelector('.drag-item')) return;
+      const vlan=parseInt(e.dataTransfer.getData('vlan'));
+      const name=e.dataTransfer.getData('name');
+      const src=devPool.querySelector('[data-name="'+name+'"]');if(!src) return;
+      const ok=vlan===parseInt(zone.dataset.vlan);
+      const content=zone.querySelector('.zone-content');content.innerHTML='';
+      const placed=src.cloneNode(true);placed.draggable=false;content.appendChild(placed);
+      src.remove();
+      zone.classList.add(ok?'ok-zone':'ko-zone');placed.classList.add(ok?'ok-item':'ko-item');
+      if(!ok){
+        setTimeout(()=>{
+          zone.classList.remove('ko-zone');content.innerHTML='<span class="zone-ph">Trascina qui…</span>';
+          const ri=document.createElement('div');ri.className='drag-item';ri.draggable=true;
+          ri.dataset.vlan=vlan;ri.dataset.name=name;ri.textContent=name;
+          ri.addEventListener('dragstart',ev=>{ev.dataTransfer.setData('vlan',vlan);ev.dataTransfer.setData('name',name);ri.classList.add('dragging');});
+          ri.addEventListener('dragend',()=>ri.classList.remove('dragging'));
+          devPool.appendChild(ri);
+        },600);
+      } else {
+        addXP(10);vlanCorrect++;
+        const fb=_id('vlan-fb');fb.className='fb-strip show ok';fb.textContent='✓ '+name+' → '+p.port+' (VLAN '+vlan+') +10 XP';
+        if(devPool.children.length===0){
+          addXP(50);showToast('🏆 VLAN completate! +50 XP bonus','var(--orange)');
+          _id('vlan-next').classList.add('show');
+          if(!G.modules['vlan_mod'].completed) completeModule('vlan_mod');
+        }
+      }
+    });
+    portPool.appendChild(zone);
   });
 }
 
-function openModal(id){
-  const mod=MODS.find(m=>m.id===id);
-  const status=getStatus(mod);
-  const prog=G.modules[id].progress||0;
-  const prereqHtml=mod.req.length?`
-    <div class="modal-prereqs">
-      <div class="modal-prereqs-label">Prerequisiti</div>
-      ${mod.req.map(r=>{const m=MODS.find(x=>x.id===r);const done=G.modules[r]&&G.modules[r].completed;return`<div class="prereq-item"><span class="prereq-check" style="color:${done?'var(--green)':'var(--muted)'}">${done?'✓':'○'}</span><span style="font-size:0.82rem;${done?'color:var(--green)':''}">${m?m.title:r}</span></div>`}).join('')}
-    </div>`:'';
-  const progressHtml=prog>0&&status!=='done'?`
-    <div style="margin-bottom:14px">
-      <div style="display:flex;justify-content:space-between;font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);margin-bottom:6px"><span>PROGRESSO</span><span>${prog}%</span></div>
-      <div class="lc-xp-track"><div class="lc-xp-fill" style="width:${prog}%"></div></div>
-    </div>`:'';
-  let actionHtml;
-  if(status==='locked'){
-    actionHtml=`<span class="btn-disabled">🔒 Completa i prerequisiti</span>`;
-  } else if(status==='done'){
-    actionHtml=`<a href="${mod.link}" class="btn-primary">▶ Rigioca</a><button class="btn-secondary" onclick="resetMod('${id}')">↺ Reset progresso</button>`;
-  } else {
-    actionHtml=`<a href="${mod.link}" class="btn-primary" onclick="markStarted('${id}')">▶ Inizia — +${mod.xp} XP</a><a href="ccna-schemas.html" class="btn-secondary">📖 Studia prima</a>`;
+// ── AI LAB ──
+let labTopic=TOPICS[0];
+function initLabTopics(){
+  const tg=_id('lab-topic-grid');tg.innerHTML='';
+  TOPICS.forEach(t=>{
+    const b=document.createElement('button');b.className='topic-btn'+(t===labTopic?' sel':'');
+    b.textContent=t;b.onclick=()=>{document.querySelectorAll('#lab-topic-grid .topic-btn').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');labTopic=t;};
+    tg.appendChild(b);
+  });
+}
+async function loadLabAI(){
+  _id('lab-ai-panel').style.display='none';_id('lab-ai-err').classList.remove('show');
+  _id('lab-loading').classList.add('show');_id('lab-ai-start').style.display='none';
+  const prompt='Sei un trainer CCNA. Genera UNA domanda a risposta multipla (4 opzioni, 1 corretta) su: "'+labTopic+'".\nRispondi SOLO con JSON valido:\n{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":0,"explanation":"Spiegazione in italiano 2-3 frasi."}';
+  try{
+    const res=await fetch('https://api.anthropic.com/v1/messages',{
+      method:'POST',
+      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-ipc':'true'},
+      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})
+    });
+    const data=await res.json();
+    if(!res.ok) throw new Error('HTTP '+res.status+': '+(data?.error?.message||'errore'));
+    const txt=data?.content?.[0]?.text;
+    if(!txt) throw new Error('Risposta AI vuota');
+    const m=txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
+    if(!m) throw new Error('JSON non trovato');
+    const q=JSON.parse(m[0]);
+    _id('lab-loading').classList.remove('show');
+    _id('lab-ai-panel').style.display='block';
+    _id('lab-ai-q').textContent=q.question;
+    _id('lab-ai-expl').classList.remove('show');
+    _id('lab-ai-next').classList.remove('show');
+    const opts=_id('lab-ai-opts');opts.innerHTML='';
+    q.options.forEach((opt,i)=>{
+      const b=document.createElement('div');b.className='ai-opt';
+      b.innerHTML='<span class="opt-l">'+['A','B','C','D'][i]+'</span><span>'+opt.replace(/^[A-D]\)\s*/,'')+'</span>';
+      b.onclick=()=>{
+        if(b.dataset.answered) return;
+        opts.querySelectorAll('.ai-opt').forEach((x,j)=>{x.dataset.answered='1';x.onclick=null;if(j===q.correct)x.classList.add('ok');});
+        if(i!==q.correct) b.classList.add('ko');
+        _id('lab-ai-expl').textContent=q.explanation;_id('lab-ai-expl').classList.add('show');
+        _id('lab-ai-next').classList.add('show');
+        if(i===q.correct) addXP(15);
+      };
+      opts.appendChild(b);
+    });
+  }catch(e){
+    _id('lab-loading').classList.remove('show');
+    _id('lab-ai-err').classList.add('show');
+    _id('lab-ai-err').innerHTML='⚠️ '+e.message+' <button onclick="loadLabAI()" style="background:none;border:1px solid var(--red);color:#fca5a5;padding:3px 10px;cursor:pointer;border-radius:4px;margin-left:8px;font-size:.78rem">Riprova</button>';
+    _id('lab-ai-start').style.display='block';
   }
-  document.getElementById('modal-inner').innerHTML=`
-    <button class="modal-close" onclick="closeModal()">✕</button>
-    <div class="modal-icon">${mod.icon}</div>
-    <div class="modal-title">${mod.title}</div>
-    <div class="modal-meta">${mod.type==='boss'?'BOSS CHALLENGE':mod.type==='cert'?'CERTIFICAZIONE':'MODULO'} · TIER ${mod.tier} · ${mod.xp} XP · ${status==='done'?'COMPLETATO ✓':status==='locked'?'BLOCCATO':'DISPONIBILE'}</div>
-    <div class="modal-desc">${mod.desc}</div>
-    ${prereqHtml}
-    <div style="font-family:'JetBrains Mono',monospace;font-size:0.62rem;color:var(--muted);letter-spacing:2px;text-transform:uppercase;margin-bottom:8px">Attività incluse</div>
-    <div class="modal-games">${mod.games.map(g=>`<span class="modal-game-tag">${g}</span>`).join('')}</div>
-    ${progressHtml}
-    <div class="modal-actions">${actionHtml}</div>`;
-  document.getElementById('modal').classList.add('open');
 }
 
-function closeModal(){document.getElementById('modal').classList.remove('open');}
-
-function markStarted(id){
-  if(!G.modules[id].completed){
-    G.modules[id].progress=Math.max(G.modules[id].progress||0,10);
-    saveState();
-  }
+// ══════════════════════════════════════
+// SCHEMAS
+// ══════════════════════════════════════
+function selSchema(id,btn){
+  document.querySelectorAll('.schema-nav-btn').forEach(b=>b.classList.remove('sel'));
+  if(btn) btn.classList.add('sel');
+  renderSchema(id);
+}
+function renderSchema(id){
+  const c=_id('schema-content');
+  const schemas={
+    osi:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">📶</span><h3>I 7 Layer OSI</h3><span style="background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)">DIAGRAMMA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>N°</th><th>NOME</th><th>PDU</th><th>PROTOCOLLI</th><th>DISPOSITIVO</th></tr><tr><td class="ca">7</td><td style="color:#fca5a5;font-weight:600">Application</td><td class="cm">Data</td><td class="cm">HTTP,FTP,DNS,SMTP,SSH</td><td style="font-size:.75rem;color:var(--muted)">Firewall, Server, PC</td></tr><tr><td class="ca">6</td><td style="color:#fcd34d;font-weight:600">Presentation</td><td class="cm">Data</td><td class="cm">SSL/TLS,JPEG,ASCII</td><td style="font-size:.75rem;color:var(--muted)">Gateway</td></tr><tr><td class="ca">5</td><td style="color:#fde047;font-weight:600">Session</td><td class="cm">Data</td><td class="cm">NetBIOS,RPC,NFS</td><td style="font-size:.75rem;color:var(--muted)">Gateway</td></tr><tr><td class="ca">4</td><td style="color:#6ee7b7;font-weight:600">Transport</td><td class="cm">Segment</td><td class="cm">TCP,UDP</td><td style="font-size:.75rem;color:var(--muted)">Firewall, Load Balancer</td></tr><tr><td class="ca">3</td><td style="color:#67e8f9;font-weight:600">Network</td><td class="cm">Packet</td><td class="cm">IP,ICMP,OSPF,BGP</td><td style="font-size:.75rem;color:var(--muted)">Router, L3 Switch</td></tr><tr><td class="ca">2</td><td style="color:#93c5fd;font-weight:600">Data Link</td><td class="cm">Frame</td><td class="cm">Ethernet,802.11,PPP</td><td style="font-size:.75rem;color:var(--muted)">Switch, Bridge</td></tr><tr><td class="ca">1</td><td style="color:#c4b5fd;font-weight:600">Physical</td><td class="cm">Bits</td><td class="cm">UTP,Fibra,Wi-Fi</td><td style="font-size:.75rem;color:var(--muted)">Hub, Cavi, Repeater</td></tr></table><div class="note">💡 Mnemonico L7→L1: <strong>"All People Seem To Need Data Processing"</strong></div></div></div>`,
+    subnet:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🔢</span><h3>CIDR Cheat Sheet</h3><span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)">TABELLA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>CIDR</th><th>SUBNET MASK</th><th>HOST USABILI</th><th>SUBNET DA /24</th><th>BLOCK SIZE</th></tr><tr><td class="cm">/24</td><td class="cm">255.255.255.0</td><td class="cg">254</td><td class="co">1</td><td class="cm">256</td></tr><tr><td class="cm">/25</td><td class="cm">255.255.255.128</td><td class="cg">126</td><td class="co">2</td><td class="cm">128</td></tr><tr><td class="cm">/26</td><td class="cm">255.255.255.192</td><td class="cg">62</td><td class="co">4</td><td class="cm">64</td></tr><tr><td class="cm">/27</td><td class="cm">255.255.255.224</td><td class="cg">30</td><td class="co">8</td><td class="cm">32</td></tr><tr><td class="cm">/28</td><td class="cm">255.255.255.240</td><td class="cg">14</td><td class="co">16</td><td class="cm">16</td></tr><tr><td class="cm">/29</td><td class="cm">255.255.255.248</td><td class="cg">6</td><td class="co">32</td><td class="cm">8</td></tr><tr><td class="cm">/30</td><td class="cm">255.255.255.252</td><td class="cg">2</td><td class="co">64</td><td class="cm">4</td></tr></table><div class="formula-grid" style="margin-top:16px"><div class="formula-box"><div class="formula-label">Host usabili</div><div class="formula-val">2ʰ − 2</div><div class="formula-sub">h = 32 − CIDR. Si tolgono network e broadcast.</div></div><div class="formula-box"><div class="formula-label">Block size</div><div class="formula-val">256 − valore mask</div><div class="formula-sub">Es: /26 → 256−192=64. Subnet ogni 64.</div></div></div></div></div>`,
+    cli:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">💻</span><h3>CLI Cisco — Comandi essenziali</h3><span style="background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3)">REFERENCE</span></div><div class="schema-card-body"><div class="two-col"><div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">SHOW COMMANDS</div><table class="ref-table"><tr><td class="cm">show running-config</td><td style="font-size:.75rem;color:var(--muted)">Config in RAM</td></tr><tr><td class="cm">show ip interface brief</td><td style="font-size:.75rem;color:var(--muted)">Stato interfacce</td></tr><tr><td class="cm">show ip route</td><td style="font-size:.75rem;color:var(--muted)">Routing table</td></tr><tr><td class="cm">show vlan brief</td><td style="font-size:.75rem;color:var(--muted)">VLAN configurate</td></tr><tr><td class="cm">show version</td><td style="font-size:.75rem;color:var(--muted)">Info IOS/hardware</td></tr></table></div><div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">CONFIGURAZIONE</div><div class="code-block"><span class="cp">R1#</span> <span class="ck">enable</span><br><span class="cp">R1#</span> <span class="ck">configure terminal</span><br><span class="cp">R1(config)#</span> <span class="ck">hostname R1</span><br><span class="cp">R1(config)#</span> <span class="ck">interface Gi0/0</span><br><span class="cp">R1(config-if)#</span> <span class="ck">ip address</span> <span class="cv">192.168.1.1 255.255.255.0</span><br><span class="cp">R1(config-if)#</span> <span class="ck">no shutdown</span><br><span class="cp">R1(config)#</span> <span class="ck">ip route 0.0.0.0 0.0.0.0</span> <span class="cv">x.x.x.x</span><br><span class="cp">R1#</span> <span class="ck">copy run start</span></div></div></div></div></div>`,
+    vlan:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🔀</span><h3>VLAN — Configurazione completa</h3><span style="background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3)">CLI</span></div><div class="schema-card-body"><div class="two-col"><div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">ACCESS PORT</div><div class="code-block"><span class="cc">! Crea VLAN</span><br><span class="cp">SW(config)#</span> <span class="ck">vlan</span> <span class="cv">10</span><br><span class="cp">SW(config-vlan)#</span> <span class="ck">name</span> <span class="cv">Sales</span><br><span class="cc">! Assegna porta</span><br><span class="cp">SW(config)#</span> <span class="ck">interface</span> <span class="cv">Fa0/1</span><br><span class="cp">SW(config-if)#</span> <span class="ck">switchport mode access</span><br><span class="cp">SW(config-if)#</span> <span class="ck">switchport access vlan</span> <span class="cv">10</span></div></div><div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">TRUNK PORT</div><div class="code-block"><span class="cc">! Configura trunk</span><br><span class="cp">SW(config)#</span> <span class="ck">interface</span> <span class="cv">Fa0/24</span><br><span class="cp">SW(config-if)#</span> <span class="ck">switchport mode trunk</span><br><span class="cp">SW(config-if)#</span> <span class="ck">switchport trunk allowed vlan</span> <span class="cv">10,20,30</span><br><span class="cc">! Verifica</span><br><span class="cp">SW#</span> <span class="ck">show vlan brief</span></div></div></div></div></div>`,
+    nat:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🔄</span><h3>NAT & PAT</h3><span style="background:rgba(245,158,11,.15);color:var(--orange);border:1px solid rgba(245,158,11,.3)">TABELLA + CLI</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>DESCRIZIONE</th><th>USO TIPICO</th></tr><tr><td class="ca">Static NAT</td><td style="font-size:.8rem">1 IP privato ↔ 1 IP pubblico fisso</td><td style="font-size:.75rem;color:var(--muted)">Server esposti (web, mail)</td></tr><tr><td class="ca">Dynamic NAT</td><td style="font-size:.8rem">Pool IP pubblici, assegnati on-demand</td><td style="font-size:.75rem;color:var(--muted)">Raro</td></tr><tr><td class="ca">PAT / Overload</td><td style="font-size:.8rem">Molti IP privati → 1 IP pubblico (porta diversa)</td><td style="font-size:.75rem;color:var(--muted)">Home, uffici — il più usato</td></tr></table><div class="code-block" style="margin-top:14px"><span class="cc">! PAT completo</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 1 permit</span> <span class="cv">192.168.1.0 0.0.0.255</span><br><span class="cp">R1(config)#</span> <span class="ck">ip nat inside source list 1 interface Gi0/1 overload</span><br><span class="cp">R1(config-if)#</span> <span class="ck">ip nat inside</span> <span class="cc">! interfaccia LAN</span><br><span class="cp">R1(config-if)#</span> <span class="ck">ip nat outside</span> <span class="cc">! interfaccia WAN</span><br><span class="cp">R1#</span> <span class="ck">show ip nat translations</span></div></div></div>`,
+    acl:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🛡️</span><h3>ACL — Access Control Lists</h3><span style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)">CLI</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>NUMERI</th><th>FILTRA</th><th>POSIZIONE</th></tr><tr><td class="ca">Standard</td><td class="cm">1–99</td><td>Solo IP sorgente</td><td style="font-size:.75rem;color:var(--muted)">Vicino alla destinazione</td></tr><tr><td class="ca">Extended</td><td class="cm">100–199</td><td>Src/Dst IP, proto, porta</td><td style="font-size:.75rem;color:var(--muted)">Vicino alla sorgente</td></tr></table><div class="two-col" style="margin-top:14px"><div><div class="code-block"><span class="cc">! Standard — blocca rete 10.x</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 10 deny</span> <span class="cv">10.0.0.0 0.255.255.255</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 10 permit any</span><br><span class="cp">R1(config-if)#</span> <span class="ck">ip access-group 10 in</span></div></div><div><div class="code-block"><span class="cc">! Extended — solo HTTP/HTTPS</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 101 permit tcp</span> <span class="cv">192.168.1.0 0.0.0.255 any eq 80</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 101 permit tcp</span> <span class="cv">192.168.1.0 0.0.0.255 any eq 443</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 101 deny ip any any</span></div></div></div><div class="note">⚠️ <strong>Implicit deny:</strong> alla fine di ogni ACL c\'è sempre un "deny any any" invisibile!</div></div></div>`,
+    ipv6:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">6️⃣</span><h3>IPv6 — Riferimento rapido</h3><span style="background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3)">TABELLA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>PREFISSO</th><th>IPv4 EQUIV.</th><th>NOTE</th></tr><tr><td class="ca">Global Unicast</td><td class="cm">2000::/3</td><td style="font-size:.78rem">IP pubblico</td><td style="font-size:.75rem;color:var(--muted)">Instradabile su Internet</td></tr><tr><td class="ca">Link-Local</td><td class="cm">FE80::/10</td><td style="font-size:.78rem">169.254.x.x</td><td style="font-size:.75rem;color:var(--muted)">Solo subnet locale, autogenerato</td></tr><tr><td class="ca">Unique Local</td><td class="cm">FC00::/7</td><td style="font-size:.78rem">192.168.x.x</td><td style="font-size:.75rem;color:var(--muted)">Privato, non routable Internet</td></tr><tr><td class="ca">Multicast</td><td class="cm">FF00::/8</td><td style="font-size:.78rem">224.x.x.x</td><td style="font-size:.75rem;color:var(--muted)">Gruppo di destinatari</td></tr><tr><td class="ca">Loopback</td><td class="cm">::1</td><td style="font-size:.78rem">127.0.0.1</td><td style="font-size:.75rem;color:var(--muted)">Localhost</td></tr></table><div class="note" style="margin-top:12px">💡 Abbreviazione: rimuovi zeri iniziali per gruppo (0db8→db8) e sostituisci gruppi consecutivi di zero con :: (solo una volta).<br>Es: 2001:0db8:0000:0000:0000:0000:0000:0001 → <strong>2001:db8::1</strong></div></div></div>`,
+  };
+  c.innerHTML=schemas[id]||'<p style="color:var(--muted)">Schema non trovato.</p>';
 }
 
-function resetMod(id){
-  G.modules[id]={progress:0,completed:false};
-  const mod=MODS.find(m=>m.id===id);
-  if(mod&&mod.type==='cert') G.certs=Math.max(0,G.certs-1);
-  G.done=MODS.filter(m=>G.modules[m.id]&&G.modules[m.id].completed).length;
-  saveState();renderTree();updateUI();closeModal();
-  showToast('Progresso resettato per '+mod.title);
-}
-
-// Called by other pages via localStorage event
-window.addEventListener('storage',e=>{
-  if(e.key===SAVE_KEY){G=loadState();updateUI();renderTree();}
-});
-
-// ── XP & LEVEL ──
-function addXP(n){
-  G.xp+=n;G.score+=n;
-  while(G.xp>=G.xpNext){G.xp-=G.xpNext;G.level++;G.xpNext=Math.round(G.xpNext*1.35);}
-  saveState();updateUI();
-}
-
-function getRank(){
-  const r=RANKS.slice().reverse().find(r=>G.level>=r[0]);
-  return r||RANKS[0];
-}
-
-function updateUI(){
-  const rank=getRank();
-  const pct=(G.xp/G.xpNext*100).toFixed(1);
-  document.getElementById('lc-xp-fill').style.width=pct+'%';
-  document.getElementById('lc-xp-cur').textContent=G.xp+' XP';
-  document.getElementById('lc-xp-max').textContent=G.xpNext+' XP';
-  document.getElementById('lc-rank').textContent=rank[1];
-  document.getElementById('lc-lv').textContent='Livello '+G.level;
-  document.getElementById('lc-avatar').textContent=rank[2];
-  document.getElementById('lc-done').textContent=G.done;
-  document.getElementById('lc-score').textContent=G.score;
-  document.getElementById('lc-streak').textContent=G.streak+'🔥';
-  document.getElementById('lc-cert').textContent=G.certs;
-  document.getElementById('nav-lv').textContent=G.level;
-  document.getElementById('nav-bar').style.width=pct+'%';
-  document.getElementById('nav-pts').textContent=G.score+' XP';
-}
-
-let toastT;
-function showToast(msg,color){
-  const t=document.getElementById('toast');
-  t.textContent=msg;
-  t.style.borderLeftColor=color||'var(--green)';
-  t.classList.add('show');
-  clearTimeout(toastT);
-  toastT=setTimeout(()=>t.classList.remove('show'),3000);
-}
-
-// ── DEMO: mark completable from other pages ──
-// Other pages call: localStorage.setItem('ccna_complete_mod', JSON.stringify({id, xp}))
-window.addEventListener('storage',e=>{
-  if(e.key==='ccna_complete_mod'){
-    try{
-      const {id,xp}=JSON.parse(e.newValue);
-      if(!G.modules[id]||G.modules[id].completed) return;
-      G.modules[id].completed=true;G.modules[id].progress=100;
-      G.done++;
-      const mod=MODS.find(m=>m.id===id);
-      if(mod&&mod.type==='cert') G.certs++;
-      G.streak++;
-      addXP(xp||50);
-      showToast('✓ '+((mod&&mod.title)||id)+' completato! +'+xp+' XP');
-      renderTree();
-    }catch(e){}
-  }
-});
-
-renderTree();
+// ══════════════════════════════════════
+// INIT
+// ══════════════════════════════════════
 updateUI();
+renderTree();
+initQuizMenu();
 </script>
 </body>
 </html>
