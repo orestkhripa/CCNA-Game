@@ -300,6 +300,33 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .order-num{width:22px;height:22px;border-radius:50%;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;min-width:22px}
 .order-slot.ok .order-num{background:var(--green);color:var(--bg)}
 .play-progress{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);margin:6px 0}
+/* ─── HERO RESTYLE ─── */
+.home-hero{position:relative;overflow:hidden}
+.home-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(59,130,246,.16) 1px,transparent 0);background-size:24px 24px;-webkit-mask-image:linear-gradient(120deg,#000,transparent 68%);mask-image:linear-gradient(120deg,#000,transparent 68%);pointer-events:none}
+.home-hero::after{content:'';position:absolute;top:-45%;right:-8%;width:440px;height:440px;background:radial-gradient(circle,rgba(6,182,212,.16),transparent 62%);pointer-events:none}
+.home-top{position:relative;z-index:1}
+.hero-badge{display:inline-flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);background:rgba(6,182,212,.08);border:1px solid rgba(6,182,212,.3);padding:5px 12px;border-radius:20px;margin-bottom:16px}
+.hero-badge .dot{width:6px;height:6px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);animation:pulseDot 1.6s infinite}
+@keyframes pulseDot{0%,100%{opacity:1}50%{opacity:.25}}
+.hero-cta{display:inline-flex;align-items:center;gap:9px;margin-top:22px;padding:12px 22px;background:var(--accent);color:#fff;border:none;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:.85rem;cursor:pointer;transition:all .2s;box-shadow:0 6px 20px rgba(59,130,246,.35)}
+.hero-cta:hover{transform:translateY(-2px);box-shadow:0 10px 28px rgba(59,130,246,.5)}
+.hero-cta-sub{margin-left:14px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)}
+.lv-card{box-shadow:0 8px 30px rgba(0,0,0,.28)}
+.lv-avatar{box-shadow:0 0 18px rgba(59,130,246,.3)}
+/* ─── FUN FACTS CAROUSEL ─── */
+.facts-wrap{position:relative;background:linear-gradient(135deg,rgba(139,92,246,.07),transparent 60%),var(--panel);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:12px;padding:18px 20px;margin-bottom:26px;overflow:hidden}
+.facts-head{display:flex;align-items:center;gap:8px;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:2px;text-transform:uppercase;color:var(--purple);margin-bottom:12px}
+.facts-body{display:flex;align-items:center;gap:16px;min-height:58px}
+.facts-ico{font-size:1.9rem;flex-shrink:0;transition:transform .35s}
+.facts-text{font-size:.9rem;line-height:1.55;color:var(--text);flex:1;transition:opacity .3s}
+.facts-text b{color:var(--cyan);font-weight:600}
+.facts-nav{display:flex;align-items:center;justify-content:space-between;margin-top:14px}
+.facts-dots{display:flex;gap:6px;flex-wrap:wrap}
+.facts-dot{width:7px;height:7px;border-radius:50%;background:var(--dim);cursor:pointer;transition:all .25s}
+.facts-dot.on{background:var(--purple);width:18px;border-radius:4px}
+.facts-arrows{display:flex;gap:6px}
+.facts-arrow{width:30px;height:30px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-size:1rem;line-height:1;transition:all .15s;display:flex;align-items:center;justify-content:center}
+.facts-arrow:hover{border-color:var(--purple);color:var(--purple)}
 </style>
 </head>
 <body>
@@ -323,8 +350,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="home-hero">
     <div class="home-top">
       <div>
+        <div class="hero-badge"><span class="dot"></span> Percorso CCNA 200-301</div>
         <h1>Diventa un<br><span>Network Engineer</span></h1>
-        <p>Percorso a livelli da zero a CCNA. Sblocca moduli, completa giochi interattivi, guadagna XP.</p>
+        <p>Da zero a CCNA con giochi interattivi: abbina, calcola, ordina e configura come su un vero Cisco IOS. Ogni livello è un gioco — il quiz consolida.</p>
+        <div>
+          <button class="hero-cta" onclick="continuaPercorso()">▶ Continua il percorso</button>
+          <span class="hero-cta-sub" id="hero-progress">0 / 21 moduli</span>
+        </div>
       </div>
       <div class="lv-card">
         <div class="lv-card-top">
@@ -342,6 +374,22 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
           <div class="lv-stat"><b id="lv-streak">0🔥</b><span>Streak</span></div>
           <div class="lv-stat"><b id="lv-cert">0</b><span>Cert.</span></div>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- FUN FACTS CAROUSEL -->
+  <div class="facts-wrap" id="facts-wrap" onmouseenter="factsPause()" onmouseleave="factsResume()">
+    <div class="facts-head">💡 Lo sapevi?</div>
+    <div class="facts-body">
+      <div class="facts-ico" id="fact-ico">🌐</div>
+      <div class="facts-text" id="fact-text"></div>
+    </div>
+    <div class="facts-nav">
+      <div class="facts-dots" id="fact-dots"></div>
+      <div class="facts-arrows">
+        <button class="facts-arrow" onclick="factsGo(-1)" aria-label="Precedente">‹</button>
+        <button class="facts-arrow" onclick="factsGo(1)" aria-label="Successivo">›</button>
       </div>
     </div>
   </div>
@@ -634,7 +682,7 @@ function showView(v){
   document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
   _id('view-'+v).classList.add('active');
   _id('nb-'+v).classList.add('active');
-  if(v==='home') renderTree();
+  if(v==='home'){renderTree();updateHeroProgress();}
   if(v==='quiz') initQuizMenu();
   if(v==='lab')  {initOsi();initSubnet();initCli();initPacket();initVlan();initLabTopics();}
   if(v==='schemas') renderSchema('osi');
@@ -1976,11 +2024,62 @@ function finishLevel(){
 }
 
 // ══════════════════════════════════════
+// HOME · CTA + FUN FACTS CAROUSEL
+// ══════════════════════════════════════
+function continuaPercorso(){
+  const next=MODS.find(m=>getStatus(m)==='active');
+  if(next){launchModuleGame(next);}
+  else{
+    const done=MODS.every(m=>G.modules[m.id]&&G.modules[m.id].completed);
+    showToast(done?'🏆 Hai completato tutto il percorso!':'Completa i moduli sbloccati per procedere','var(--accent)');
+  }
+}
+function updateHeroProgress(){
+  const hp=_id('hero-progress');if(!hp)return;
+  const done=MODS.filter(m=>G.modules[m.id]&&G.modules[m.id].completed).length;
+  hp.textContent=done+' / '+MODS.length+' moduli';
+}
+const FUN_FACTS=[
+  {i:'🌐',t:"Il primo messaggio inviato su <b>ARPANET</b> nel 1969 doveva essere \"LOGIN\", ma il sistema andò in crash dopo due lettere: <b>LO</b>."},
+  {i:'📡',t:"Un indirizzo <b>IPv6</b> ha 128 bit: esistono più indirizzi disponibili che granelli di sabbia sulla Terra."},
+  {i:'🔢',t:"La subnet mask <b>/30</b> lascia solo 2 host utilizzabili: perfetta per i link punto-punto tra due router."},
+  {i:'🔀',t:"Lo <b>Spanning Tree Protocol</b> fu inventato da Radia Perlman, che lo spiegò persino con una poesia."},
+  {i:'🚦',t:"Le porte <b>80</b> (HTTP) e <b>443</b> (HTTPS) rientrano nelle 1.024 \"well-known ports\" riservate ai servizi standard."},
+  {i:'💾',t:"Un indirizzo <b>MAC</b> è a 48 bit: i primi 24 identificano il produttore della scheda di rete (OUI)."},
+  {i:'⚡',t:"<b>EIGRP</b> riconverge in un lampo perché tiene già pronta una rotta di backup: il <b>feasible successor</b>."},
+  {i:'🛡️',t:"Ogni <b>ACL</b> termina con un \"deny any\" invisibile: se nessuna regola fa match, il traffico è bloccato."},
+  {i:'🧠',t:"Il modello <b>OSI</b> ha 7 livelli. Mnemonico: <b>All People Seem To Need Data Processing</b>."},
+  {i:'🏠',t:"Gli indirizzi <b>192.168.x.x</b> sono privati (RFC 1918): non instradabili su Internet, richiedono il NAT."},
+  {i:'🔌',t:"<b>Ping</b> usa il protocollo ICMP e prende il nome dal suono del sonar dei sottomarini."},
+  {i:'🤝',t:"<b>TCP</b> apre ogni connessione con un saluto in 3 mosse: SYN → SYN-ACK → ACK."},
+  {i:'🎯',t:"L'esame <b>CCNA 200-301</b> dura 120 minuti e copre 6 aree, dal networking di base all'automazione."}
+];
+let factsIdx=0,factsTimer=null;
+function renderFact(){
+  const f=FUN_FACTS[factsIdx];
+  const tx=_id('fact-text'),ic=_id('fact-ico');
+  if(!tx)return;
+  tx.style.opacity=0;ic.style.transform='scale(.6)';
+  setTimeout(()=>{tx.innerHTML=f.t;ic.textContent=f.i;tx.style.opacity=1;ic.style.transform='scale(1)';},180);
+  document.querySelectorAll('#fact-dots .facts-dot').forEach((d,i)=>d.classList.toggle('on',i===factsIdx));
+}
+function factsGo(d){factsIdx=(factsIdx+d+FUN_FACTS.length)%FUN_FACTS.length;renderFact();factsResume();}
+function factsPause(){clearInterval(factsTimer);factsTimer=null;}
+function factsResume(){factsPause();factsTimer=setInterval(()=>factsGo(1),6500);}
+function initFacts(){
+  const dots=_id('fact-dots');if(!dots)return;dots.innerHTML='';
+  FUN_FACTS.forEach((_,i)=>{const d=el('span','facts-dot'+(i===0?' on':''));d.onclick=()=>{factsIdx=i;renderFact();factsResume();};dots.appendChild(d);});
+  renderFact();factsResume();
+}
+
+// ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
 updateUI();
 renderTree();
 initQuizMenu();
+initFacts();
+updateHeroProgress();
 </script>
 </body>
 </html>
