@@ -346,7 +346,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="q-timer" id="q-timer">30</div>
     </div>
     <div class="prog-dots" id="prog-dots"></div>
-    <div class="loading-box" id="q-loading"><div class="spinner"></div><div class="loading-txt">GENERANDO DOMANDA AI...</div></div>
+    <div class="loading-box" id="q-loading"><div class="spinner"></div><div class="loading-txt">CARICAMENTO...</div></div>
     <div class="err-box" id="q-err"></div>
     <div id="q-question" style="display:none">
       <div class="q-box"><div class="q-tag" id="q-tag"></div><div class="q-text" id="q-text"></div></div>
@@ -366,7 +366,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="rs"><b id="res-xp">0</b><span>XP guadagnati</span></div>
     </div>
     <div class="result-btns">
-      <button class="rbtn rbtn-retry" onclick="startQuiz()">↺ Rigioca</button>
+      <button class="rbtn rbtn-retry" onclick="replayQuiz()">↺ Rigioca</button>
+      <button class="rbtn" id="res-lab-btn" style="display:none;border:1px solid var(--purple);color:var(--purple)">⚗️ Pratica interattiva</button>
       <button class="rbtn rbtn-home" onclick="showView('home')">🏠 Home</button>
     </div>
   </div>
@@ -380,7 +381,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="lab-tab" onclick="selLabTab('cli',this)">💻 CLI</button>
     <button class="lab-tab" onclick="selLabTab('packet',this)">📦 Packet Flow</button>
     <button class="lab-tab" onclick="selLabTab('vlan',this)">🔀 VLAN</button>
-    <button class="lab-tab" onclick="selLabTab('ailab',this)">🤖 Quiz AI</button>
+    <button class="lab-tab" onclick="selLabTab('ailab',this)">🎲 Quiz rapido</button>
   </div>
 
   <!-- OSI DRAG -->
@@ -498,10 +499,10 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div class="lab-content" id="lab-ailab">
     <div class="sec-title">Argomento</div>
     <div class="topic-grid" id="lab-topic-grid" style="margin-bottom:16px"></div>
-    <button class="check-btn" onclick="loadLabAI()" id="lab-ai-start">🤖 Genera domanda AI</button>
-    <div class="loading-box" id="lab-loading"><div class="spinner"></div><div class="loading-txt">GENERANDO...</div></div>
+    <button class="check-btn" onclick="loadLabAI()" id="lab-ai-start">🎲 Domanda casuale</button>
+    <div class="loading-box" id="lab-loading"><div class="spinner"></div><div class="loading-txt">CARICAMENTO...</div></div>
     <div class="ai-panel" id="lab-ai-panel" style="display:none">
-      <div class="ai-label">🤖 AI QUESTION</div>
+      <div class="ai-label">🎲 DOMANDA</div>
       <div class="ai-q" id="lab-ai-q"></div>
       <div class="ai-opts" id="lab-ai-opts"></div>
       <div class="explainer" id="lab-ai-expl"></div>
@@ -670,27 +671,22 @@ function launchModuleGame(mod){
   // mark progress
   if(!G.modules[mod.id].completed) G.modules[mod.id].progress=Math.max(G.modules[mod.id].progress||0,5);
   saveG();
-  // jump to right game
-  const gameMap={
-    quiz:'quiz', osi:'lab', subnet:'lab', cli:'lab', vlan:'lab',
-    packet:'lab', ailab:'lab',
-  };
-  const view=gameMap[mod.game]||'lab';
-  showView(view);
-  if(view==='lab'){
-    selLabTab(mod.game,null);
-    // pre-select relevant topic in AI quiz
-    if(mod.game==='ailab'){
-      labTopic=mod.title;
-    }
-  }
-  if(view==='quiz'){
-    // pre-select relevant topic for CCNA cert
-    quizTopic=mod.title==='CCNA 200-301 Sim'?'CCNA 200-301 completo — tutti gli argomenti':mod.title;
-    startQuiz();
-  }
-  // Show toast
+  // passa alla view quiz senza tornare al menu
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  _id('view-quiz').classList.add('active');
+  _id('nb-quiz').classList.add('active');
+  startModuleQuiz(mod);
   showToast('▶ '+mod.title+' — +'+mod.xp+' XP al completamento','var(--accent)');
+}
+// Apre il lab interattivo abbinato al modulo
+function openModuleLab(key){
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  _id('view-lab').classList.add('active');
+  _id('nb-lab').classList.add('active');
+  initOsi();initSubnet();initCli();initPacket();initVlan();initLabTopics();
+  selLabTab(key,null);
 }
 function completeModule(id){
   if(G.modules[id]&&G.modules[id].completed) return;
@@ -714,6 +710,283 @@ const TOPICS=[
 const MODE_CFG={practice:{q:10,t:60,mult:1},speed:{q:15,t:20,mult:1.5},hardcore:{q:10,t:30,mult:2},exam:{q:30,t:90,mult:1.2}};
 let quizTopic=TOPICS[0],quizMode='practice',quizState={};
 
+// ══════════════════════════════════════
+// BANCO DOMANDE PRE-SCRITTO (per modulo)
+//   o = opzioni, c = indice corretto, e = spiegazione
+// ══════════════════════════════════════
+const QBANK={
+net_basics:[
+ {q:"Qual è la definizione corretta di LAN?",o:["Rete che copre un'area geografica limitata come un ufficio o edificio","Rete che collega città o nazioni diverse","Rete pubblica gestita da un ISP","Collegamento punto-punto tra due router"],c:0,e:"Una LAN (Local Area Network) copre un'area ristretta come casa, ufficio o campus, con alta velocità e bassa latenza."},
+ {q:"Che cosa distingue una WAN da una LAN?",o:["La WAN copre grandi distanze geografiche, spesso tramite provider terzi","La WAN è sempre più veloce della LAN","La WAN usa solo cavi in fibra","La WAN non può trasportare traffico IP"],c:0,e:"Una WAN (Wide Area Network) collega reti distanti geograficamente, tipicamente affidandosi a service provider."},
+ {q:"In una topologia a stella, come sono collegati i dispositivi?",o:["Ogni dispositivo si collega a un nodo centrale (switch/hub)","Ogni dispositivo è collegato a formare un anello","Tutti condividono un unico cavo dorsale","Ogni dispositivo è collegato a tutti gli altri"],c:0,e:"Nella topologia a stella tutti i nodi si connettono a un dispositivo centrale; un guasto a un cavo isola solo quel nodo."},
+ {q:"A quale livello OSI opera un hub?",o:["Livello 1 - Fisico","Livello 2 - Data Link","Livello 3 - Network","Livello 4 - Transport"],c:0,e:"L'hub è un ripetitore multiporta: rigenera il segnale elettrico a livello 1 e non legge indirizzi MAC."},
+ {q:"Qual è la differenza principale tra hub e switch?",o:["Lo switch inoltra i frame solo alla porta di destinazione usando la MAC; l'hub ripete a tutte le porte","L'hub è più veloce dello switch","Lo switch opera solo a livello 3","L'hub crea VLAN, lo switch no"],c:0,e:"Lo switch mantiene una tabella MAC e inoltra in modo selettivo; l'hub trasmette a tutte le porte (un unico dominio di collisione)."},
+ {q:"Cosa significa comunicazione full-duplex?",o:["Invio e ricezione simultanei senza collisioni","Solo un dispositivo può trasmettere alla volta","La comunicazione avviene solo in una direzione","Richiede sempre un hub"],c:0,e:"Il full-duplex permette trasmissione e ricezione contemporanee, eliminando le collisioni (tipico dei link switch-a-dispositivo)."},
+ {q:"Quale unità misura tipicamente la larghezza di banda di un collegamento?",o:["Bit per secondo (bps)","Byte totali","Hertz","Pacchetti per sessione"],c:0,e:"La banda si misura in bit per secondo (Mbps, Gbps): è la capacità teorica massima del collegamento."},
+ {q:"Quale cavo si usa tradizionalmente tra due dispositivi simili (es. switch-switch) senza auto-MDIX?",o:["Cavo crossover","Cavo straight-through","Cavo seriale","Cavo coassiale"],c:0,e:"Il crossover incrocia le coppie TX/RX ed è usato tra dispositivi dello stesso tipo; lo straight-through tra dispositivi diversi."},
+ {q:"In un modello client-server, cosa caratterizza il server?",o:["Fornisce risorse o servizi ai client che ne fanno richiesta","Richiede sempre risorse agli altri nodi","Non ha indirizzo IP","È sempre un dispositivo wireless"],c:0,e:"Il server ospita e fornisce servizi (web, file, DNS...) mentre i client li richiedono."},
+ {q:"Qual è un vantaggio della fibra ottica rispetto al rame?",o:["Immunità alle interferenze elettromagnetiche e distanze maggiori","Costa sempre meno","È più facile da terminare","Trasporta corrente elettrica"],c:0,e:"La fibra usa impulsi di luce: non è soggetta a EMI e supporta distanze e banda molto superiori al rame."},
+ {q:"Cosa rappresenta il 'throughput' reale di una rete?",o:["La quantità effettiva di dati trasferiti nell'unità di tempo","La velocità massima teorica del mezzo","Il numero di dispositivi collegati","La lunghezza del cavo"],c:0,e:"Il throughput è la velocità realmente raggiunta, spesso inferiore alla banda nominale per overhead e congestione."},
+ {q:"Quale topologia offre la massima ridondanza collegando ogni nodo a tutti gli altri?",o:["Mesh (magliata) completa","Bus","Stella","Anello singolo"],c:0,e:"Nella mesh completa ogni dispositivo ha un link diretto con ogni altro: massima ridondanza ma costo elevato."}
+],
+binary:[
+ {q:"Quanti bit ci sono in un byte?",o:["8","4","16","32"],c:0,e:"Un byte è composto da 8 bit; un ottetto IPv4 è appunto 8 bit (0-255)."},
+ {q:"Qual è il valore decimale del binario 11000000?",o:["192","128","224","240"],c:0,e:"11000000 = 128+64 = 192, primo ottetto tipico di una mask /26."},
+ {q:"Il decimale 255 in binario è:",o:["11111111","10000000","11110000","01111111"],c:0,e:"255 = tutti gli 8 bit a 1 (128+64+32+16+8+4+2+1)."},
+ {q:"Quanti valori diversi può rappresentare un ottetto (8 bit)?",o:["256 (da 0 a 255)","255","128","512"],c:0,e:"Con 8 bit si hanno 2^8 = 256 combinazioni, cioè valori da 0 a 255."},
+ {q:"L'esadecimale corrispondente al decimale 15 è:",o:["F","10","E","1111"],c:0,e:"In esadecimale 15 = F. L'hex usa cifre 0-9 e A-F (10-15)."},
+ {q:"Quanti bit rappresenta una singola cifra esadecimale?",o:["4 bit (un nibble)","8 bit","2 bit","16 bit"],c:0,e:"Ogni cifra hex mappa 4 bit; due cifre hex = 1 byte. Comodo con MAC e IPv6."},
+ {q:"Qual è il valore decimale di 10101010?",o:["170","150","160","85"],c:0,e:"128+32+8+2 = 170."},
+ {q:"Quanti indirizzi teorici offre uno spazio a 32 bit (IPv4)?",o:["Circa 4,3 miliardi (2^32)","65.536","16 milioni","2^16"],c:0,e:"IPv4 usa 32 bit: 2^32 circa 4,29 miliardi di indirizzi totali."},
+ {q:"Convertendo il binario 00001111 in esadecimale ottieni:",o:["0F","F0","1F","FF"],c:0,e:"0000=0, 1111=F, quindi 0F. Si raggruppano i bit a nibble di 4."},
+ {q:"Il bit più significativo (MSB) di un ottetto ha quale peso?",o:["128","1","64","256"],c:0,e:"Nell'ottetto i pesi sono 128-64-32-16-8-4-2-1; l'MSB (più a sinistra) vale 128."},
+ {q:"Quale operazione logica usa la subnet mask per estrarre la rete da un IP?",o:["AND bit a bit","OR bit a bit","XOR","NOT"],c:0,e:"L'AND logico tra IP e maschera azzera i bit host lasciando l'indirizzo di rete."},
+ {q:"Il decimale 200 in binario è:",o:["11001000","11000100","10011000","11100000"],c:0,e:"200 = 128+64+8 = 11001000."}
+],
+osi_mod:[
+ {q:"Quanti livelli ha il modello OSI?",o:["7","5","4","6"],c:0,e:"Il modello OSI ha 7 livelli: Physical, Data Link, Network, Transport, Session, Presentation, Application."},
+ {q:"A quale livello OSI opera un router?",o:["Livello 3 - Network","Livello 2 - Data Link","Livello 4 - Transport","Livello 1 - Physical"],c:0,e:"Il router instrada in base all'indirizzo IP, che è di livello 3 (Network)."},
+ {q:"Qual è la PDU (unità dati) del livello Transport?",o:["Segmento","Pacchetto","Frame","Bit"],c:0,e:"Transport=segmento, Network=pacchetto, Data Link=frame, Physical=bit."},
+ {q:"Quale protocollo opera al livello Network?",o:["IP","TCP","HTTP","Ethernet"],c:0,e:"IP (e ICMP, OSPF) opera a livello 3. TCP è livello 4, HTTP livello 7, Ethernet livello 2."},
+ {q:"A quale livello OSI appartengono gli indirizzi MAC?",o:["Livello 2 - Data Link","Livello 3 - Network","Livello 1 - Physical","Livello 4 - Transport"],c:0,e:"Gli indirizzi MAC identificano l'hardware a livello 2 (Data Link), sottolivello MAC."},
+ {q:"Quale livello OSI gestisce cifratura e compressione dei dati?",o:["Presentation (6)","Session (5)","Application (7)","Transport (4)"],c:0,e:"Il livello Presentation gestisce formato, cifratura e compressione dei dati."},
+ {q:"Lo switch di livello 2 prende decisioni di inoltro basandosi su:",o:["Indirizzo MAC di destinazione","Indirizzo IP di destinazione","Numero di porta TCP","Nome DNS"],c:0,e:"Lo switch consulta la tabella MAC (CAM) per inoltrare il frame alla porta corretta."},
+ {q:"Quale mnemonico ricorda i livelli OSI dal 7 all'1?",o:["All People Seem To Need Data Processing","Please Do Not Throw Sausage Pizza Away","Every Good Boy Does Fine","Richard Of York Gave Battle"],c:0,e:"'All People Seem To Need Data Processing' va da Application (7) a Physical (1)."},
+ {q:"L'aggiunta di header a ogni livello mentre i dati scendono lo stack si chiama:",o:["Incapsulamento","Decapsulamento","Frammentazione","Segmentazione"],c:0,e:"Scendendo lo stack ogni livello aggiunge il proprio header (incapsulamento); in ricezione avviene il decapsulamento."},
+ {q:"A quale livello OSI opera il protocollo TCP?",o:["Livello 4 - Transport","Livello 3 - Network","Livello 5 - Session","Livello 7 - Application"],c:0,e:"TCP e UDP sono protocolli di livello 4 (Transport), che gestiscono affidabilità e porte."},
+ {q:"Quale livello OSI definisce cavi, connettori, voltaggi e segnali?",o:["Physical (1)","Data Link (2)","Network (3)","Session (5)"],c:0,e:"Il livello 1 Physical riguarda la trasmissione dei bit grezzi sul mezzo fisico."},
+ {q:"Nel modello OSI, il livello Session (5) si occupa di:",o:["Stabilire, gestire e terminare le sessioni tra applicazioni","Instradare i pacchetti","Assegnare indirizzi MAC","Convertire i segnali elettrici"],c:0,e:"Il livello Session apre, coordina e chiude i dialoghi/sessioni tra host."}
+],
+tcpip_mod:[
+ {q:"Quante fasi ha il three-way handshake di TCP?",o:["3: SYN, SYN-ACK, ACK","2: SYN, ACK","4: SYN, ACK, FIN, RST","1: solo SYN"],c:0,e:"TCP apre la connessione con SYN, SYN-ACK, ACK, stabilendo i numeri di sequenza."},
+ {q:"Quale protocollo di trasporto è connectionless e senza garanzia di consegna?",o:["UDP","TCP","IP","ICMP"],c:0,e:"UDP è connectionless, veloce e senza ritrasmissione: adatto a VoIP, streaming e DNS."},
+ {q:"Quale porta usa HTTPS?",o:["443","80","22","53"],c:0,e:"HTTPS usa la porta TCP 443; HTTP la 80, SSH la 22, DNS la 53."},
+ {q:"Il numero di porta di destinazione appartiene a quale livello?",o:["Transport (4)","Network (3)","Application (7)","Data Link (2)"],c:0,e:"Le porte TCP/UDP sono un concetto del livello Transport e identificano l'applicazione/servizio."},
+ {q:"Quale meccanismo TCP evita che il mittente saturi il ricevente?",o:["Controllo di flusso tramite finestra (windowing)","Broadcast storm control","Split horizon","CSMA/CD"],c:0,e:"TCP usa il windowing per adattare la quantità di dati inviati alla capacità del ricevente."},
+ {q:"Quante porte TCP/UDP totali esistono?",o:["65.536 (0-65535)","1024","256","1.000.000"],c:0,e:"Il campo porta è a 16 bit: 2^16 = 65.536 porte (0-65535)."},
+ {q:"Le 'well-known ports' rientrano in quale intervallo?",o:["0-1023","1024-49151","49152-65535","0-255"],c:0,e:"Le porte note vanno da 0 a 1023 e sono riservate ai servizi standard."},
+ {q:"Quale protocollo di trasporto useresti per un trasferimento file affidabile?",o:["TCP","UDP","ICMP","ARP"],c:0,e:"TCP garantisce consegna ordinata e affidabile con ACK e ritrasmissioni: ideale per file/web/email."},
+ {q:"Il modello TCP/IP a 4 livelli è composto da:",o:["Application, Transport, Internet, Network Access","Fisico, Dati, Rete, Sessione","7 livelli come OSI","Solo TCP e IP"],c:0,e:"Il modello TCP/IP raggruppa in 4 livelli: Application, Transport, Internet, Network Access."},
+ {q:"Quale porta usa il protocollo DNS?",o:["53","25","67","110"],c:0,e:"Il DNS usa la porta 53 (UDP per le query, TCP per zone transfer e risposte grandi)."},
+ {q:"Nel handshake TCP, il numero di sequenza serve a:",o:["Ordinare i byte e rilevare dati mancanti","Cifrare i dati","Assegnare indirizzi IP","Identificare la VLAN"],c:0,e:"I sequence number permettono di riordinare i segmenti e individuare/ritrasmettere i dati persi."},
+ {q:"Quale protocollo applicativo usa UDP porte 67/68?",o:["DHCP","FTP","SSH","SMTP"],c:0,e:"DHCP usa UDP: porta 67 (server) e 68 (client) per assegnare gli indirizzi IP dinamicamente."}
+],
+ip_addr:[
+ {q:"Quale intervallo appartiene agli indirizzi privati (RFC 1918)?",o:["10.0.0.0 - 10.255.255.255","11.0.0.0 - 11.255.255.255","172.15.0.0/16","192.169.0.0/16"],c:0,e:"RFC 1918: 10.0.0.0/8, 172.16.0.0/12 e 192.168.0.0/16 sono gli indirizzi privati."},
+ {q:"A quale classe appartiene l'indirizzo 192.168.1.10?",o:["Classe C","Classe A","Classe B","Classe D"],c:0,e:"Il primo ottetto 192 (range 192-223) è di classe C, con maschera di default /24."},
+ {q:"Qual è la maschera di default di un indirizzo di classe A?",o:["255.0.0.0 (/8)","255.255.0.0 (/16)","255.255.255.0 (/24)","255.255.255.255"],c:0,e:"Classe A: /8. Classe B /16, Classe C /24."},
+ {q:"L'indirizzo 127.0.0.1 è:",o:["L'indirizzo di loopback locale","Un indirizzo pubblico","Un indirizzo broadcast","Un indirizzo APIPA"],c:0,e:"127.0.0.0/8 è riservato al loopback; 127.0.0.1 testa lo stack TCP/IP locale."},
+ {q:"Gli indirizzi APIPA rientrano in quale range?",o:["169.254.0.0/16","10.0.0.0/8","192.0.2.0/24","224.0.0.0/4"],c:0,e:"APIPA usa 169.254.0.0/16 quando un client non riceve risposta dal DHCP."},
+ {q:"Quale intervallo è riservato agli indirizzi multicast?",o:["224.0.0.0 - 239.255.255.255 (classe D)","240.0.0.0/4","192.168.0.0/16","172.16.0.0/12"],c:0,e:"La classe D (224.0.0.0/4) è usata per il multicast; la classe E (240/4) è sperimentale."},
+ {q:"Cosa identifica la porzione host di un indirizzo IP?",o:["Il singolo dispositivo all'interno della rete","La rete di appartenenza","Il gateway predefinito","Il server DNS"],c:0,e:"L'IP si divide in porzione di rete (comune) e porzione host (univoca per ogni dispositivo)."},
+ {q:"L'intervallo privato di classe B (RFC 1918) è:",o:["172.16.0.0 - 172.31.255.255","172.16.0.0 - 172.16.255.255","172.0.0.0 - 172.255.255.255","172.32.0.0/12"],c:0,e:"Il blocco privato di classe B è 172.16.0.0/12, cioè da 172.16.0.0 a 172.31.255.255."},
+ {q:"Un indirizzo con tutti i bit host a 1 rappresenta:",o:["L'indirizzo di broadcast della subnet","L'indirizzo di rete","Il primo host utilizzabile","Il gateway"],c:0,e:"Host tutti a 1 = broadcast; host tutti a 0 = indirizzo di rete. Nessuno dei due è assegnabile a un host."},
+ {q:"Perché sono necessari gli indirizzi privati e il NAT?",o:["Per far fronte all'esaurimento degli indirizzi IPv4 pubblici","Perché sono più veloci","Perché sono più sicuri di IPv6","Per abilitare il multicast"],c:0,e:"Gli indirizzi privati più il NAT permettono di condividere pochi IP pubblici, mitigando l'esaurimento IPv4."},
+ {q:"Quanti bit compongono un indirizzo IPv4?",o:["32","64","128","16"],c:0,e:"IPv4 è a 32 bit, suddiviso in 4 ottetti da 8 bit."},
+ {q:"Quale di questi è un indirizzo IP pubblico valido?",o:["8.8.8.8","10.1.1.1","192.168.0.5","169.254.1.1"],c:0,e:"8.8.8.8 (DNS Google) è pubblico; gli altri sono privati o APIPA."}
+],
+subnetting:[
+ {q:"Quanti host utilizzabili offre una subnet /26?",o:["62","64","30","126"],c:0,e:"/26 lascia 6 bit host: 2^6 - 2 = 62 host utilizzabili."},
+ {q:"Qual è la subnet mask corrispondente a /27?",o:["255.255.255.224","255.255.255.192","255.255.255.240","255.255.255.128"],c:0,e:"/27 = 3 bit di rete nell'ultimo ottetto: 224 (128+64+32)."},
+ {q:"Il 'block size' di una /28 nell'ultimo ottetto è:",o:["16","8","32","14"],c:0,e:"/28 mask 240, block size = 256-240 = 16. Le subnet iniziano ogni 16."},
+ {q:"A quale subnet appartiene l'host 192.168.1.70 con maschera /26?",o:["192.168.1.64","192.168.1.0","192.168.1.128","192.168.1.32"],c:0,e:"/26 ha block size 64: reti .0, .64, .128, .192. 70 cade nella .64 (64-127)."},
+ {q:"Qual è l'indirizzo di broadcast della rete 192.168.1.0/26?",o:["192.168.1.63","192.168.1.64","192.168.1.127","192.168.1.255"],c:0,e:"La prima subnet /26 va da .0 a .63; il broadcast è l'ultimo indirizzo, cioè .63."},
+ {q:"Cosa significa VLSM?",o:["Variable Length Subnet Mask - maschere di lunghezza variabile","Very Large Subnet Mask","Virtual LAN Subnet Method","Variable Link State Metric"],c:0,e:"Il VLSM consente maschere di diversa lunghezza sulla stessa rete, ottimizzando lo spazio indirizzi."},
+ {q:"Quanti host utilizzabili offre una /30, tipica dei link punto-punto?",o:["2","4","6","1"],c:0,e:"/30 = 2 bit host: 2^2 - 2 = 2 host, ideale per collegamenti tra due router."},
+ {q:"Con h bit host, quanti host utilizzabili ci sono?",o:["2^h - 2","2^h","2^h + 2","h^2"],c:0,e:"Si sottraggono 2 per rete e broadcast: 2^h - 2 host assegnabili."},
+ {q:"Suddividendo una /24 in subnet /26, quante subnet ottieni?",o:["4","2","8","16"],c:0,e:"Da /24 a /26 si prendono 2 bit in più: 2^2 = 4 subnet."},
+ {q:"Qual è il primo host utilizzabile nella rete 10.0.0.0/24?",o:["10.0.0.1","10.0.0.0","10.0.0.255","10.0.0.254"],c:0,e:"L'indirizzo di rete .0 non è assegnabile; il primo host è .1, l'ultimo .254, broadcast .255."},
+ {q:"La maschera 255.255.255.252 corrisponde a quale prefisso CIDR?",o:["/30","/29","/28","/31"],c:0,e:"252 = 11111100, cioè 6 bit nell'ultimo ottetto, quindi /30."},
+ {q:"Quanti host utilizzabili offre una /23?",o:["510","512","254","1022"],c:0,e:"/23 = 9 bit host: 2^9 - 2 = 510 host (una /23 unisce due /24)."}
+],
+switching:[
+ {q:"Come costruisce lo switch la sua tabella MAC?",o:["Impara la MAC sorgente dei frame in ingresso associandola alla porta","Interroga il server DHCP","Usa il protocollo OSPF","Legge l'indirizzo IP di destinazione"],c:0,e:"Lo switch esamina la MAC sorgente dei frame ricevuti e associa MAC-porta nella tabella CAM."},
+ {q:"Cosa fa uno switch con un frame per una MAC destinazione sconosciuta?",o:["Fa flooding su tutte le porte tranne quella d'ingresso","Scarta il frame","Lo invia solo al gateway","Genera un errore ARP"],c:0,e:"Con MAC destinazione sconosciuta lo switch fa flooding (unknown unicast) su tutte le porte eccetto la sorgente."},
+ {q:"Qual è lo scopo principale dello Spanning Tree Protocol (STP)?",o:["Prevenire i loop di livello 2 in topologie ridondanti","Assegnare indirizzi IP","Cifrare il traffico VLAN","Instradare tra subnet diverse"],c:0,e:"STP (802.1D) blocca logicamente i link ridondanti per evitare loop e broadcast storm a livello 2."},
+ {q:"Quanti bit ha un indirizzo MAC?",o:["48 bit","32 bit","64 bit","128 bit"],c:0,e:"La MAC è a 48 bit (12 cifre hex): i primi 24 sono l'OUI del produttore, gli altri 24 la scheda."},
+ {q:"In STP, quale switch diventa la root bridge?",o:["Quello con il bridge ID più basso","Quello con più porte","Quello con l'IP più alto","Quello configurato per ultimo"],c:0,e:"La root bridge è lo switch con il bridge ID (priorità + MAC) più basso."},
+ {q:"Cosa rappresenta un dominio di collisione?",o:["Un segmento in cui i frame possono collidere tra loro","L'insieme dei dispositivi che ricevono un broadcast","Una VLAN","Una subnet IP"],c:0,e:"Ogni porta switch è un dominio di collisione separato; l'hub invece li condivide tutti."},
+ {q:"Ogni porta switch è un dominio di ___ separato ma condivide lo stesso dominio di ___.",o:["collisione ; broadcast","broadcast ; collisione","VLAN ; subnet","MAC ; IP"],c:0,e:"Lo switch separa i domini di collisione (per porta) ma di default tutte le porte sono nello stesso dominio di broadcast."},
+ {q:"Cosa succede a un frame con MAC destinazione broadcast (FFFF.FFFF.FFFF)?",o:["Viene inoltrato a tutte le porte della VLAN","Viene scartato","Va solo al router","Viene messo in coda STP"],c:0,e:"Il frame broadcast raggiunge tutti i dispositivi del dominio di broadcast/VLAN."},
+ {q:"Quale stato di porta STP inoltra il traffico normalmente?",o:["Forwarding","Blocking","Listening","Learning"],c:0,e:"Solo nello stato Forwarding la porta inoltra dati; gli altri sono stati transitori o di prevenzione loop."},
+ {q:"La tabella MAC di uno switch è memorizzata nella cosiddetta:",o:["CAM table","ARP cache","Routing table","NAT table"],c:0,e:"La tabella MAC risiede nella CAM (Content Addressable Memory) dello switch."},
+ {q:"Cosa introduce Rapid STP (802.1w) rispetto a 802.1D?",o:["Convergenza più rapida dopo un cambiamento di topologia","La cifratura dei BPDU","L'assegnazione automatica delle VLAN","Il routing tra VLAN"],c:0,e:"RSTP (802.1w) riduce drasticamente i tempi di convergenza rispetto allo STP classico."},
+ {q:"Un frame Ethernet contiene, oltre ai dati, principalmente:",o:["MAC sorgente, MAC destinazione e FCS","Indirizzi IP sorgente e destinazione","Numeri di porta TCP","Il prefisso CIDR"],c:0,e:"L'header Ethernet ha MAC destinazione, MAC sorgente, EtherType e in coda l'FCS per il controllo errori."}
+],
+vlan_mod:[
+ {q:"Che cosa crea una VLAN su uno switch?",o:["Un dominio di broadcast separato logicamente","Una nuova subnet fisica cablata","Un dominio di collisione","Una tabella di routing"],c:0,e:"Ogni VLAN è un dominio di broadcast separato: dispositivi in VLAN diverse non comunicano senza routing."},
+ {q:"Quale standard IEEE definisce il tagging VLAN sui trunk?",o:["802.1Q","802.11","802.3","802.1X"],c:0,e:"802.1Q inserisce un tag di 4 byte nel frame per identificare la VLAN sui link trunk."},
+ {q:"Che tipo di porta trasporta il traffico di più VLAN tra switch?",o:["Porta trunk","Porta access","Porta mirror","Porta console"],c:0,e:"La porta trunk trasporta più VLAN taggate; la porta access appartiene a una sola VLAN."},
+ {q:"Come comunicano host di VLAN diverse?",o:["Tramite routing (router o switch L3) - inter-VLAN routing","Direttamente sullo stesso switch","Tramite STP","Non possono mai comunicare"],c:0,e:"Serve un dispositivo di livello 3 (router-on-a-stick o switch L3) per instradare tra VLAN."},
+ {q:"Cos'è la native VLAN su un trunk 802.1Q?",o:["La VLAN il cui traffico viaggia non taggato sul trunk","La prima VLAN creata","La VLAN di management obbligatoria","Una VLAN che blocca il traffico"],c:0,e:"Il traffico della native VLAN (default 1) attraversa il trunk senza tag; va allineata su entrambi i lati."},
+ {q:"Quale comando assegna la porta Fa0/1 alla VLAN 10 in modalità access?",o:["switchport access vlan 10","vlan 10 access Fa0/1","switchport trunk vlan 10","assign vlan 10"],c:0,e:"Sotto l'interfaccia: 'switchport mode access' e 'switchport access vlan 10'."},
+ {q:"Quante VLAN supporta il campo VLAN ID a 12 bit?",o:["4094 utilizzabili (0 e 4095 riservate)","1024","256","65535"],c:0,e:"Il VLAN ID è a 12 bit (0-4095); 1-4094 sono utilizzabili, 0 e 4095 riservate."},
+ {q:"Cos'è il 'router-on-a-stick'?",o:["Un router con una interfaccia fisica suddivisa in sottointerfacce per VLAN","Un router senza routing table","Uno switch di livello 2","Un access point"],c:0,e:"Il router-on-a-stick usa sottointerfacce (una per VLAN) su un unico link trunk per l'inter-VLAN routing."},
+ {q:"Qual è la VLAN di default su uno switch Cisco?",o:["VLAN 1","VLAN 0","VLAN 10","VLAN 100"],c:0,e:"Di default tutte le porte appartengono alla VLAN 1, che funge anche da native e management iniziale."},
+ {q:"Un vantaggio di segmentare la rete in VLAN è:",o:["Ridurre i domini di broadcast e migliorare sicurezza e gestione","Aumentare le collisioni","Eliminare la necessità di switch","Velocizzare lo spanning tree"],c:0,e:"Le VLAN riducono la dimensione dei domini di broadcast, isolano i gruppi e semplificano la gestione."},
+ {q:"Quanti byte aggiunge il tag 802.1Q al frame Ethernet?",o:["4 byte","2 byte","8 byte","12 byte"],c:0,e:"Il tag 802.1Q è di 4 byte (include TPID e TCI con priorità e VLAN ID)."},
+ {q:"Il protocollo che propaga automaticamente le VLAN tra switch Cisco è:",o:["VTP (VLAN Trunking Protocol)","STP","CDP","OSPF"],c:0,e:"VTP sincronizza il database VLAN tra switch dello stesso dominio (attenzione ai rischi di sovrascrittura)."}
+],
+routing_s:[
+ {q:"Qual è il comando per una rotta statica di default su un router Cisco?",o:["ip route 0.0.0.0 0.0.0.0 <next-hop>","ip default-network","router static 0.0.0.0","ip route default <next-hop>"],c:0,e:"'ip route 0.0.0.0 0.0.0.0 <next-hop>' definisce la rotta di ultima istanza."},
+ {q:"Qual è la distanza amministrativa di una rotta statica per default?",o:["1","0","110","120"],c:0,e:"La statica ha AD 1 (molto affidabile); connesse=0, OSPF=110, EIGRP=90, RIP=120."},
+ {q:"Cosa rappresenta il 'next hop' in una rotta statica?",o:["L'indirizzo IP del router successivo verso la destinazione","La rete di destinazione finale","L'interfaccia di loopback","Il gateway del PC"],c:0,e:"Il next hop è l'IP del router adiacente a cui inoltrare i pacchetti per quella destinazione."},
+ {q:"Nella tabella di routing, cosa indica una rotta 'connected' (C)?",o:["Una rete direttamente collegata a un'interfaccia attiva","Una rotta appresa via OSPF","Una rotta statica","Una rotta di default"],c:0,e:"Le reti direttamente connesse (codice C) hanno AD 0 e appaiono appena l'interfaccia è up con IP."},
+ {q:"Cos'è una floating static route?",o:["Una rotta statica di backup con AD più alta della primaria","Una rotta senza next hop","Una rotta dinamica","Una rotta multicast"],c:0,e:"La floating static ha una AD maggiore così entra in tabella solo se la rotta primaria cade."},
+ {q:"Perché una rotta statica ha AD più bassa di OSPF?",o:["Perché è configurata manualmente ed è considerata più affidabile","Perché è più veloce","Perché usa meno CPU","Non è vero, ha AD più alta"],c:0,e:"L'AD misura l'affidabilità della sorgente: la statica (1) è preferita a OSPF (110)."},
+ {q:"Il comando 'show ip route' mostra:",o:["La tabella di routing del router","La configurazione delle VLAN","La tabella ARP","Lo stato dello spanning tree"],c:0,e:"'show ip route' elenca reti connesse, statiche e apprese con AD e metriche."},
+ {q:"Una rotta statica che punta a un'interfaccia di uscita è tipica di:",o:["Collegamenti punto-punto","Reti multiaccesso Ethernet","Interfacce loopback","VLAN trunk"],c:0,e:"Su link punto-punto si può usare l'interfaccia di uscita; su Ethernet è meglio indicare il next-hop IP."},
+ {q:"Cosa succede senza una rotta verso la destinazione e senza default route?",o:["Il router scarta il pacchetto","Il router fa flooding","Il pacchetto va in broadcast","Il router crea una rotta automatica"],c:0,e:"Senza corrispondenza in tabella né default route, il pacchetto viene scartato."},
+ {q:"Il routing statico è più adatto a:",o:["Reti piccole e stabili","Reti molto grandi e mutevoli","Ambienti con molti cambi di topologia","Backbone Internet"],c:0,e:"La statica non scala e non reagisce ai cambi: ideale per reti piccole/stub o rotte di default."},
+ {q:"In 'ip route 10.1.1.0 255.255.255.0 192.168.1.2', qual è la destinazione?",o:["10.1.1.0 con maschera 255.255.255.0","192.168.1.2","255.255.255.0 da sola","Nessuna, è una default"],c:0,e:"'10.1.1.0 255.255.255.0' è la rete di destinazione; 192.168.1.2 è il next hop."},
+ {q:"La rotta di default è anche detta:",o:["Gateway of last resort","Rotta connessa","Rotta host","Null route"],c:0,e:"La default route (0.0.0.0/0) è il 'gateway of last resort', usata quando nessun'altra rotta corrisponde."}
+],
+ospf_mod:[
+ {q:"Che tipo di protocollo di routing è OSPF?",o:["Link-state","Distance vector","Path vector","Static"],c:0,e:"OSPF è link-state: ogni router costruisce una mappa della topologia e calcola i percorsi con SPF."},
+ {q:"Quale algoritmo usa OSPF per il percorso migliore?",o:["Dijkstra (SPF)","Bellman-Ford","DUAL","Prim"],c:0,e:"OSPF esegue l'algoritmo Shortest Path First (Dijkstra) sul database link-state."},
+ {q:"Qual è la distanza amministrativa di OSPF?",o:["110","90","120","1"],c:0,e:"OSPF ha AD 110; EIGRP 90, RIP 120, statica 1."},
+ {q:"Su cosa si basa di default la metrica (cost) di OSPF?",o:["Sulla larghezza di banda dell'interfaccia","Sul numero di hop","Sul ritardo","Sul carico"],c:0,e:"Il costo OSPF = banda di riferimento / banda dell'interfaccia; link più veloci hanno costo minore."},
+ {q:"Cos'è l'area 0 in OSPF?",o:["L'area backbone a cui tutte le altre aree si collegano","Un'area di sola lettura","L'area dei router di confine","Un'area senza router"],c:0,e:"L'area 0 è il backbone: in OSPF multi-area tutte le aree devono connettersi ad essa."},
+ {q:"Come stabiliscono l'adiacenza i router OSPF?",o:["Scambiando pacchetti Hello per formare relazioni di neighbor","Con il three-way handshake TCP","Tramite broadcast ARP","Con messaggi DHCP"],c:0,e:"OSPF usa pacchetti Hello (multicast 224.0.0.5) per scoprire i vicini e mantenere le adiacenze."},
+ {q:"Cosa identifica univocamente un router OSPF?",o:["Il Router ID","L'indirizzo MAC","Il numero di area","Il process ID"],c:0,e:"Il Router ID (un IP a 32 bit, spesso la loopback più alta) identifica il router nel dominio OSPF."},
+ {q:"In una rete multiaccesso, OSPF elegge un ___ per ridurre gli scambi di LSA.",o:["DR (Designated Router)","Root bridge","Gateway","Master DHCP"],c:0,e:"Su reti broadcast OSPF elegge un DR e un BDR per limitare le adiacenze e il traffico LSA."},
+ {q:"OSPF invia gli aggiornamenti di routing:",o:["Solo quando cambia la topologia (più gli Hello periodici)","Ogni 30 secondi l'intera tabella","In broadcast continuo","Mai, è statico"],c:0,e:"Essendo link-state, OSPF inonda LSA solo ai cambiamenti; RIP invece manda periodicamente l'intera tabella."},
+ {q:"A quale indirizzo multicast OSPF invia gli Hello?",o:["224.0.0.5","224.0.0.9","255.255.255.255","224.0.0.10"],c:0,e:"224.0.0.5 = tutti i router OSPF; 224.0.0.6 = DR/BDR. EIGRP usa 224.0.0.10."},
+ {q:"Cosa contiene il Link-State Database (LSDB) di OSPF?",o:["La mappa completa della topologia dell'area","Solo le rotte di default","Le tabelle MAC","Gli indirizzi DHCP assegnati"],c:0,e:"L'LSDB raccoglie tutti gli LSA: ogni router nell'area ha una copia identica della topologia."},
+ {q:"Un vantaggio di OSPF rispetto a RIP è:",o:["Scalabilità e convergenza rapida senza limite di hop","È più semplice da configurare","Usa meno memoria","Non richiede indirizzi IP"],c:0,e:"OSPF scala molto meglio, converge rapidamente e non ha il limite dei 15 hop di RIP."}
+],
+eigrp_mod:[
+ {q:"Chi ha sviluppato originariamente EIGRP?",o:["Cisco","IETF","IEEE","Microsoft"],c:0,e:"EIGRP è un protocollo sviluppato da Cisco, spesso definito ibrido (advanced distance vector)."},
+ {q:"Quale algoritmo usa EIGRP per garantire percorsi privi di loop?",o:["DUAL","Dijkstra","Bellman-Ford puro","Spanning Tree"],c:0,e:"EIGRP usa DUAL (Diffusing Update Algorithm) per calcolare successor e feasible successor senza loop."},
+ {q:"Qual è la distanza amministrativa di EIGRP interno?",o:["90","110","120","170"],c:0,e:"EIGRP interno ha AD 90 (esterno 170), più bassa di OSPF (110): quindi preferito a parità di rotta."},
+ {q:"Cos'è il 'successor' in EIGRP?",o:["Il percorso migliore verso una destinazione, installato in tabella","Un percorso di backup","Il router vicino con MAC più alto","La rotta di default"],c:0,e:"Il successor è il next hop con la metrica migliore (feasible distance minima); va nella routing table."},
+ {q:"Cos'è il 'feasible successor'?",o:["Un percorso di backup precalcolato senza loop","Il percorso principale","Un router non raggiungibile","Il DR della rete"],c:0,e:"Il feasible successor è una rotta di riserva già validata come loop-free, usata se il successor cade."},
+ {q:"Su quali metriche si basa di default EIGRP?",o:["Bandwidth e delay","Solo hop count","Solo bandwidth","Costo come OSPF"],c:0,e:"Di default EIGRP usa bandwidth e delay (K1 e K3); load e reliability sono disattivati di default."},
+ {q:"A quale indirizzo multicast EIGRP invia gli aggiornamenti?",o:["224.0.0.10","224.0.0.5","224.0.0.9","255.255.255.255"],c:0,e:"EIGRP usa 224.0.0.10; OSPF 224.0.0.5, RIPv2 224.0.0.9."},
+ {q:"EIGRP invia aggiornamenti di routing:",o:["Solo quando ci sono cambiamenti (partial e bounded)","Ogni 30 secondi la tabella intera","Solo in broadcast","Mai"],c:0,e:"EIGRP invia aggiornamenti parziali e limitati solo ai router interessati quando cambia qualcosa."},
+ {q:"Come EIGRP scopre e mantiene i vicini?",o:["Con pacchetti Hello","Con TCP handshake","Con richieste ARP","Con DHCP discover"],c:0,e:"EIGRP usa Hello periodici per formare e mantenere le adiacenze (neighbor table)."},
+ {q:"Quali tre tabelle mantiene EIGRP?",o:["Neighbor, Topology e Routing","MAC, ARP e Routing","VLAN, STP e Routing","NAT, ACL e Routing"],c:0,e:"EIGRP mantiene la neighbor table, la topology table (con successor/feasible) e la routing table."},
+ {q:"EIGRP è classificato come protocollo:",o:["Advanced distance vector (ibrido)","Puro link-state","Path vector","Statico"],c:0,e:"EIGRP combina caratteristiche distance vector e link-state: è detto advanced distance vector o ibrido."},
+ {q:"La 'feasible distance' in EIGRP è:",o:["La metrica totale più bassa verso una destinazione","La distanza del vicino verso la destinazione","Il numero di hop","La banda del link"],c:0,e:"La feasible distance è la migliore metrica calcolata localmente verso la rete di destinazione."}
+],
+acl_mod:[
+ {q:"Una ACL standard filtra il traffico in base a:",o:["Solo l'indirizzo IP sorgente","IP sorgente e destinazione e porta","Solo la porta TCP","L'indirizzo MAC"],c:0,e:"Le ACL standard (1-99) filtrano solo sull'IP sorgente; le extended anche su destinazione, protocollo e porta."},
+ {q:"Quale range numerico identifica le ACL standard IPv4?",o:["1-99 (e 1300-1999)","100-199","200-299","0-99"],c:0,e:"Le ACL standard usano 1-99 (e 1300-1999); le extended 100-199 (e 2000-2699)."},
+ {q:"Cosa c'è implicitamente alla fine di ogni ACL?",o:["Un 'deny any' implicito","Un 'permit any' implicito","Un log automatico","Una regola NAT"],c:0,e:"Ogni ACL termina con un deny any invisibile: se nessuna regola fa match, il traffico è bloccato."},
+ {q:"Dove è consigliato posizionare una ACL standard?",o:["Il più vicino possibile alla destinazione","Il più vicino possibile alla sorgente","Sempre in ingresso sul router core","Su ogni interfaccia"],c:0,e:"La ACL standard filtra solo la sorgente, quindi va vicino alla destinazione per non bloccare traffico legittimo."},
+ {q:"Dove è consigliato posizionare una ACL extended?",o:["Il più vicino possibile alla sorgente","Vicino alla destinazione","Solo sull'interfaccia WAN","Sul default gateway dei PC"],c:0,e:"La extended è specifica, quindi va vicino alla sorgente per scartare subito il traffico indesiderato."},
+ {q:"Cos'è una wildcard mask in una ACL?",o:["Una maschera inversa: 0 = bit da confrontare, 1 = bit ignorato","Una subnet mask normale","Un indirizzo broadcast","Un numero di porta"],c:0,e:"La wildcard è l'inverso della subnet mask: 0 = il bit deve corrispondere, 1 = il bit è ignorato."},
+ {q:"La wildcard mask per confrontare esattamente una rete /24 è:",o:["0.0.0.255","255.255.255.0","0.0.0.0","0.0.255.255"],c:0,e:"Per una /24 la wildcard è 0.0.0.255: primi 3 ottetti da confrontare, ultimo ignorato."},
+ {q:"Quale comando applica la ACL 10 in ingresso su un'interfaccia?",o:["ip access-group 10 in","access-list 10 in","ip acl 10 inbound","apply access-list 10 in"],c:0,e:"Sotto l'interfaccia: 'ip access-group 10 in' (o out) applica la ACL nella direzione scelta."},
+ {q:"Le ACL extended possono filtrare in base a:",o:["Protocollo, IP sorgente/destinazione e numero di porta","Solo IP sorgente","Solo indirizzo MAC","Solo VLAN ID"],c:0,e:"Le extended (100-199) filtrano su protocollo (TCP/UDP/ICMP), IP sorgente e destinazione e porte."},
+ {q:"Come vengono valutate le regole di una ACL?",o:["Dall'alto verso il basso, prima corrispondenza vince","In ordine casuale","Solo l'ultima conta","In ordine di specificità automatica"],c:0,e:"Le ACL sono processate top-down: appena una regola fa match, viene applicata e la valutazione si ferma."},
+ {q:"Una named ACL offre il vantaggio di:",o:["Nomi descrittivi e modifica delle singole righe","Maggiore velocità hardware","Filtrare i MAC","Sostituire il routing"],c:0,e:"Le named ACL usano nomi significativi e consentono di aggiungere/rimuovere righe specifiche più facilmente."},
+ {q:"Per permettere solo il traffico HTTPS, quale porta specifichi nella extended ACL?",o:["eq 443","eq 80","eq 22","eq 25"],c:0,e:"HTTPS usa la porta 443; 'permit tcp <src> any eq 443' consente solo quel traffico."}
+],
+nat_mod:[
+ {q:"Cosa fa il NAT (Network Address Translation)?",o:["Traduce indirizzi IP privati in pubblici e viceversa","Cifra i pacchetti","Assegna VLAN","Calcola le rotte"],c:0,e:"Il NAT modifica gli indirizzi IP nell'header dei pacchetti, tipicamente da privati (RFC1918) a pubblici."},
+ {q:"Cosa distingue il PAT (NAT overload) dal NAT statico?",o:["Il PAT mappa molti IP privati su un solo IP pubblico usando le porte","Il PAT usa un IP pubblico per ogni privato","Il PAT non usa le porte","Il PAT funziona solo con IPv6"],c:0,e:"Il PAT (overload) condivide un unico IP pubblico tra molti host distinguendo le sessioni tramite le porte."},
+ {q:"Nel NAT, l'indirizzo privato dell'host interno è chiamato:",o:["Inside local","Inside global","Outside local","Outside global"],c:0,e:"Inside local = IP privato interno; inside global = IP pubblico dopo traduzione."},
+ {q:"Quale tipo di NAT è più usato per condividere una connessione di casa/ufficio?",o:["PAT (overload)","NAT statico","Dynamic NAT senza overload","Nessuno"],c:0,e:"Il PAT permette a molti dispositivi di navigare con un solo IP pubblico: è la soluzione più diffusa."},
+ {q:"Il NAT statico è tipicamente usato per:",o:["Esporre server interni con un IP pubblico fisso","Assegnare IP ai client DHCP","Creare VLAN","Bilanciare il carico"],c:0,e:"Il NAT statico crea una mappatura 1:1 fissa, utile per rendere raggiungibili server (web, mail) dall'esterno."},
+ {q:"Quale comando visualizza le traduzioni NAT attive?",o:["show ip nat translations","show nat pool","show ip route","show running-nat"],c:0,e:"'show ip nat translations' elenca le mappature inside/outside local/global attive."},
+ {q:"Su un router, quale interfaccia va marcata 'ip nat inside'?",o:["L'interfaccia verso la rete privata (LAN)","L'interfaccia verso Internet","L'interfaccia loopback","Tutte le interfacce"],c:0,e:"'ip nat inside' si mette sulla LAN privata, 'ip nat outside' sull'interfaccia pubblica (WAN)."},
+ {q:"Un vantaggio di sicurezza del NAT è:",o:["Nasconde la struttura di indirizzamento interno","Cifra il traffico","Blocca tutti i virus","Autentica gli utenti"],c:0,e:"Il NAT maschera gli IP interni: dall'esterno si vede solo l'IP pubblico."},
+ {q:"Cosa permette al PAT di distinguere sessioni diverse dello stesso IP pubblico?",o:["I numeri di porta","Gli indirizzi MAC","I VLAN ID","Le metriche di routing"],c:0,e:"Il PAT assegna/traccia numeri di porta univoci per ogni sessione, mappandoli sull'unico IP pubblico."},
+ {q:"L'indirizzo pubblico con cui l'host interno appare su Internet è chiamato:",o:["Inside global","Inside local","Outside global","Outside local"],c:0,e:"Inside global è l'IP pubblico assegnato dal NAT all'host interno visto da Internet."},
+ {q:"Un limite del NAT è:",o:["Può complicare applicazioni P2P e protocolli che includono l'IP nel payload","Rallenta sempre la LAN a metà","Impedisce l'uso di TCP","Richiede IPv6"],c:0,e:"Il NAT può rompere applicazioni che incorporano indirizzi nel payload (es. alcuni VoIP/FTP) senza ALG."},
+ {q:"Il NAT è meno necessario con IPv6 perché:",o:["Lo spazio di indirizzamento è enorme e ogni host può avere un IP globale","IPv6 non supporta il NAT","IPv6 è più lento","IPv6 usa solo indirizzi privati"],c:0,e:"IPv6 offre uno spazio così vasto da rendere superfluo il NAT per la conservazione degli indirizzi."}
+],
+ssh_sec:[
+ {q:"Perché SSH è preferito a Telnet per la gestione remota?",o:["SSH cifra la sessione, Telnet la trasmette in chiaro","SSH è più veloce","Telnet non funziona sui router","SSH non richiede password"],c:0,e:"SSH cifra credenziali e dati; Telnet invia tutto in chiaro ed è vulnerabile allo sniffing."},
+ {q:"Quale porta usa SSH di default?",o:["22","23","443","80"],c:0,e:"SSH usa la porta TCP 22; Telnet la 23."},
+ {q:"Cosa fa la port security su uno switch?",o:["Limita gli indirizzi MAC ammessi su una porta","Cifra il traffico VLAN","Assegna IP statici","Crea trunk automatici"],c:0,e:"La port security restringe quali/quanti MAC possono usare una porta, bloccando accessi non autorizzati."},
+ {q:"Cosa rappresenta la prima 'A' in AAA?",o:["Authentication","Access","Address","Auditing"],c:0,e:"AAA = Authentication (chi sei), Authorization (cosa puoi fare), Accounting (cosa hai fatto)."},
+ {q:"Quale comando cifra le password in chiaro nel running-config?",o:["service password-encryption","enable secret","password encryption on","crypto key generate"],c:0,e:"'service password-encryption' applica una cifratura debole (tipo 7) alle password in chiaro del config."},
+ {q:"Perché usare 'enable secret' invece di 'enable password'?",o:["enable secret memorizza un hash, enable password è debolmente cifrata","Sono identici","enable password è più sicuro","enable secret non richiede password"],c:0,e:"'enable secret' salva un hash molto più sicuro della 'enable password'."},
+ {q:"Quale modalità port security mette la porta in err-disabled a una violazione?",o:["shutdown","protect","restrict","permit"],c:0,e:"La modalità 'shutdown' (default) mette la porta in err-disabled; 'restrict' e 'protect' scartano solo il traffico."},
+ {q:"Quali sono i due protocolli AAA server più comuni?",o:["RADIUS e TACACS+","HTTP e HTTPS","OSPF e EIGRP","STP e VTP"],c:0,e:"RADIUS (standard) e TACACS+ (Cisco, cifra l'intero pacchetto) sono i protocolli AAA tipici."},
+ {q:"Cosa serve per abilitare SSH su un router Cisco?",o:["Hostname, ip domain-name e chiavi RSA generate","Solo abilitare Telnet","Un server DHCP","Una VLAN dedicata"],c:0,e:"Servono hostname, ip domain-name e 'crypto key generate rsa', più utenti locali/AAA."},
+ {q:"Cos'è una MAC 'sticky' nella port security?",o:["Un MAC appreso dinamicamente e salvato nella config","Un MAC casuale","Un indirizzo broadcast","Un MAC bloccato"],c:0,e:"Con 'port-security mac-address sticky' lo switch impara il MAC e lo salva nel running-config."},
+ {q:"Perché disabilitare le porte switch inutilizzate?",o:["Per ridurre la superficie di attacco e accessi non autorizzati","Solo per risparmiare energia","Per velocizzare STP","Non serve a nulla"],c:0,e:"Le porte inattive andrebbero spente (shutdown) e messe in una VLAN parcheggio per sicurezza."},
+ {q:"Un login banner (MOTD) serve principalmente a:",o:["Avvisare legalmente gli utenti sull'accesso autorizzato","Cifrare la sessione","Assegnare privilegi","Configurare AAA"],c:0,e:"Il banner MOTD mostra un avviso legale/di sicurezza; è buona prassi anche se non protegge tecnicamente."}
+],
+ipv6_mod:[
+ {q:"Quanti bit ha un indirizzo IPv6?",o:["128","64","32","256"],c:0,e:"IPv6 usa 128 bit, contro i 32 di IPv4, offrendo uno spazio enormemente più grande."},
+ {q:"Quale prefisso identifica un indirizzo IPv6 link-local?",o:["FE80::/10","2000::/3","FC00::/7","FF00::/8"],c:0,e:"Gli indirizzi link-local (FE80::/10) sono validi solo sul segmento locale e autogenerati."},
+ {q:"Come si abbrevia 2001:0db8:0000:0000:0000:0000:0000:0001?",o:["2001:db8::1","2001:db8:0:1","2001::db8::1","2001:db8:1"],c:0,e:"Si tolgono gli zeri iniziali di ogni gruppo e si sostituisce una sola sequenza di gruppi nulli con ::."},
+ {q:"Quale tipo di indirizzo IPv6 corrisponde agli IP pubblici instradabili?",o:["Global unicast (2000::/3)","Link-local (FE80::/10)","Unique local (FC00::/7)","Multicast (FF00::/8)"],c:0,e:"I global unicast (2000::/3) sono instradabili su Internet, equivalenti agli IP pubblici IPv4."},
+ {q:"IPv6 ha eliminato quale concetto presente in IPv4?",o:["Il broadcast (sostituito dal multicast)","Il multicast","Gli indirizzi unicast","Il routing"],c:0,e:"IPv6 non usa il broadcast: le funzioni sono svolte da multicast e anycast."},
+ {q:"Cos'è SLAAC in IPv6?",o:["Autoconfigurazione stateless dell'indirizzo","Un protocollo di routing","Un tipo di ACL","Un server DHCP obbligatorio"],c:0,e:"SLAAC permette all'host di generarsi l'indirizzo dal prefisso annunciato dal router (RA)."},
+ {q:"Quale protocollo sostituisce ARP in IPv6?",o:["NDP (Neighbor Discovery Protocol)","RARP","ICMPv4","DHCP"],c:0,e:"NDP usa messaggi ICMPv6 (NS/NA, RS/RA) per scoperta vicini, risoluzione indirizzi e router discovery."},
+ {q:"Quanti gruppi (hextet) compongono un indirizzo IPv6?",o:["8 gruppi da 16 bit","4 gruppi da 8 bit","16 gruppi da 8 bit","6 gruppi da 32 bit"],c:0,e:"IPv6 ha 8 gruppi da 16 bit separati da due punti (128 bit totali)."},
+ {q:"L'indirizzo di loopback IPv6 è:",o:["::1","127.0.0.1","FE80::1","::"],c:0,e:"::1 è il loopback IPv6, equivalente a 127.0.0.1 in IPv4."},
+ {q:"La regola del '::' (doppio due punti) può essere usata:",o:["Una sola volta per indirizzo","Quante volte si vuole","Solo all'inizio","Mai negli indirizzi pubblici"],c:0,e:"Il :: comprime una sola sequenza di gruppi a zero; usarlo due volte renderebbe l'indirizzo ambiguo."},
+ {q:"Un prefisso IPv6 tipico per una subnet LAN è:",o:["/64","/24","/32","/128"],c:0,e:"Le subnet IPv6 usano tipicamente /64: 64 bit di rete e 64 di interface ID (richiesto da SLAAC)."},
+ {q:"A cosa serve l'indirizzo multicast FF02::1 in IPv6?",o:["Raggiungere tutti i nodi sul link locale","Raggiungere tutti i router","Loopback","Broadcast globale"],c:0,e:"FF02::1 = tutti i nodi del link; FF02::2 = tutti i router del link."}
+],
+wan_mod:[
+ {q:"Cosa fornisce una VPN site-to-site?",o:["Un tunnel cifrato tra due sedi attraverso Internet","Una LAN wireless","Un servizio DHCP","Una VLAN estesa fisicamente"],c:0,e:"La VPN site-to-site connette in modo sicuro reti di sedi diverse cifrando il traffico su Internet."},
+ {q:"Quale suite di protocolli fornisce cifratura e autenticazione per le VPN?",o:["IPSec","HTTP","STP","VTP"],c:0,e:"IPSec offre riservatezza, integrità e autenticazione ai tunnel VPN (ESP/AH, IKE)."},
+ {q:"Cos'è GRE?",o:["Un protocollo di tunneling che incapsula vari protocolli, senza cifratura nativa","Un protocollo di cifratura","Un protocollo di routing","Uno standard VLAN"],c:0,e:"GRE incapsula pacchetti in un tunnel ma non cifra: spesso combinato con IPSec per la sicurezza."},
+ {q:"Cosa caratterizza MPLS?",o:["Inoltra i pacchetti in base a etichette (label) invece del solo IP","Cifra tutto il traffico","È un protocollo wireless","Assegna VLAN"],c:0,e:"MPLS usa label switching per instradare rapidamente i pacchetti nella rete del provider."},
+ {q:"Quale tecnologia WAN è un collegamento dedicato punto-punto tra due sedi?",o:["Leased line","Broadband condivisa","Wi-Fi","Hotspot 4G"],c:0,e:"La leased line è un circuito dedicato e sempre attivo tra due punti, con banda garantita."},
+ {q:"Una VPN client-to-site (remote access) serve a:",o:["Connettere un singolo utente remoto alla rete aziendale","Collegare due data center","Sostituire lo switch","Creare VLAN"],c:0,e:"La remote access VPN permette a un lavoratore remoto di accedere in sicurezza alla LAN aziendale."},
+ {q:"Nel modello WAN, il dispositivo del cliente al confine col provider è detto:",o:["CE (Customer Edge)","PE (Provider Edge)","Core router","DTE loopback"],c:0,e:"Il CE (Customer Edge) è l'apparato del cliente che si collega al PE del provider."},
+ {q:"Quale incapsulamento WAN standard per link punto-punto supporta l'autenticazione?",o:["PPP","Ethernet","802.1Q","ARP"],c:0,e:"PPP supporta autenticazione (PAP/CHAP), multilink e più protocolli su link seriali punto-punto."},
+ {q:"IPSec opera principalmente a quale livello?",o:["Livello 3 (Network)","Livello 2 (Data Link)","Livello 7 (Application)","Livello 1 (Physical)"],c:0,e:"IPSec protegge il traffico a livello 3, cifrando i pacchetti IP tra gli endpoint del tunnel."},
+ {q:"Cosa fornisce la 'broadband' come tecnologia WAN?",o:["Accesso Internet condiviso ad alta velocità (DSL, cavo, fibra)","Un circuito dedicato garantito","Solo connettività wireless","Un tunnel cifrato automatico"],c:0,e:"Broadband (DSL/cavo/fibra) offre accesso Internet ad alta velocità su mezzo condiviso, senza banda garantita."},
+ {q:"Quale protocollo IPSec fornisce cifratura del payload?",o:["ESP (Encapsulating Security Payload)","AH (Authentication Header)","IKE da solo","GRE"],c:0,e:"ESP cifra e autentica il payload; AH offre solo autenticazione/integrità senza cifratura."},
+ {q:"Un vantaggio della VPN rispetto a una leased line è:",o:["Costo inferiore usando Internet come trasporto","Banda sempre garantita","Latenza nulla","Nessuna cifratura necessaria"],c:0,e:"La VPN sfrutta Internet (economico) al posto di circuiti dedicati costosi, a scapito di garanzie di banda."}
+],
+auto_mod:[
+ {q:"Cosa separa l'architettura SDN?",o:["Il control plane dal data plane","Le VLAN dalle subnet","Solo il routing dallo switching fisico","Il NAT dall'ACL"],c:0,e:"SDN centralizza il control plane (in un controller) separandolo dal data plane dei dispositivi."},
+ {q:"Quale formato di dati leggibile è molto usato nelle API di rete?",o:["JSON","EXE","MP3","CSV binario"],c:0,e:"JSON è leggero e leggibile, molto usato nelle API REST; anche XML e YAML sono comuni."},
+ {q:"Cosa usa una API REST per le operazioni?",o:["Metodi HTTP come GET, POST, PUT, DELETE","Comandi CLI Cisco","Pacchetti OSPF","Frame Ethernet"],c:0,e:"Le REST API sfruttano i verbi HTTP (GET/POST/PUT/DELETE) per interagire con le risorse."},
+ {q:"Quale linguaggio è lo standard de facto per l'automazione di rete?",o:["Python","COBOL","Assembly","PHP"],c:0,e:"Python, con librerie come Netmiko e Nornir, è ampiamente usato per automatizzare la rete."},
+ {q:"Quale strumento di automazione è agentless e usa YAML per i playbook?",o:["Ansible","Puppet","Chef","Java"],c:0,e:"Ansible è agentless (usa SSH) e definisce le configurazioni in playbook YAML."},
+ {q:"Nel REST, quale verbo HTTP recupera dati senza modificarli?",o:["GET","POST","DELETE","PUT"],c:0,e:"GET è usato per leggere risorse; POST crea, PUT aggiorna, DELETE elimina."},
+ {q:"Cos'è un controller SDN?",o:["Un sistema centralizzato che gestisce le decisioni di inoltro dei dispositivi","Uno switch di livello 2","Un tipo di cavo","Un server DHCP"],c:0,e:"Il controller SDN centralizza l'intelligenza di rete e programma i dispositivi tramite southbound API."},
+ {q:"Quale codice di stato HTTP indica una richiesta andata a buon fine?",o:["200 OK","404 Not Found","500 Server Error","401 Unauthorized"],c:0,e:"200 indica successo; 4xx errori client (404, 401), 5xx errori server (500)."},
+ {q:"Un vantaggio dell'automazione di rete è:",o:["Configurazioni coerenti e ripetibili, meno errori umani","Elimina la necessità di indirizzi IP","Rende inutile la sicurezza","Aumenta gli errori manuali"],c:0,e:"L'automazione riduce gli errori manuali garantendo configurazioni standardizzate e scalabili."},
+ {q:"Cosa sono le 'northbound API' in SDN?",o:["Interfacce tra il controller e le applicazioni/orchestratori","Interfacce tra controller e switch","Cavi in fibra","Protocolli di routing"],c:0,e:"Le northbound API espongono le funzioni del controller alle applicazioni; le southbound parlano coi dispositivi."},
+ {q:"Quale formato usa l'indentazione significativa ed è comune in Ansible?",o:["YAML","JSON","XML","HTML"],c:0,e:"YAML usa l'indentazione per la struttura ed è molto leggibile: tipico dei playbook Ansible."},
+ {q:"Cos'è l'Infrastructure as Code (IaC)?",o:["Gestire l'infrastruttura tramite file di codice versionabili","Cablare fisicamente i data center","Un linguaggio di programmazione","Un protocollo di routing"],c:0,e:"IaC descrive l'infrastruttura in file di codice (versionati in Git), rendendo i deployment ripetibili."}
+]
+};
+// Ogni lab interattivo abbinato a UN SOLO modulo (niente ripetizioni)
+const LABMAP={osi_mod:'osi',tcpip_mod:'packet',subnetting:'subnet',vlan_mod:'vlan',routing_s:'cli'};
+// Aggregazioni per BOSS e certificazione finale
+const AGG={boss1:['subnetting','ip_addr'],boss2:['routing_s','ospf_mod','eigrp_mod'],boss3:['acl_mod','nat_mod','ssh_sec']};
+const ALL_BANK_IDS=Object.keys(QBANK);
+// Argomenti del quiz libero -> banchi moduli
+const TOPIC_MAP={
+ 'OSI & TCP/IP Model':['osi_mod','tcpip_mod'],
+ 'IP Addressing & Subnetting':['binary','ip_addr','subnetting'],
+ 'VLANs & Switching':['switching','vlan_mod'],
+ 'Routing (OSPF, EIGRP, RIP)':['routing_s','ospf_mod','eigrp_mod'],
+ 'NAT & PAT':['nat_mod'],
+ 'ACLs':['acl_mod'],
+ 'WAN & VPN':['wan_mod'],
+ 'Network Security':['ssh_sec'],
+ 'IPv6':['ipv6_mod'],
+ 'Network Automation & SDN':['auto_mod'],
+};
+function qShuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));const t=a[i];a[i]=a[j];a[j]=t;}return a;}
+function collectQ(ids){let out=[];ids.forEach(id=>{if(QBANK[id])out=out.concat(QBANK[id]);});return out;}
+function questionsForModule(mod){
+  if(mod.type==='cert') return collectQ(ALL_BANK_IDS);
+  if(AGG[mod.id]) return collectQ(AGG[mod.id]);
+  if(QBANK[mod.id]) return QBANK[mod.id].slice();
+  return collectQ(ALL_BANK_IDS);
+}
+// mescola le opzioni mantenendo la risposta corretta
+function prepQuestion(raw,tag){
+  const opts=raw.o.map((t,i)=>({t,ok:i===raw.c}));
+  qShuffle(opts);
+  return{question:raw.q,options:opts.map(o=>o.t),correct:opts.findIndex(o=>o.ok),explanation:raw.e,subtopic:raw.tag||tag||''};
+}
+
 function initQuizMenu(){
   const tg=_id('topic-grid');tg.innerHTML='';
   TOPICS.forEach(t=>{
@@ -729,14 +1002,33 @@ function selMode(btn){
   document.querySelectorAll('.mode-btn').forEach(b=>b.classList.remove('sel'));
   btn.classList.add('sel');quizMode=btn.dataset.mode;
 }
-async function startQuiz(){
+function startQuiz(){
   const cfg=MODE_CFG[quizMode];
-  quizState={topic:quizTopic,mode:quizMode,cfg,cur:0,total:cfg.q,results:[],xpEarned:0,timer:null,timeLeft:cfg.t,answered:false};
+  const ids=TOPIC_MAP[quizTopic]||ALL_BANK_IDS;
+  const pool=qShuffle(collectQ(ids));
+  quizState={source:'topic',topic:quizTopic,mode:quizMode,cfg,pool,total:Math.min(cfg.q,pool.length)||1,cur:0,results:[],xpEarned:0,timer:null,timeLeft:cfg.t,answered:false,labKey:null};
   _id('quiz-menu').style.display='none';
   _id('quiz-active').style.display='block';
   _id('quiz-result').style.display='none';
   buildDots();
-  await loadQuestion();
+  loadQuestion();
+}
+// Quiz dedicato a un singolo modulo del percorso
+function startModuleQuiz(mod){
+  const isBoss=mod.type==='boss',isCert=mod.type==='cert';
+  const pool=qShuffle(questionsForModule(mod));
+  const total=isCert?Math.min(30,pool.length):isBoss?Math.min(12,pool.length):Math.min(10,pool.length);
+  const t=isBoss?25:isCert?75:45;
+  quizState={source:'module',moduleId:mod.id,modTitle:mod.title,mode:isBoss?'boss':'module',cfg:{t,mult:isBoss?2:isCert?1.5:1},pool,total:total||1,cur:0,results:[],xpEarned:0,timer:null,timeLeft:t,answered:false,labKey:LABMAP[mod.id]||null};
+  _id('quiz-menu').style.display='none';
+  _id('quiz-active').style.display='block';
+  _id('quiz-result').style.display='none';
+  buildDots();
+  loadQuestion();
+}
+function replayQuiz(){
+  if(quizState&&quizState.source==='module'){const m=MODS.find(x=>x.id===quizState.moduleId);if(m)return startModuleQuiz(m);}
+  startQuiz();
 }
 function buildDots(){
   const el=_id('prog-dots');el.innerHTML='';
@@ -744,45 +1036,18 @@ function buildDots(){
     const d=document.createElement('div');d.className='prog-dot'+(i===0?' cur':'');d.id='dot-'+i;el.appendChild(d);
   }
 }
-async function loadQuestion(){
+function loadQuestion(){
   quizState.answered=false;
   clearInterval(quizState.timer);
-  _id('q-loading').classList.add('show');
-  _id('q-question').style.display='none';
+  _id('q-loading').classList.remove('show');
   _id('q-err').classList.remove('show');
   _id('q-feedback').classList.remove('show','ok','ko');
   _id('next-btn').classList.remove('show');
   _id('opts-grid').innerHTML='';
-
-  const prev=quizState.results.slice(-3).map(r=>r.q).join('", "');
-  const avoidStr=prev?`Non ripetere: "${prev}"`:'';
-  const diff=quizMode==='exam'?'medium':quizMode==='hardcore'?'hard':'mixed';
-
-  const prompt=`Sei un trainer CCNA. Genera UNA domanda a risposta multipla (4 opzioni, 1 corretta) su: "${quizState.topic}". Difficoltà: ${diff}. ${avoidStr}
-Rispondi SOLO con JSON valido senza markdown:
-{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":0,"explanation":"Spiegazione in italiano 2-3 frasi.","subtopic":"..."}`;
-
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-ipc':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await res.json();
-    if(!res.ok) throw new Error('HTTP '+res.status+': '+(data?.error?.message||'errore API'));
-    const txt=data?.content?.[0]?.text;
-    if(!txt) throw new Error('Risposta AI vuota');
-    const m=txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
-    if(!m) throw new Error('JSON non trovato');
-    const q=JSON.parse(m[0]);
-    if(!q.question||!Array.isArray(q.options)) throw new Error('Struttura non valida');
-    quizState.currentQ=q;
-    renderQuestion(q);
-  }catch(e){
-    _id('q-loading').classList.remove('show');
-    _id('q-err').classList.add('show');
-    _id('q-err').innerHTML='⚠️ '+e.message+' <button onclick="loadQuestion()" style="background:none;border:1px solid var(--red);color:#fca5a5;padding:3px 10px;cursor:pointer;border-radius:4px;margin-left:8px;font-size:.78rem">Riprova</button>';
-  }
+  const raw=quizState.pool[quizState.cur%quizState.pool.length];
+  const q=prepQuestion(raw,quizState.modTitle||quizState.topic);
+  quizState.currentQ=q;
+  renderQuestion(q);
 }
 function renderQuestion(q){
   _id('q-loading').classList.remove('show');
@@ -838,7 +1103,7 @@ function answerQ(idx,btn){
     showFeedback(false,'✗ Risposta errata',quizState.currentQ.explanation);
   }
   dotMark(ok);_id('next-btn').classList.add('show');
-  if(quizMode==='hardcore'&&!ok){
+  if(quizState.mode==='hardcore'&&!ok){
     _id('next-btn').textContent='VER RISULTATI';
     _id('next-btn').onclick=showQuizResult;
   }
@@ -872,6 +1137,14 @@ function showQuizResult(){
   else{grade='❌ RIPASSA';col='var(--red)';}
   const ge=_id('res-grade');ge.textContent=grade;ge.style.color=col;ge.style.background=col+'22';
   _id('res-pct').style.color=col;
+  // completa il modulo se superato
+  if(quizState.source==='module'&&pct>=70&&quizState.moduleId){completeModule(quizState.moduleId);}
+  // mostra il lab interattivo abbinato (se presente)
+  const lb=_id('res-lab-btn');
+  if(lb){
+    if(quizState.labKey){lb.style.display='';lb.onclick=()=>openModuleLab(quizState.labKey);}
+    else{lb.style.display='none';}
+  }
 }
 
 // ══════════════════════════════════════
@@ -1252,48 +1525,38 @@ function initLabTopics(){
     tg.appendChild(b);
   });
 }
-async function loadLabAI(){
-  _id('lab-ai-panel').style.display='none';_id('lab-ai-err').classList.remove('show');
-  _id('lab-loading').classList.add('show');_id('lab-ai-start').style.display='none';
-  const prompt='Sei un trainer CCNA. Genera UNA domanda a risposta multipla (4 opzioni, 1 corretta) su: "'+labTopic+'".\nRispondi SOLO con JSON valido:\n{"question":"...","options":["A) ...","B) ...","C) ...","D) ..."],"correct":0,"explanation":"Spiegazione in italiano 2-3 frasi."}';
-  try{
-    const res=await fetch('https://api.anthropic.com/v1/messages',{
-      method:'POST',
-      headers:{'Content-Type':'application/json','anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-ipc':'true'},
-      body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:900,messages:[{role:'user',content:prompt}]})
-    });
-    const data=await res.json();
-    if(!res.ok) throw new Error('HTTP '+res.status+': '+(data?.error?.message||'errore'));
-    const txt=data?.content?.[0]?.text;
-    if(!txt) throw new Error('Risposta AI vuota');
-    const m=txt.replace(/```json|```/g,'').trim().match(/\{[\s\S]*\}/);
-    if(!m) throw new Error('JSON non trovato');
-    const q=JSON.parse(m[0]);
-    _id('lab-loading').classList.remove('show');
-    _id('lab-ai-panel').style.display='block';
-    _id('lab-ai-q').textContent=q.question;
-    _id('lab-ai-expl').classList.remove('show');
-    _id('lab-ai-next').classList.remove('show');
-    const opts=_id('lab-ai-opts');opts.innerHTML='';
-    q.options.forEach((opt,i)=>{
-      const b=document.createElement('div');b.className='ai-opt';
-      b.innerHTML='<span class="opt-l">'+['A','B','C','D'][i]+'</span><span>'+opt.replace(/^[A-D]\)\s*/,'')+'</span>';
-      b.onclick=()=>{
-        if(b.dataset.answered) return;
-        opts.querySelectorAll('.ai-opt').forEach((x,j)=>{x.dataset.answered='1';x.onclick=null;if(j===q.correct)x.classList.add('ok');});
-        if(i!==q.correct) b.classList.add('ko');
-        _id('lab-ai-expl').textContent=q.explanation;_id('lab-ai-expl').classList.add('show');
-        _id('lab-ai-next').classList.add('show');
-        if(i===q.correct) addXP(15);
-      };
-      opts.appendChild(b);
-    });
-  }catch(e){
-    _id('lab-loading').classList.remove('show');
+function loadLabAI(){
+  _id('lab-ai-err').classList.remove('show');
+  _id('lab-loading').classList.remove('show');
+  const ids=TOPIC_MAP[labTopic]||ALL_BANK_IDS;
+  const pool=collectQ(ids);
+  if(!pool.length){
     _id('lab-ai-err').classList.add('show');
-    _id('lab-ai-err').innerHTML='⚠️ '+e.message+' <button onclick="loadLabAI()" style="background:none;border:1px solid var(--red);color:#fca5a5;padding:3px 10px;cursor:pointer;border-radius:4px;margin-left:8px;font-size:.78rem">Riprova</button>';
+    _id('lab-ai-err').textContent='⚠️ Nessuna domanda disponibile per questo argomento.';
     _id('lab-ai-start').style.display='block';
+    return;
   }
+  const raw=pool[Math.floor(Math.random()*pool.length)];
+  const q=prepQuestion(raw,labTopic);
+  _id('lab-ai-start').style.display='none';
+  _id('lab-ai-panel').style.display='block';
+  _id('lab-ai-q').textContent=q.question;
+  _id('lab-ai-expl').classList.remove('show');
+  _id('lab-ai-next').classList.remove('show');
+  const opts=_id('lab-ai-opts');opts.innerHTML='';
+  q.options.forEach((opt,i)=>{
+    const b=document.createElement('div');b.className='ai-opt';
+    b.innerHTML='<span class="opt-l">'+['A','B','C','D'][i]+'</span><span>'+opt.replace(/^[A-D]\)\s*/,'')+'</span>';
+    b.onclick=()=>{
+      if(b.dataset.answered) return;
+      opts.querySelectorAll('.ai-opt').forEach((x,j)=>{x.dataset.answered='1';x.onclick=null;if(j===q.correct)x.classList.add('ok');});
+      if(i!==q.correct) b.classList.add('ko');
+      _id('lab-ai-expl').textContent=q.explanation;_id('lab-ai-expl').classList.add('show');
+      _id('lab-ai-next').classList.add('show');
+      if(i===q.correct) addXP(15);
+    };
+    opts.appendChild(b);
+  });
 }
 
 // ══════════════════════════════════════
