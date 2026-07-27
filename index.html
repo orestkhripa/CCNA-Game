@@ -273,6 +273,33 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .sim-btn-go:hover{background:#2563eb}
 .sim-btn-rst{background:transparent;border:1px solid var(--border);color:var(--muted)}
 .sim-btn-rst:hover{border-color:var(--dim);color:var(--text)}
+/* ─── LEVEL PLAYER ─── */
+.play-wrap{max-width:720px;margin:0 auto}
+.play-head{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+.play-head .p-ico{font-size:2rem}
+.play-head h2{font-family:'Syne',sans-serif;font-size:1.2rem;font-weight:800}
+.play-head .p-sub{font-size:.78rem;color:var(--muted)}
+.play-steps{display:flex;gap:8px;margin-bottom:20px}
+.pstep{flex:1;text-align:center;font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;padding:8px 4px;border:1px solid var(--border);border-radius:8px;color:var(--muted);transition:all .2s}
+.pstep.cur{border-color:var(--accent);color:var(--accent);background:rgba(59,130,246,.06)}
+.pstep.ok{border-color:var(--green);color:var(--green)}
+.game-instr{font-size:.85rem;color:var(--muted);margin-bottom:16px;line-height:1.6}
+.match-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:22px;text-align:center;margin-bottom:14px}
+.match-name{font-family:'JetBrains Mono',monospace;font-size:1.25rem;font-weight:700;color:var(--cyan);margin-bottom:6px;word-break:break-word;line-height:1.4}
+.match-hint{font-size:.76rem;color:var(--muted)}
+.cat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px;margin-bottom:12px}
+.cat-btn{padding:12px;border:1px solid var(--border);background:var(--panel);color:var(--text);border-radius:8px;cursor:pointer;font-size:.8rem;font-weight:600;font-family:'DM Sans',sans-serif;transition:all .15s}
+.cat-btn:hover{border-color:var(--accent);color:var(--accent)}
+.cat-btn.ok{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08)}
+.cat-btn.ko{border-color:var(--red);color:var(--red);background:rgba(239,68,68,.08);animation:shake .3s}
+.order-pool{display:flex;flex-direction:column;gap:7px;margin-bottom:14px;min-height:8px}
+.order-slot{display:flex;align-items:center;gap:10px;padding:11px 14px;border:1px solid var(--border);border-radius:8px;background:var(--panel);font-size:.84rem;cursor:pointer;transition:all .15s}
+.order-slot:hover{border-color:var(--accent)}
+.order-slot.ok{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.06);cursor:default}
+.order-slot.ko{animation:shake .3s;border-color:var(--red)}
+.order-num{width:22px;height:22px;border-radius:50%;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;min-width:22px}
+.order-slot.ok .order-num{background:var(--green);color:var(--bg)}
+.play-progress{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);margin:6px 0}
 </style>
 </head>
 <body>
@@ -526,6 +553,31 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div id="schema-content"></div>
 </div>
 
+<!-- ══════════════ LEVEL PLAYER ══════════════ -->
+<div class="view" id="view-play">
+  <div class="play-wrap">
+    <div class="play-head">
+      <div class="p-ico" id="play-icon">🎮</div>
+      <div><h2 id="play-title">Livello</h2><div class="p-sub" id="play-sub"></div></div>
+    </div>
+    <div class="play-steps">
+      <div class="pstep cur" id="pstep-game">1 · Gioco</div>
+      <div class="pstep" id="pstep-quiz">2 · Consolidamento</div>
+      <div class="pstep" id="pstep-done">3 · Completato</div>
+    </div>
+    <div id="play-game"></div>
+    <div id="play-quiz" style="display:none"></div>
+    <div id="play-done" style="display:none" class="result-wrap">
+      <div class="result-pct" id="play-done-pct" style="font-size:3rem">✓</div>
+      <div id="play-done-msg" style="margin-bottom:22px;color:var(--muted);font-size:.9rem"></div>
+      <div class="result-btns">
+        <button class="rbtn rbtn-retry" onclick="startLevel(LP.mod)">↺ Ripeti</button>
+        <button class="rbtn rbtn-home" onclick="showView('home')">🏠 Percorso</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <div class="xp-toast" id="xp-toast"></div>
 
 <script>
@@ -668,15 +720,8 @@ function renderTree(){
   });
 }
 function launchModuleGame(mod){
-  // mark progress
-  if(!G.modules[mod.id].completed) G.modules[mod.id].progress=Math.max(G.modules[mod.id].progress||0,5);
-  saveG();
-  // passa alla view quiz senza tornare al menu
-  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
-  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
-  _id('view-quiz').classList.add('active');
-  _id('nb-quiz').classList.add('active');
-  startModuleQuiz(mod);
+  // ogni livello è un gioco interattivo dedicato + quiz di consolidamento
+  startLevel(mod);
   showToast('▶ '+mod.title+' — +'+mod.xp+' XP al completamento','var(--accent)');
 }
 // Apre il lab interattivo abbinato al modulo
@@ -1579,6 +1624,355 @@ function renderSchema(id){
     ipv6:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">6️⃣</span><h3>IPv6 — Riferimento rapido</h3><span style="background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3)">TABELLA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>PREFISSO</th><th>IPv4 EQUIV.</th><th>NOTE</th></tr><tr><td class="ca">Global Unicast</td><td class="cm">2000::/3</td><td style="font-size:.78rem">IP pubblico</td><td style="font-size:.75rem;color:var(--muted)">Instradabile su Internet</td></tr><tr><td class="ca">Link-Local</td><td class="cm">FE80::/10</td><td style="font-size:.78rem">169.254.x.x</td><td style="font-size:.75rem;color:var(--muted)">Solo subnet locale, autogenerato</td></tr><tr><td class="ca">Unique Local</td><td class="cm">FC00::/7</td><td style="font-size:.78rem">192.168.x.x</td><td style="font-size:.75rem;color:var(--muted)">Privato, non routable Internet</td></tr><tr><td class="ca">Multicast</td><td class="cm">FF00::/8</td><td style="font-size:.78rem">224.x.x.x</td><td style="font-size:.75rem;color:var(--muted)">Gruppo di destinatari</td></tr><tr><td class="ca">Loopback</td><td class="cm">::1</td><td style="font-size:.78rem">127.0.0.1</td><td style="font-size:.75rem;color:var(--muted)">Localhost</td></tr></table><div class="note" style="margin-top:12px">💡 Abbreviazione: rimuovi zeri iniziali per gruppo (0db8→db8) e sostituisci gruppi consecutivi di zero con :: (solo una volta).<br>Es: 2001:0db8:0000:0000:0000:0000:0000:0001 → <strong>2001:db8::1</strong></div></div></div>`,
   };
   c.innerHTML=schemas[id]||'<p style="color:var(--muted)">Schema non trovato.</p>';
+}
+
+// ══════════════════════════════════════
+// LEVEL PLAYER — ogni livello è un gioco interattivo
+// ══════════════════════════════════════
+const LP={mod:null,quiz:null};
+function el(tag,cls,html){const e=document.createElement(tag);if(cls)e.className=cls;if(html!=null)e.innerHTML=html;return e;}
+function normCalc(s){return String(s).trim().toLowerCase().replace(/\s+/g,'');}
+function normCli(s){return String(s).trim().toLowerCase().replace(/\s+/g,' ');}
+// helper subnet
+function ipToInt(ip){return ip.split('.').reduce((a,o)=>((a<<8)+(+o))>>>0,0)>>>0;}
+function intToIp(n){return [24,16,8,0].map(s=>(n>>>s)&255).join('.');}
+function rnd(a,b){return a+Math.floor(Math.random()*(b-a+1));}
+function makeSubnetRound(minC,maxC){
+  const c=rnd(minC,maxC);
+  const bases=['192.168.'+rnd(0,30)+'.','10.'+rnd(0,60)+'.'+rnd(0,60)+'.','172.'+rnd(16,31)+'.'+rnd(0,60)+'.'];
+  const ip=bases[rnd(0,bases.length-1)]+rnd(1,254);
+  const ipn=ipToInt(ip),maskn=(0xffffffff<<(32-c))>>>0;
+  const net=(ipn&maskn)>>>0,bc=(net|(~maskn>>>0))>>>0;
+  const hosts=Math.pow(2,32-c)-2;
+  return{prompt:'Indirizzo: '+ip+' /'+c,fields:[
+    {label:'Subnet mask',answer:intToIp(maskn),ph:'255.255.255.x'},
+    {label:'Network address',answer:intToIp(net)},
+    {label:'Broadcast',answer:intToIp(bc)},
+    {label:'Primo host',answer:intToIp((net+1)>>>0)},
+    {label:'Ultimo host',answer:intToIp((bc-1)>>>0)},
+    {label:'N. host validi',answer:String(hosts)}
+  ]};
+}
+// ── MOTORE: ABBINA (categorizza) ──
+function engineMatch(arena,data,onDone){
+  const queue=qShuffle(data.items.slice());let i=0,correct=0;
+  function render(){
+    if(i>=queue.length){addXP(15);setTimeout(onDone,300);return;}
+    const it=queue[i];arena.innerHTML='';
+    arena.appendChild(el('div','game-instr',data.instruction));
+    const card=el('div','match-card');card.appendChild(el('div','match-name',it.n));if(it.h)card.appendChild(el('div','match-hint',it.h));arena.appendChild(card);
+    const grid=el('div','cat-grid','');
+    qShuffle(data.cats.slice()).forEach(cat=>{
+      const b=el('button','cat-btn',cat);
+      b.onclick=()=>{
+        if(grid.dataset.done)return;
+        if(cat===it.c){b.classList.add('ok');correct++;addXP(5);grid.dataset.done='1';i++;setTimeout(render,450);}
+        else{b.classList.add('ko');grid.dataset.done='1';[...grid.children].forEach(x=>{if(x.textContent===it.c)x.classList.add('ok');});i++;setTimeout(render,1000);}
+      };
+      grid.appendChild(b);
+    });
+    arena.appendChild(grid);
+    arena.appendChild(el('div','play-progress','Elemento '+(i+1)+'/'+queue.length+' · Corretti: '+correct));
+  }
+  render();
+}
+// ── MOTORE: CALCOLA/DIGITA ──
+function engineCalc(arena,data,onDone){
+  let rounds=[];if(data.list)rounds=data.list.slice();else for(let k=0;k<(data.count||3);k++)rounds.push(data.gen());
+  let idx=0;
+  function renderRound(){
+    const r=rounds[idx];arena.innerHTML='';
+    arena.appendChild(el('div','game-instr',data.instruction+' &nbsp;·&nbsp; <b>Round '+(idx+1)+'/'+rounds.length+'</b>'));
+    const card=el('div','match-card');card.appendChild(el('div','match-name',r.prompt));arena.appendChild(card);
+    const inputs=[];
+    r.fields.forEach(f=>{
+      const row=el('div','field-row');row.appendChild(el('span','field-lbl',f.label));
+      const inp=document.createElement('input');inp.className='field-inp';inp.placeholder=f.ph||'';row.appendChild(inp);
+      const ck=el('span','field-ck','');row.appendChild(ck);arena.appendChild(row);inputs.push({inp,ck,ans:f.answer});
+    });
+    const btn=el('button','check-btn','Verifica');arena.appendChild(btn);
+    const fb=el('div','fb-strip','');arena.appendChild(fb);
+    btn.onclick=()=>{
+      let allok=true;
+      inputs.forEach(o=>{
+        if(normCalc(o.inp.value)===normCalc(o.ans)){o.inp.classList.add('ok');o.inp.classList.remove('ko');o.ck.textContent='✓';}
+        else{o.inp.classList.add('ko');o.inp.classList.remove('ok');o.ck.textContent='✗';allok=false;}
+      });
+      fb.className='fb-strip show '+(allok?'ok':'ko');
+      fb.textContent=allok?'✓ Corretto!':'✗ Correggi i campi con ✗';
+      if(allok){addXP(10);idx++;if(idx>=rounds.length)setTimeout(onDone,500);else setTimeout(renderRound,650);}
+    };
+  }
+  renderRound();
+}
+// ── MOTORE: ORDINA/SEQUENZA ──
+function engineOrder(arena,data,onDone){
+  const rounds=data.rounds||[{instruction:data.instruction,steps:data.steps}];let ri=0;
+  function render(){
+    const r=rounds[ri];arena.innerHTML='';
+    arena.appendChild(el('div','game-instr',r.instruction||data.instruction));
+    arena.appendChild(el('div','play-progress','✓ Sequenza corretta:'));
+    const seq=el('div','order-pool','');arena.appendChild(seq);
+    arena.appendChild(el('div','play-progress','Clicca i passi nell\'ordine giusto:'));
+    const pool=el('div','order-pool','');arena.appendChild(pool);
+    let expected=0;
+    qShuffle(r.steps.map((s,idx)=>({s,idx}))).forEach(o=>{
+      const item=el('div','order-slot','<span>'+o.s+'</span>');
+      item.onclick=()=>{
+        if(item.dataset.done)return;
+        if(o.idx===expected){
+          item.dataset.done='1';item.classList.add('ok');
+          item.insertBefore(el('span','order-num',String(expected+1)),item.firstChild);
+          pool.removeChild(item);seq.appendChild(item);expected++;addXP(5);
+          if(expected>=r.steps.length){ri++;if(ri>=rounds.length)setTimeout(onDone,500);else setTimeout(render,700);}
+        }else{item.classList.add('ko');setTimeout(()=>item.classList.remove('ko'),350);}
+      };
+      pool.appendChild(item);
+    });
+  }
+  render();
+}
+// ── MOTORE: MISSIONE CLI ──
+function engineCli(arena,data,onDone){
+  arena.innerHTML='';
+  const mis=el('div','cli-mission','<strong>MISSIONE:</strong> '+data.brief);arena.appendChild(mis);
+  const wrap=el('div','cli-wrap','<div class="cli-bar"><div class="cli-dot" style="background:#ff5f57"></div><div class="cli-dot" style="background:#ffbd2e"></div><div class="cli-dot" style="background:#28c840"></div><span style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--muted);margin-left:8px;letter-spacing:2px">CISCO IOS</span></div><div class="cli-out"></div><div class="cli-inp"><span class="cli-ps"></span><input class="cli-field" autocomplete="off" spellcheck="false" placeholder="digita un comando..."></div>');
+  arena.appendChild(wrap);
+  const out=wrap.querySelector('.cli-out'),ps=wrap.querySelector('.cli-ps'),field=wrap.querySelector('.cli-field');
+  if(data.hints){const hr=el('div','hint-row','');data.hints.forEach(h=>{const c=el('span','hint-chip',h);c.onclick=()=>{field.value=h;field.focus();};hr.appendChild(c);});mis.appendChild(hr);}
+  let step=0;
+  function prompt(){const st=data.steps[step]||data.steps[data.steps.length-1];return st.p||'Router>';}
+  function log(t,cls){const l=el('div','cl '+(cls||'cl-o'),t);out.appendChild(l);out.scrollTop=out.scrollHeight;}
+  function match(cmd,st){const c=normCli(cmd);return st.re?new RegExp(st.re).test(c):c===normCli(st.cmd);}
+  ps.textContent=prompt();log('Completa la missione usando i comandi Cisco IOS.','cl-c');
+  field.addEventListener('keydown',e=>{
+    if(e.key!=='Enter')return;
+    const val=field.value;field.value='';if(!val.trim())return;
+    log(prompt()+' '+val,'cl-p');
+    const st=data.steps[step];
+    if(match(val,st)){log(st.msg||'OK','cl-s');step++;addXP(6);
+      if(step>=data.steps.length){log('✓ Missione completata!','cl-s');field.disabled=true;setTimeout(onDone,700);}
+      else ps.textContent=prompt();
+    }else log('% Comando non atteso qui. Riprova (usa i suggerimenti sopra).','cl-e');
+  });
+  setTimeout(()=>field.focus(),60);
+}
+// ══════════════════════════════════════
+// DATI DEI 21 LIVELLI (allineati CCNA 200-301)
+// ══════════════════════════════════════
+const LEVELS={
+ net_basics:{engine:"match",data:{instruction:"A quale livello OSI opera ciascun dispositivo o mezzo?",cats:["L1 Fisico","L2 Data Link","L3 Network"],items:[
+   {n:"Hub",h:"Ripete il segnale a tutte le porte",c:"L1 Fisico"},
+   {n:"Ripetitore",h:"Rigenera il segnale elettrico",c:"L1 Fisico"},
+   {n:"Cavo UTP / Fibra",h:"Mezzo trasmissivo",c:"L1 Fisico"},
+   {n:"Switch",h:"Inoltra in base alla MAC",c:"L2 Data Link"},
+   {n:"Bridge",h:"Collega segmenti a livello 2",c:"L2 Data Link"},
+   {n:"Access Point",h:"Wi-Fi 802.11",c:"L2 Data Link"},
+   {n:"Router",h:"Instrada in base all'indirizzo IP",c:"L3 Network"},
+   {n:"Switch multilayer (L3)",h:"Routing tra VLAN",c:"L3 Network"}
+ ]}},
+ binary:{engine:"calc",data:{instruction:"Conversioni binario / decimale / esadecimale.",list:[
+   {prompt:"11000000  →  decimale",fields:[{label:"Decimale",answer:"192"}]},
+   {prompt:"10101100  →  decimale",fields:[{label:"Decimale",answer:"172"}]},
+   {prompt:"200  →  binario (8 bit)",fields:[{label:"Binario",answer:"11001000"}]},
+   {prompt:"0xFF  →  decimale",fields:[{label:"Decimale",answer:"255"}]},
+   {prompt:"15  →  esadecimale",fields:[{label:"Hex",answer:"f"}]},
+   {prompt:"11111111  →  decimale",fields:[{label:"Decimale",answer:"255"}]}
+ ]}},
+ osi_mod:{engine:"match",data:{instruction:"A quale livello OSI appartiene ciascun protocollo?",cats:["Application (7)","Transport (4)","Network (3)","Data Link (2)","Physical (1)"],items:[
+   {n:"HTTP",c:"Application (7)"},{n:"DNS",c:"Application (7)"},{n:"FTP",c:"Application (7)"},{n:"SMTP",c:"Application (7)"},
+   {n:"TCP",c:"Transport (4)"},{n:"UDP",c:"Transport (4)"},
+   {n:"IP",c:"Network (3)"},{n:"ICMP",c:"Network (3)"},{n:"OSPF",c:"Network (3)"},
+   {n:"Ethernet",c:"Data Link (2)"},{n:"Frame / MAC",c:"Data Link (2)"},
+   {n:"Cavo UTP",c:"Physical (1)"},{n:"Fibra ottica",c:"Physical (1)"}
+ ]}},
+ tcpip_mod:{engine:"order",data:{rounds:[
+   {instruction:"Ordina le fasi del 3-way handshake TCP:",steps:["SYN","SYN-ACK","ACK"]},
+   {instruction:"Ordina l'incapsulamento dei dati (dal livello 7 al livello 1):",steps:["Dati (Application)","Segmento (Transport)","Pacchetto (Network)","Frame (Data Link)","Bit (Physical)"]}
+ ]}},
+ ip_addr:{engine:"match",data:{instruction:"Classifica ciascun indirizzo IPv4.",cats:["Privato","Pubblico","Loopback","APIPA","Multicast"],items:[
+   {n:"10.15.4.9",c:"Privato"},{n:"172.16.30.1",c:"Privato"},{n:"192.168.100.5",c:"Privato"},
+   {n:"8.8.8.8",c:"Pubblico"},{n:"172.32.5.1",h:"Fuori dal blocco 172.16-31",c:"Pubblico"},{n:"200.1.1.1",c:"Pubblico"},
+   {n:"127.0.0.1",c:"Loopback"},{n:"169.254.10.20",c:"APIPA"},
+   {n:"224.0.0.5",c:"Multicast"},{n:"239.1.1.1",c:"Multicast"}
+ ]}},
+ subnetting:{engine:"calc",data:{instruction:"Calcola i parametri della subnet.",gen:()=>makeSubnetRound(25,30),count:3}},
+ boss1:{engine:"calc",data:{instruction:"BOSS · Subnet Gauntlet: risolvi 5 subnet.",gen:()=>makeSubnetRound(26,30),count:5}},
+ switching:{engine:"match",data:{instruction:"Quale dispositivo/tecnologia corrisponde a ciascuna caratteristica?",cats:["Switch","Hub","Router"],items:[
+   {n:"Separa i domini di collisione (uno per porta)",c:"Switch"},
+   {n:"Un solo dominio di collisione condiviso",c:"Hub"},
+   {n:"Instrada pacchetti tra reti IP diverse",c:"Router"},
+   {n:"Usa la tabella MAC (CAM)",c:"Switch"},
+   {n:"Ripete il traffico a tutte le porte",c:"Hub"},
+   {n:"Separa i domini di broadcast",c:"Router"},
+   {n:"Previene i loop L2 con STP",c:"Switch"},
+   {n:"Opera al livello 3 (IP)",c:"Router"}
+ ]}},
+ vlan_mod:{engine:"match",data:{instruction:"Che tipo di porta/VLAN descrive ciascuno scenario?",cats:["Access","Trunk","Native VLAN"],items:[
+   {n:"Porta collegata a un singolo PC",c:"Access"},
+   {n:"Link tra due switch che trasporta più VLAN",c:"Trunk"},
+   {n:"Appartiene a una sola VLAN",c:"Access"},
+   {n:"Usa i tag 802.1Q",c:"Trunk"},
+   {n:"Traffico non taggato sul trunk (default VLAN 1)",c:"Native VLAN"},
+   {n:"switchport mode access",c:"Access"},
+   {n:"switchport mode trunk",c:"Trunk"}
+ ]}},
+ routing_s:{engine:"cli",data:{brief:"Su R1: entra in modalità privilegiata e di configurazione, aggiungi una rotta statica verso 10.0.0.0/24 via 192.168.1.2, una default route via 192.168.1.1, poi salva.",hints:["enable","configure terminal","ip route 10.0.0.0 255.255.255.0 192.168.1.2","ip route 0.0.0.0 0.0.0.0 192.168.1.1","end","copy running-config startup-config"],steps:[
+   {p:"R1>",cmd:"enable",msg:"Modalità privilegiata."},
+   {p:"R1#",cmd:"configure terminal",msg:"Configurazione globale."},
+   {p:"R1(config)#",cmd:"ip route 10.0.0.0 255.255.255.0 192.168.1.2",msg:"Rotta statica aggiunta."},
+   {p:"R1(config)#",cmd:"ip route 0.0.0.0 0.0.0.0 192.168.1.1",msg:"Default route (gateway of last resort)."},
+   {p:"R1(config)#",cmd:"end",msg:"Torni al prompt privilegiato."},
+   {p:"R1#",re:"^(copy running-config startup-config|copy run start|write memory|wr)$",msg:"Configurazione salvata in NVRAM."}
+ ]}},
+ ospf_mod:{engine:"order",data:{instruction:"Ordina gli stati di adiacenza OSPF (dal primo fino a Full):",steps:["Down","Init","2-Way","ExStart","Exchange","Loading","Full"]}},
+ eigrp_mod:{engine:"match",data:{instruction:"L'affermazione è vera per EIGRP, OSPF o entrambi?",cats:["EIGRP","OSPF","Entrambi"],items:[
+   {n:"Distanza amministrativa 90",c:"EIGRP"},
+   {n:"Distanza amministrativa 110",c:"OSPF"},
+   {n:"Usa l'algoritmo DUAL",c:"EIGRP"},
+   {n:"Usa l'algoritmo SPF (Dijkstra)",c:"OSPF"},
+   {n:"Protocollo link-state con aree",c:"OSPF"},
+   {n:"Metrica basata su bandwidth e delay",c:"EIGRP"},
+   {n:"Ha successor e feasible successor",c:"EIGRP"},
+   {n:"Multicast 224.0.0.10",c:"EIGRP"},
+   {n:"Multicast 224.0.0.5",c:"OSPF"},
+   {n:"Usa pacchetti Hello per i vicini",c:"Entrambi"},
+   {n:"Sviluppato da Cisco",c:"EIGRP"}
+ ]}},
+ boss2:{engine:"cli",data:{brief:"BOSS · Configura OSPF su R1: process 1, annuncia le reti 192.168.1.0/24 e 10.0.0.0/24 in area 0.",hints:["enable","configure terminal","router ospf 1","network 192.168.1.0 0.0.0.255 area 0","network 10.0.0.0 0.0.0.255 area 0","end"],steps:[
+   {p:"R1>",cmd:"enable",msg:"OK"},
+   {p:"R1#",cmd:"configure terminal",msg:"OK"},
+   {p:"R1(config)#",cmd:"router ospf 1",msg:"Processo OSPF 1 avviato."},
+   {p:"R1(config-router)#",cmd:"network 192.168.1.0 0.0.0.255 area 0",msg:"Rete annunciata in area 0."},
+   {p:"R1(config-router)#",cmd:"network 10.0.0.0 0.0.0.255 area 0",msg:"Rete annunciata in area 0."},
+   {p:"R1(config-router)#",cmd:"end",msg:"OSPF configurato."}
+ ]}},
+ acl_mod:{engine:"match",data:{instruction:"La caratteristica riguarda una ACL Standard o Extended?",cats:["Standard","Extended"],items:[
+   {n:"Numerazione 1-99",c:"Standard"},
+   {n:"Numerazione 100-199",c:"Extended"},
+   {n:"Filtra solo l'IP sorgente",c:"Standard"},
+   {n:"Filtra sorgente, destinazione, protocollo e porta",c:"Extended"},
+   {n:"Va posizionata vicino alla destinazione",c:"Standard"},
+   {n:"Va posizionata vicino alla sorgente",c:"Extended"},
+   {n:"Può permettere solo la porta 443",c:"Extended"},
+   {n:"Considera solo l'origine del pacchetto",c:"Standard"}
+ ]}},
+ nat_mod:{engine:"match",data:{instruction:"Quale tipo di NAT descrive lo scenario?",cats:["Static NAT","Dynamic NAT","PAT (overload)"],items:[
+   {n:"Mappatura 1:1 fissa per un web server esposto",c:"Static NAT"},
+   {n:"Molti host privati condividono 1 IP pubblico via porte",c:"PAT (overload)"},
+   {n:"Pool di IP pubblici assegnati on-demand",c:"Dynamic NAT"},
+   {n:"Tipico router di casa/ufficio",c:"PAT (overload)"},
+   {n:"Usa i numeri di porta per distinguere le sessioni",c:"PAT (overload)"},
+   {n:"Server mail sempre raggiungibile allo stesso IP",c:"Static NAT"}
+ ]}},
+ ssh_sec:{engine:"cli",data:{brief:"Metti in sicurezza R1: hostname, password enable cifrata, dominio, chiavi RSA e accesso SSH sulle linee VTY.",hints:["enable","configure terminal","hostname R1","enable secret cisco123","ip domain-name lab.local","crypto key generate rsa","line vty 0 4","transport input ssh","login local"],steps:[
+   {p:"Router>",cmd:"enable",msg:"OK"},
+   {p:"Router#",cmd:"configure terminal",msg:"OK"},
+   {p:"Router(config)#",re:"^hostname .+",msg:"Hostname impostato."},
+   {p:"R1(config)#",re:"^enable secret .+",msg:"Password enable cifrata (hash)."},
+   {p:"R1(config)#",re:"^ip domain-name .+",msg:"Dominio impostato."},
+   {p:"R1(config)#",re:"^crypto key generate rsa.*",msg:"Chiavi RSA generate."},
+   {p:"R1(config)#",cmd:"line vty 0 4",msg:"Entri nelle linee VTY."},
+   {p:"R1(config-line)#",cmd:"transport input ssh",msg:"Solo SSH ammesso (niente Telnet)."},
+   {p:"R1(config-line)#",cmd:"login local",msg:"Autenticazione con utenti locali."}
+ ]}},
+ boss3:{engine:"match",data:{instruction:"BOSS · Security Audit: abbina ogni minaccia alla contromisura corretta.",cats:["Port Security","SSH","ACL","enable secret","Shutdown porta"],items:[
+   {n:"MAC flooding sulla tabella CAM",c:"Port Security"},
+   {n:"Sessione Telnet in chiaro intercettabile",c:"SSH"},
+   {n:"Traffico non autorizzato verso un server",c:"ACL"},
+   {n:"Password enable visibile in chiaro",c:"enable secret"},
+   {n:"Porta switch inutilizzata lasciata attiva",c:"Shutdown porta"},
+   {n:"Host non autorizzato collegato a una porta access",c:"Port Security"},
+   {n:"Filtrare per IP/porta il traffico in ingresso",c:"ACL"}
+ ]}},
+ ipv6_mod:{engine:"calc",data:{instruction:"Comprimi / riconosci gli indirizzi IPv6.",list:[
+   {prompt:"Comprimi: 2001:0db8:0000:0000:0000:0000:0000:0001",fields:[{label:"Forma compressa",answer:"2001:db8::1"}]},
+   {prompt:"Comprimi: fe80:0000:0000:0000:0000:0000:0000:00a1",fields:[{label:"Forma compressa",answer:"fe80::a1"}]},
+   {prompt:"Comprimi: 2001:0db8:0000:00ff:0000:0000:0000:0010",fields:[{label:"Forma compressa",answer:"2001:db8:0:ff::10"}]},
+   {prompt:"Indirizzo di loopback IPv6?",fields:[{label:"Loopback",answer:"::1"}]},
+   {prompt:"Prefisso degli indirizzi link-local?",fields:[{label:"Prefisso",answer:"fe80::/10"}]}
+ ]}},
+ wan_mod:{engine:"match",data:{instruction:"Quale tecnologia WAN/VPN corrisponde a ciascuna caratteristica?",cats:["IPSec","MPLS","GRE","Leased line","PPP"],items:[
+   {n:"Cifratura e autenticazione del traffico (ESP/AH)",c:"IPSec"},
+   {n:"Inoltro tramite etichette (label switching)",c:"MPLS"},
+   {n:"Tunnel che incapsula vari protocolli, senza cifratura",c:"GRE"},
+   {n:"Circuito dedicato punto-punto sempre attivo",c:"Leased line"},
+   {n:"Incapsulamento seriale con autenticazione PAP/CHAP",c:"PPP"},
+   {n:"ESP protegge la riservatezza del payload",c:"IPSec"},
+   {n:"Usato dai provider per VPN L3 e QoS",c:"MPLS"}
+ ]}},
+ auto_mod:{engine:"match",data:{instruction:"A quale categoria appartiene ciascun elemento dell'automazione?",cats:["Formato dati","API / Protocollo","Strumento","Concetto SDN"],items:[
+   {n:"JSON",c:"Formato dati"},{n:"YAML",c:"Formato dati"},{n:"XML",c:"Formato dati"},
+   {n:"REST",c:"API / Protocollo"},{n:"GET / POST / PUT / DELETE",c:"API / Protocollo"},
+   {n:"Ansible",c:"Strumento"},{n:"Python",c:"Strumento"},
+   {n:"Control plane centralizzato",c:"Concetto SDN"},{n:"Northbound / Southbound API",c:"Concetto SDN"}
+ ]}}
+};
+const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli};
+// ── FLUSSO LIVELLO ──
+function setPlayStep(s){
+  ['game','quiz','done'].forEach(k=>{const e=_id('pstep-'+k);e.classList.remove('cur','ok');});
+  if(s==='game')_id('pstep-game').classList.add('cur');
+  if(s==='quiz'){_id('pstep-game').classList.add('ok');_id('pstep-quiz').classList.add('cur');}
+  if(s==='done'){_id('pstep-game').classList.add('ok');_id('pstep-quiz').classList.add('ok');_id('pstep-done').classList.add('cur');}
+}
+function startLevel(mod){
+  LP.mod=mod;
+  if(!G.modules[mod.id].completed) G.modules[mod.id].progress=Math.max(G.modules[mod.id].progress||0,10);
+  saveG();
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  _id('view-play').classList.add('active');
+  _id('play-icon').textContent=mod.icon;_id('play-title').textContent=mod.title;_id('play-sub').textContent=mod.sub;
+  _id('play-done').style.display='none';_id('play-quiz').style.display='none';_id('play-game').style.display='block';
+  const cfg=LEVELS[mod.id];
+  if(!cfg){setPlayStep('quiz');startConsolidation();return;}
+  setPlayStep('game');
+  ENGINES[cfg.engine](_id('play-game'),cfg.data,onGameDone);
+}
+function onGameDone(){showToast('✓ Gioco completato! Ora il consolidamento','var(--green)');startConsolidation();}
+function startConsolidation(){
+  setPlayStep('quiz');
+  _id('play-game').style.display='none';_id('play-done').style.display='none';
+  _id('play-quiz').style.display='block';
+  const mod=LP.mod;const pool=qShuffle(questionsForModule(mod));
+  const n=mod.type==='cert'?20:mod.type==='boss'?6:4;
+  LP.quiz={pool:pool.slice(0,Math.min(n,pool.length)),cur:0,ok:0,answered:false};
+  renderCons();
+}
+function renderCons(){
+  const wrap=_id('play-quiz');wrap.innerHTML='';const Q=LP.quiz,mod=LP.mod;
+  if(Q.cur>=Q.pool.length){finishLevel();return;}
+  Q.answered=false;
+  const q=prepQuestion(Q.pool[Q.cur],mod.title);Q.currentQ=q;
+  wrap.appendChild(el('div','game-instr','🧠 Consolidamento · Domanda '+(Q.cur+1)+'/'+Q.pool.length));
+  wrap.appendChild(el('div','q-box','<div class="q-text">'+q.question+'</div>'));
+  const grid=el('div','opts-grid','');
+  const fb=el('div','feedback','');
+  const nb=el('button','next-btn','PROSSIMA →');
+  q.options.forEach((opt,i)=>{
+    const b=el('button','opt','<span class="opt-lbl">'+['A','B','C','D'][i]+'</span><span>'+opt+'</span>');
+    b.onclick=()=>{
+      if(Q.answered)return;Q.answered=true;
+      grid.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add('ok');});
+      if(i!==q.correct)b.classList.add('ko');else{Q.ok++;addXP(8);}
+      fb.className='feedback show '+(i===q.correct?'ok':'ko');
+      fb.innerHTML='<div class="feedback-title">'+(i===q.correct?'✓ Corretto':'✗ Errato')+'</div><div>'+q.explanation+'</div>';
+      nb.classList.add('show');
+    };
+    grid.appendChild(b);
+  });
+  nb.onclick=()=>{Q.cur++;renderCons();};
+  wrap.appendChild(grid);wrap.appendChild(fb);wrap.appendChild(nb);
+}
+function finishLevel(){
+  const mod=LP.mod;setPlayStep('done');
+  _id('play-quiz').style.display='none';_id('play-game').style.display='none';_id('play-done').style.display='block';
+  const passed=LP.quiz.ok>=Math.ceil(LP.quiz.pool.length*0.5);
+  if(passed&&!G.modules[mod.id].completed) completeModule(mod.id);
+  _id('play-done-pct').textContent=passed?'✓':'✗';
+  _id('play-done-pct').style.color=passed?'var(--green)':'var(--orange)';
+  _id('play-done-msg').innerHTML=(passed?'Livello completato! ':'Ci sei quasi. ')+'Quiz: '+LP.quiz.ok+'/'+LP.quiz.pool.length+(passed?' &nbsp;·&nbsp; +'+mod.xp+' XP':' — ripeti per sbloccare il modulo');
 }
 
 // ══════════════════════════════════════
