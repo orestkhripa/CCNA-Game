@@ -473,10 +473,20 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   .net-diag{gap:6px}
   .dev-ico{width:46px;height:46px;font-size:1.3rem}
   .link-seg{min-width:20px}
-  /* schemi: tabelle e blocchi codice scrollabili in orizzontale */
-  .schema-card-body{overflow-x:auto}
-  .ref-table{font-size:.74rem;min-width:440px}
-  .formula-grid{grid-template-columns:1fr 1fr}
+  /* schemi: tabelle larghe → schede impilate leggibili senza scroll orizzontale */
+  .schema-card-body{overflow-x:hidden}
+  .ref-table{font-size:.82rem}
+  .ref-table.has-head,.ref-table.has-head tbody{display:block}
+  .ref-table.has-head tr{display:block;border:1px solid var(--border);border-radius:9px;margin-bottom:10px;background:var(--surface);overflow:hidden}
+  .ref-table.has-head tr:first-child{display:none}
+  .ref-table.has-head td{display:flex;justify-content:space-between;align-items:baseline;gap:14px;padding:8px 12px;border:none;border-bottom:1px solid var(--border);text-align:right;line-height:1.45}
+  .ref-table.has-head tr td:last-child{border-bottom:none}
+  .ref-table.has-head td::before{content:attr(data-label);font-family:'JetBrains Mono',monospace;font-size:.56rem;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);text-align:left;flex:0 0 38%;white-space:nowrap}
+  .ref-table.has-head tr td:first-child{background:rgba(255,255,255,.025);font-weight:700}
+  .ref-table tr:hover td{background:none}
+  .ref-table.has-head tr td:first-child:hover{background:rgba(255,255,255,.025)}
+  .code-block{font-size:.68rem}
+  .formula-grid{grid-template-columns:1fr}
   /* calendario */
   .cal-stats{grid-template-columns:1fr 1fr}
   .cal-stat b{font-size:1.25rem}
@@ -1957,6 +1967,19 @@ function renderSchema(id){
     ipv6:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">6️⃣</span><h3>IPv6 — Riferimento rapido</h3><span style="background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3)">TABELLA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>PREFISSO</th><th>IPv4 EQUIV.</th><th>NOTE</th></tr><tr><td class="ca">Global Unicast</td><td class="cm">2000::/3</td><td style="font-size:.78rem">IP pubblico</td><td style="font-size:.75rem;color:var(--muted)">Instradabile su Internet</td></tr><tr><td class="ca">Link-Local</td><td class="cm">FE80::/10</td><td style="font-size:.78rem">169.254.x.x</td><td style="font-size:.75rem;color:var(--muted)">Solo subnet locale, autogenerato</td></tr><tr><td class="ca">Unique Local</td><td class="cm">FC00::/7</td><td style="font-size:.78rem">192.168.x.x</td><td style="font-size:.75rem;color:var(--muted)">Privato, non routable Internet</td></tr><tr><td class="ca">Multicast</td><td class="cm">FF00::/8</td><td style="font-size:.78rem">224.x.x.x</td><td style="font-size:.75rem;color:var(--muted)">Gruppo di destinatari</td></tr><tr><td class="ca">Loopback</td><td class="cm">::1</td><td style="font-size:.78rem">127.0.0.1</td><td style="font-size:.75rem;color:var(--muted)">Localhost</td></tr></table><div class="note" style="margin-top:12px">💡 Abbreviazione: rimuovi zeri iniziali per gruppo (0db8→db8) e sostituisci gruppi consecutivi di zero con :: (solo una volta).<br>Es: 2001:0db8:0000:0000:0000:0000:0000:0001 → <strong>2001:db8::1</strong></div></div></div>`,
   };
   c.innerHTML=schemas[id]||'<p style="color:var(--muted)">Schema non trovato.</p>';
+  makeTablesResponsive(c);
+}
+// Rende le tabelle di riferimento leggibili su mobile: legge le intestazioni
+// e le assegna come data-label a ogni cella (il CSS le impila senza scroll)
+function makeTablesResponsive(root){
+  root.querySelectorAll('table.ref-table').forEach(tb=>{
+    const rows=[...tb.rows];if(!rows.length)return;
+    const head=[...rows[0].cells];
+    if(!head.some(c=>c.tagName==='TH'))return;
+    tb.classList.add('has-head');
+    const labels=head.map(c=>c.textContent.trim());
+    rows.slice(1).forEach(r=>{[...r.cells].forEach((td,i)=>{if(labels[i])td.setAttribute('data-label',labels[i]);});});
+  });
 }
 
 // ══════════════════════════════════════
