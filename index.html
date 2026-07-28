@@ -13,7 +13,7 @@
 :root{
   --bg:#07090f;--surface:#0d1117;--panel:#111827;--border:#1f2d3d;
   --accent:#3b82f6;--cyan:#06b6d4;--green:#10b981;--orange:#f59e0b;
-  --red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--muted:#64748b;--dim:#334155;
+  --red:#ef4444;--purple:#8b5cf6;--text:#e2e8f0;--muted:#7e8da3;--dim:#334155;
 }
 *{margin:0;padding:0;box-sizing:border-box}
 html{scroll-behavior:smooth}
@@ -450,6 +450,68 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   .mod-card{min-width:calc(50% - 5px)}
   .xp-toast{bottom:calc(84px + env(safe-area-inset-bottom));right:12px;left:12px;max-width:none}
 }
+/* ─── MOBILE · QUIZ / LAB / CAL / SCHEMI ─── */
+@media(max-width:640px){
+  .sec-title{font-size:.58rem;letter-spacing:2px}
+  /* tab/scroller orizzontali invece che a capo (meno altezza sprecata) */
+  .lab-tabs,.schema-nav,.mode-row{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;scrollbar-width:none;padding-bottom:4px}
+  .lab-tabs::-webkit-scrollbar,.schema-nav::-webkit-scrollbar,.mode-row::-webkit-scrollbar{display:none}
+  .lab-tab,.schema-nav-btn,.mode-btn{flex:0 0 auto;white-space:nowrap}
+  .topic-grid{grid-template-columns:1fr 1fr}
+  /* quiz in gioco */
+  .q-box{padding:16px}
+  .q-text{font-size:.92rem}
+  .q-timer{font-size:1rem;padding:5px 12px;min-width:48px}
+  .result-pct{font-size:3rem}
+  .result-stats{gap:7px}
+  .result-btns{flex-wrap:wrap}
+  .result-btns .rbtn{flex:1;min-width:120px;padding:12px 14px}
+  /* lab: stack dei pannelli affiancati */
+  #osi-arena{grid-template-columns:1fr!important}
+  .cli-out{min-height:170px;font-size:.72rem}
+  .sub-ip{font-size:1.25rem}
+  .net-diag{gap:6px}
+  .dev-ico{width:46px;height:46px;font-size:1.3rem}
+  .link-seg{min-width:20px}
+  /* schemi: tabelle e blocchi codice scrollabili in orizzontale */
+  .schema-card-body{overflow-x:auto}
+  .ref-table{font-size:.74rem;min-width:440px}
+  .formula-grid{grid-template-columns:1fr 1fr}
+  /* calendario */
+  .cal-stats{grid-template-columns:1fr 1fr}
+  .cal-stat b{font-size:1.25rem}
+  /* level player */
+  .play-head h2{font-size:1.05rem}
+  .play-steps{gap:5px}
+  .pstep{font-size:.5rem;letter-spacing:1px;padding:7px 2px}
+  .match-name{font-size:1.05rem}
+}
+/* ─── LEARN · APPROFONDIMENTI & DIAGRAMMI ─── */
+.brief-diagram{background:linear-gradient(180deg,rgba(59,130,246,.05),transparent),var(--panel);border:1px solid var(--border);border-radius:12px;padding:16px;margin-bottom:12px;overflow-x:auto}
+.brief-diagram .brief-label{color:var(--accent);margin-bottom:12px}
+.brief-diagram svg{display:block;width:100%;height:auto;max-width:560px;margin:0 auto}
+.diag-cap{font-size:.72rem;color:var(--muted);text-align:center;margin-top:10px;line-height:1.5}
+.brief-svg-node{transition:opacity .3s}
+@keyframes dashFlow{to{stroke-dashoffset:-16}}
+.flowline{stroke-dasharray:5 4;animation:dashFlow 1s linear infinite}
+.brief-card.kn{border-left-color:#818cf8}
+.brief-card.kn .brief-label{color:#818cf8}
+.brief-card.home{border-left-color:var(--green)}
+.brief-card.home .brief-label{color:var(--green)}
+.brief-card .kn-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:1px;color:#818cf8;border:1px solid rgba(129,140,248,.35);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+/* ─── GLOSSARIO ─── */
+.gloss-search{width:100%;padding:13px 16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .15s;margin-bottom:10px}
+.gloss-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
+.gloss-count{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
+#gloss-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){#gloss-list{grid-template-columns:1fr}}
+.gloss-item{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:9px;padding:12px 15px;animation:fadeUp .3s ease both}
+.gloss-term{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--cyan);margin-bottom:5px}
+.gloss-def{font-size:.82rem;line-height:1.55;color:var(--text)}
+.gloss-empty{color:var(--muted);font-size:.86rem;padding:24px;text-align:center;grid-column:1/-1}
+/* hint sui moduli bloccati */
+.mod-lock-hint{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--muted);line-height:1.35;margin-top:7px;border-top:1px dashed var(--border);padding-top:5px}
+.mod-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
 /* ─── ACCESSIBILITÀ MOVIMENTO ─── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
@@ -467,6 +529,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="nav-btn" id="nb-lab"     onclick="showView('lab')"><span class="nb-ico">⚗️</span><span class="nb-txt">Lab</span></button>
     <button class="nav-btn" id="nb-cal"     onclick="showView('cal')"><span class="nb-ico">📅</span><span class="nb-txt">Calendario</span></button>
     <button class="nav-btn" id="nb-schemas" onclick="showView('schemas')"><span class="nb-ico">📚</span><span class="nb-txt">Schemi</span></button>
+    <button class="nav-btn" id="nb-gloss" onclick="showView('gloss')"><span class="nb-ico">📖</span><span class="nb-txt">Glossario</span></button>
   </div>
   <div class="nav-xp">
     <span class="nav-lv" id="nav-lv">LV1</span>
@@ -748,6 +811,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   <div id="schema-content"></div>
 </div>
 
+<!-- ══════════════ GLOSSARIO ══════════════ -->
+<div class="view" id="view-gloss">
+  <div class="sec-title">Glossario CCNA</div>
+  <input class="gloss-search" id="gloss-search" type="search" placeholder="Cerca un termine… es. VLAN, DORA, OSPF, MAC" oninput="renderGlossary(this.value)" aria-label="Cerca nel glossario" autocomplete="off">
+  <div class="gloss-count" id="gloss-count"></div>
+  <div id="gloss-list"></div>
+</div>
+
 <!-- ══════════════ LEVEL PLAYER ══════════════ -->
 <div class="view" id="view-play">
   <div class="play-wrap">
@@ -855,6 +926,7 @@ function showView(v){
   if(v==='lab')  {initOsi();initSubnet();initCli();initPacket();initVlan();initLabTopics();}
   if(v==='cal') renderCalendar();
   if(v==='schemas') renderSchema('osi');
+  if(v==='gloss') renderGlossary((_id('gloss-search')||{}).value||'');
 }
 
 // ══════════════════════════════════════
@@ -880,6 +952,8 @@ const MODS=[
   {id:'boss1',tier:2,icon:'💀',title:'BOSS: Subnet Gauntlet',sub:'10 sfide in 5 minuti',xp:200,req:['subnetting'],type:'boss',game:'subnet'},
   {id:'switching',tier:3,icon:'🔀',title:'Switching & Ethernet',sub:'MAC, CAM table, STP',xp:100,req:['osi_mod'],type:'normal',game:'osi'},
   {id:'vlan_mod',tier:3,icon:'🏢',title:'VLANs & 802.1Q',sub:'Access, trunk, inter-VLAN',xp:110,req:['switching','boss1'],type:'normal',game:'vlan'},
+  {id:'wifi_mod',tier:3,icon:'📡',title:'Wireless & Wi-Fi',sub:'AP, WLC, SSID, WPA2/3',xp:100,req:['switching'],type:'normal',game:'ailab'},
+  {id:'redun_mod',tier:3,icon:'♻️',title:'Ridondanza L2/L3',sub:'STP, EtherChannel, HSRP',xp:120,req:['vlan_mod'],type:'normal',game:'ailab'},
   {id:'routing_s',tier:4,icon:'🗺️',title:'Routing statico',sub:'Route table, default gw',xp:100,req:['ip_addr'],type:'normal',game:'cli'},
   {id:'ospf_mod',tier:4,icon:'🌐',title:'OSPF',sub:'Link-state, SPF, aree',xp:130,req:['routing_s','vlan_mod'],type:'normal',game:'ailab'},
   {id:'eigrp_mod',tier:4,icon:'⚡',title:'EIGRP',sub:'Hybrid, DUAL, Cisco',xp:120,req:['routing_s'],type:'normal',game:'cli'},
@@ -891,6 +965,7 @@ const MODS=[
   {id:'ipv6_mod',tier:6,icon:'6️⃣',title:'IPv6',sub:'128-bit, SLAAC, NDP',xp:130,req:['subnetting'],type:'normal',game:'ailab'},
   {id:'wan_mod',tier:6,icon:'🌍',title:'WAN & VPN',sub:'MPLS, GRE, IPSec',xp:120,req:['ospf_mod'],type:'normal',game:'ailab'},
   {id:'auto_mod',tier:6,icon:'🤖',title:'Network Automation',sub:'SDN, REST, Python',xp:140,req:['boss2'],type:'normal',game:'ailab'},
+  {id:'ipserv_mod',tier:6,icon:'🛎️',title:'Servizi IP',sub:'DHCP, DNS, NTP, SNMP, QoS',xp:120,req:['routing_s','nat_mod'],type:'normal',game:'ailab'},
   {id:'ccna_cert',tier:7,icon:'🏆',title:'CCNA 200-301 Sim',sub:'120 domande — 120 min',xp:500,req:['boss1','boss2','boss3','ipv6_mod','wan_mod'],type:'cert',game:'quiz'},
 ];
 // ensure modules
@@ -930,6 +1005,15 @@ function renderTree(){
       d.innerHTML=badge+'<div class="mod-icon">'+mod.icon+'</div><div class="mod-title">'+mod.title+'</div><div class="mod-sub">'+mod.sub+'</div><div class="mod-xp">+'+mod.xp+' XP</div><div class="mod-pbar"><div class="mod-pfill" style="width:'+(st==='done'?100:prog)+'%"></div></div>';
       if(st!=='locked'){
         d.onclick=()=>launchModuleGame(mod);
+        d.tabIndex=0;d.setAttribute('role','button');
+        d.setAttribute('aria-label',mod.title+' — '+mod.sub+(st==='done'?' (completato)':''));
+        d.onkeydown=(e)=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();launchModuleGame(mod);}};
+      }else{
+        const need=mod.req.filter(r=>!(G.modules[r]&&G.modules[r].completed)).map(r=>{const rm=MODS.find(x=>x.id===r);return rm?rm.title:r;});
+        const txt=need.length?'Serve: '+need.join(', '):'Bloccato';
+        d.title='🔒 '+txt;
+        d.setAttribute('aria-label',mod.title+' — bloccato. '+txt);
+        const hint=document.createElement('div');hint.className='mod-lock-hint';hint.textContent=txt;d.appendChild(hint);
       }
       row.appendChild(d);
     });
@@ -968,8 +1052,9 @@ function completeModule(id){
 // ══════════════════════════════════════
 const TOPICS=[
   'OSI & TCP/IP Model','IP Addressing & Subnetting','VLANs & Switching',
+  'Wireless (Wi-Fi)','Ridondanza (STP/HSRP)',
   'Routing (OSPF, EIGRP, RIP)','NAT & PAT','ACLs','WAN & VPN',
-  'Network Security','IPv6','Network Automation & SDN',
+  'Network Security','Servizi IP (DHCP/DNS)','IPv6','Network Automation & SDN',
 ];
 const MODE_CFG={practice:{q:10,t:60,mult:1},speed:{q:15,t:20,mult:1.5},hardcore:{q:10,t:30,mult:2},exam:{q:30,t:90,mult:1.2}};
 let quizTopic=TOPICS[0],quizMode='practice',quizState={};
@@ -1221,6 +1306,32 @@ auto_mod:[
 // Ogni lab interattivo abbinato a UN SOLO modulo (niente ripetizioni)
 const LABMAP={osi_mod:'osi',tcpip_mod:'packet',subnetting:'subnet',vlan_mod:'vlan',routing_s:'cli'};
 // Aggregazioni per BOSS e certificazione finale
+// ── Banche domande dei moduli aggiuntivi (blueprint CCNA) ──
+QBANK.wifi_mod=[
+ {q:"In una rete wireless aziendale, qual è il ruolo del WLC (Wireless LAN Controller)?",o:["Gestisce e configura centralmente decine di Access Point","Sostituisce il router di bordo","Assegna gli indirizzi MAC ai client","Cifra il traffico via IPSec"],c:0,e:"Il WLC gestisce in modo centralizzato molti AP 'lightweight': canali, potenza, SSID e roaming, senza configurarli uno per uno."},
+ {q:"Quale banda Wi-Fi offre in genere più velocità ma minore portata?",o:["5 GHz","2.4 GHz","900 MHz","60 GHz sempre"],c:0,e:"La banda 5 GHz ha più canali non sovrapposti e velocità maggiori, ma penetra meno pareti rispetto ai 2.4 GHz."},
+ {q:"Cos'è un SSID?",o:["Il nome identificativo di una rete wireless","L'indirizzo MAC dell'Access Point","La chiave di cifratura WPA2","Il canale radio utilizzato"],c:0,e:"L'SSID (Service Set Identifier) è il nome della WLAN che i client vedono e a cui si associano."},
+ {q:"Quale standard di sicurezza wireless è il più robusto tra questi?",o:["WPA3","WPA2","WEP","Rete aperta"],c:0,e:"WPA3 è il più recente e sicuro; WEP è obsoleto e facilmente violabile, la rete aperta non ha cifratura."},
+ {q:"Nei canali 2.4 GHz, quali sono i tre canali che non si sovrappongono?",o:["1, 6, 11","1, 2, 3","2, 7, 12","1, 5, 9"],c:0,e:"Su 2.4 GHz i canali 1, 6 e 11 non si sovrappongono, riducendo le interferenze tra AP vicini."},
+ {q:"Cosa descrive un AP in modalità 'autonoma' (autonomous)?",o:["Un AP che si configura da solo senza WLC","Un AP che funziona solo via cavo","Un AP che instrada pacchetti IP","Un AP senza SSID"],c:0,e:"Un AP autonomo ha la propria configurazione locale; un AP 'lightweight' dipende invece dal WLC."}
+];
+QBANK.redun_mod=[
+ {q:"A cosa serve lo Spanning Tree Protocol (STP) in una rete switched?",o:["A prevenire i loop di livello 2 bloccando i percorsi ridondanti","Ad accelerare il routing IP","A cifrare i frame Ethernet","Ad assegnare le VLAN automaticamente"],c:0,e:"STP (802.1D/RSTP) evita i loop L2 mettendo in blocco le porte ridondanti, lasciando un solo percorso attivo."},
+ {q:"Cosa fa EtherChannel?",o:["Aggrega più link fisici in un unico link logico","Crea una VLAN per ogni porta","Cifra il traffico tra due switch","Converte rame in fibra"],c:0,e:"EtherChannel (LACP/PAgP) unisce più link in uno logico: più banda e ridondanza, e STP lo vede come un solo collegamento."},
+ {q:"Qual è lo scopo di HSRP?",o:["Fornire un gateway predefinito ridondante e virtuale","Assegnare indirizzi IP ai client","Filtrare il traffico per porta","Sincronizzare l'orario dei router"],c:0,e:"HSRP (First Hop Redundancy) fa condividere a due router un IP virtuale: se l'attivo cade, lo standby subentra come gateway."},
+ {q:"In HSRP, quale router inoltra normalmente il traffico?",o:["Il router Active","Il router Standby","Entrambi contemporaneamente","Nessuno, serve un WLC"],c:0,e:"L'Active inoltra il traffico verso il gateway virtuale; lo Standby monitora e subentra solo se l'Active diventa irraggiungibile."},
+ {q:"Quale versione di Spanning Tree converge più rapidamente?",o:["RSTP (802.1w)","STP classico (802.1D)","Nessuna, sono identiche","Solo con EtherChannel"],c:0,e:"RSTP (Rapid STP, 802.1w) converge in pochi secondi rispetto ai ~30-50s dello STP classico."},
+ {q:"Il protocollo LACP appartiene a quale tecnologia?",o:["EtherChannel (aggregazione di link)","HSRP","DHCP","OSPF"],c:0,e:"LACP (802.3ad) è lo standard aperto per negoziare l'aggregazione di link in un EtherChannel; PAgP è l'equivalente Cisco."}
+];
+QBANK.ipserv_mod=[
+ {q:"Qual è la sequenza corretta dello scambio DHCP?",o:["Discover → Offer → Request → Ack (DORA)","Request → Offer → Ack → Discover","Sync → Ack → Lease → Renew","Hello → Offer → Bind → Ack"],c:0,e:"Il client DHCP segue DORA: Discover (broadcast), Offer (server propone un IP), Request, Ack (conferma del lease)."},
+ {q:"A cosa serve il DNS?",o:["A tradurre i nomi di dominio in indirizzi IP","A cifrare il traffico web","Ad assegnare gli indirizzi IP ai client","A sincronizzare l'orario"],c:0,e:"Il DNS risolve nomi (es. kuehne-nagel.com) negli indirizzi IP necessari per instradare i pacchetti. Porta UDP/TCP 53."},
+ {q:"Quale protocollo sincronizza l'orologio dei dispositivi di rete?",o:["NTP","SNMP","Syslog","DHCP"],c:0,e:"NTP (Network Time Protocol, UDP 123) mantiene l'orario coerente: fondamentale per log, certificati e correlazione degli eventi."},
+ {q:"A cosa serve Syslog?",o:["A raccogliere e centralizzare i messaggi di log dei dispositivi","Ad assegnare gli IP","A creare le VLAN","A cifrare le password"],c:0,e:"Syslog (UDP 514) invia i messaggi di log a un server centrale, con livelli di severità da 0 (emergency) a 7 (debug)."},
+ {q:"Quale protocollo permette di monitorare i dispositivi (CPU, interfacce, traffico)?",o:["SNMP","NTP","DNS","ARP"],c:0,e:"SNMP (UDP 161/162) consente a un NMS di interrogare e ricevere trap dai dispositivi per il monitoraggio."},
+ {q:"Cosa fa la QoS (Quality of Service) in rete?",o:["Dà priorità al traffico sensibile come voce e video","Assegna gli indirizzi IP","Cifra i pacchetti","Blocca le porte inutilizzate"],c:0,e:"La QoS classifica e prioritizza il traffico (es. VoIP) per garantire bassa latenza quando la banda è satura."},
+ {q:"Su quali porte lavora tipicamente il DHCP?",o:["UDP 67 (server) e 68 (client)","TCP 80 e 443","UDP 53","TCP 22"],c:0,e:"Il server DHCP ascolta su UDP 67, il client su UDP 68; lo scambio iniziale avviene in broadcast."}
+];
 const AGG={boss1:['subnetting','ip_addr'],boss2:['routing_s','ospf_mod','eigrp_mod'],boss3:['acl_mod','nat_mod','ssh_sec']};
 const ALL_BANK_IDS=Object.keys(QBANK);
 // Argomenti del quiz libero -> banchi moduli
@@ -1228,11 +1339,14 @@ const TOPIC_MAP={
  'OSI & TCP/IP Model':['osi_mod','tcpip_mod'],
  'IP Addressing & Subnetting':['binary','ip_addr','subnetting'],
  'VLANs & Switching':['switching','vlan_mod'],
+ 'Wireless (Wi-Fi)':['wifi_mod'],
+ 'Ridondanza (STP/HSRP)':['redun_mod'],
  'Routing (OSPF, EIGRP, RIP)':['routing_s','ospf_mod','eigrp_mod'],
  'NAT & PAT':['nat_mod'],
  'ACLs':['acl_mod'],
  'WAN & VPN':['wan_mod'],
  'Network Security':['ssh_sec'],
+ 'Servizi IP (DHCP/DNS)':['ipserv_mod'],
  'IPv6':['ipv6_mod'],
  'Network Automation & SDN':['auto_mod'],
 };
@@ -2125,6 +2239,36 @@ const LEVELS={
    {n:"REST",c:"API / Protocollo"},{n:"GET / POST / PUT / DELETE",c:"API / Protocollo"},
    {n:"Ansible",c:"Strumento"},{n:"Python",c:"Strumento"},
    {n:"Control plane centralizzato",c:"Concetto SDN"},{n:"Northbound / Southbound API",c:"Concetto SDN"}
+ ]}},
+ wifi_mod:{engine:"match",data:{instruction:"A quale elemento del wireless si riferisce ciascuna descrizione?",cats:["SSID","Access Point","WLC","Sicurezza"],items:[
+   {n:"Nome della rete Wi-Fi visibile ai client",c:"SSID"},
+   {n:"Diffonde il segnale radio 802.11",c:"Access Point"},
+   {n:"Gestisce centralmente molti AP lightweight",c:"WLC"},
+   {n:"WPA3 / WPA2 proteggono l'accesso",c:"Sicurezza"},
+   {n:"Il client si associa a questo identificativo",c:"SSID"},
+   {n:"Canali 1-6-11 sulla banda 2.4 GHz",c:"Access Point"},
+   {n:"Imposta canali e potenza degli AP da un punto unico",c:"WLC"},
+   {n:"WEP è obsoleto e insicuro",c:"Sicurezza"}
+ ]}},
+ redun_mod:{engine:"match",data:{instruction:"A quale tecnologia di ridondanza appartiene ciascuna caratteristica?",cats:["STP","EtherChannel","HSRP"],items:[
+   {n:"Previene i loop L2 bloccando i link ridondanti",c:"STP"},
+   {n:"Aggrega più link fisici in uno logico",c:"EtherChannel"},
+   {n:"Gateway virtuale ridondante (Active/Standby)",c:"HSRP"},
+   {n:"RSTP (802.1w) converge in pochi secondi",c:"STP"},
+   {n:"Usa LACP o PAgP per negoziare il bundle",c:"EtherChannel"},
+   {n:"Due router condividono un IP virtuale",c:"HSRP"},
+   {n:"Elegge un Root Bridge",c:"STP"},
+   {n:"Somma la banda di più collegamenti",c:"EtherChannel"}
+ ]}},
+ ipserv_mod:{engine:"match",data:{instruction:"Quale servizio IP corrisponde a ciascuna funzione?",cats:["DHCP","DNS","NTP","Syslog","SNMP"],items:[
+   {n:"Assegna automaticamente IP, mask e gateway (DORA)",c:"DHCP"},
+   {n:"Traduce i nomi di dominio in indirizzi IP",c:"DNS"},
+   {n:"Sincronizza l'orario dei dispositivi",c:"NTP"},
+   {n:"Raccoglie i messaggi di log centralizzati",c:"Syslog"},
+   {n:"Monitora CPU, interfacce e traffico (trap)",c:"SNMP"},
+   {n:"Porte UDP 67 e 68",c:"DHCP"},
+   {n:"Porta UDP/TCP 53",c:"DNS"},
+   {n:"Porta UDP 123",c:"NTP"}
  ]}}
 };
 // ══════════════════════════════════════
@@ -2151,7 +2295,54 @@ const BRIEF={
  ipv6_mod:{real:"Con IPv4 in esaurimento, le reti moderne adottano IPv6: indirizzi enormi e autoconfigurazione (SLAAC).",key:["128 bit · 8 gruppi da 16 bit (hex)","Comprimi: zeri iniziali via · <b>::</b> una sola volta","2000::/3 global · FE80::/10 link-local · ::1 loopback","SLAAC + NDP (sostituisce ARP) · subnet /64"],ex:"2001:0db8:0000:...:0001 → 2001:db8::1"},
  wan_mod:{real:"Per collegare due sedi lontane in sicurezza, l'azienda crea una VPN IPSec su Internet invece di una costosa linea dedicata.",key:["VPN site-to-site / remote access","<b>IPSec</b> (L3): ESP cifra · AH autentica","GRE incapsula ma non cifra · MPLS = label switching","Leased line = circuito dedicato · PPP = seriale con CHAP"],ex:"IPSec opera a L3 e cifra i pacchetti IP end-to-end"},
  auto_mod:{real:"Invece di configurare 100 switch a mano, un team usa Python/Ansible per applicare le stesse config in modo automatico e ripetibile.",key:["<b>SDN</b> separa control plane e data plane","REST usa HTTP: GET/POST/PUT/DELETE","JSON/YAML/XML = formati dati","Ansible (agentless, YAML) · Python (Netmiko)"],ex:"GET 200 = OK   ·   IaC = infrastruttura come codice versionato"},
- ccna_cert:{real:"Simulazione finale: metti alla prova tutto ciò che hai imparato, come nell'esame reale CCNA 200-301.",key:["6 aree: Fondamenti · Accesso · Connettività IP · Servizi IP · Sicurezza · Automazione","120 minuti · circa 100-120 domande","Serve circa 825/1000 per passare","Domande a scelta multipla, drag-and-drop e simulazioni"],ex:"Ripassa: subnetting · OSPF · VLAN · ACL · NAT · IPv6"}
+ ccna_cert:{real:"Simulazione finale: metti alla prova tutto ciò che hai imparato, come nell'esame reale CCNA 200-301.",key:["6 aree: Fondamenti · Accesso · Connettività IP · Servizi IP · Sicurezza · Automazione","120 minuti · circa 100-120 domande","Serve circa 825/1000 per passare","Domande a scelta multipla, drag-and-drop e simulazioni"],ex:"Ripassa: subnetting · OSPF · VLAN · ACL · NAT · IPv6"},
+ wifi_mod:{real:"Il Wi-Fi collega senza cavi PC, telefoni e scanner: gli Access Point diffondono il segnale e un WLC li gestisce tutti da un punto solo.",key:["<b>SSID</b> = nome della rete · <b>AP</b> = diffonde il segnale","<b>WLC</b> = gestione centralizzata di molti AP lightweight","2.4 GHz più portata · 5 GHz più velocità · canali 1-6-11","Sicurezza: <b>WPA3</b> > WPA2 ≫ WEP (obsoleto)"],ex:"AP autonomo = config locale · AP lightweight = dipende dal WLC"},
+ redun_mod:{real:"Una rete che non deve mai fermarsi ha percorsi e gateway duplicati: STP evita i loop, EtherChannel somma i link, HSRP duplica il gateway.",key:["<b>STP</b> (802.1D/RSTP) blocca i link ridondanti → niente loop L2","<b>EtherChannel</b> (LACP/PAgP) = più link in uno logico","<b>HSRP</b> = gateway virtuale Active/Standby","RSTP (802.1w) converge in secondi"],ex:"HSRP: due router, un IP virtuale · se l'Active cade, subentra lo Standby"},
+ ipserv_mod:{real:"Dietro ogni rete funzionante ci sono servizi 'invisibili': DHCP assegna gli IP, DNS risolve i nomi, NTP tiene l'orario, Syslog/SNMP monitorano tutto.",key:["<b>DHCP</b>: Discover → Offer → Request → Ack (<b>DORA</b>) · UDP 67/68","<b>DNS</b>: nome → IP · porta 53","<b>NTP</b>: sincronizza l'orario · UDP 123","<b>Syslog</b> (514) log centralizzati · <b>SNMP</b> (161/162) monitoraggio · <b>QoS</b> = priorità a voce/video"],ex:"DORA: il client trova il server, riceve l'offerta, la richiede e ottiene il lease"}
+};
+// ══════════════════════════════════════
+// APPROFONDIMENTI · esempi Kuehne+Nagel (logistica) + vita quotidiana
+// ══════════════════════════════════════
+const BRIEF_EXTRA={
+ net_basics:{kn:"Nel magazzino di un hub logistico gli scanner RF dei picker, i PC dei reparti e le stampanti di etichette sono tutti su una <b>LAN</b> collegata agli switch. Per raggiungere il datacenter centrale o il sistema di gestione magazzino (WMS) in cloud, il traffico esce dal router sulla <b>WAN</b> aziendale.",home:"A casa TV, telefono e laptop sul Wi-Fi formano una piccola LAN. Quando guardi un film in streaming, i dati escono dal router verso la WAN del tuo provider Internet."},
+ binary:{kn:"Ogni scanner che colleghi in magazzino riceve un IP che, sotto, è una sequenza di bit: capire i bit ti dice <b>quanti dispositivi</b> entrano nella subnet di un reparto prima di doverla ampliare.",home:"Il telefono mostra <b>192.168.1.42</b>, ma il router ragiona in binario per decidere chi fa parte della tua rete di casa e chi no."},
+ osi_mod:{kn:"Quando un operatore spara un barcode, il dato sale i livelli OSI: l'app WMS (L7) → TCP (L4) → IP verso il server (L3) → Wi-Fi/Ethernet fino allo switch (L2). Se il palmare 'non si connette', l'OSI ti dice <b>a che livello</b> cercare il guasto.",home:"Aprire un sito: il browser (L7) usa TCP (L4), l'IP instrada il pacchetto (L3) e il Wi-Fi trasporta i frame fino al router (L2)."},
+ tcpip_mod:{kn:"L'invio di una distinta di spedizione al server centrale usa <b>TCP</b>: handshake e ritrasmissioni garantiscono che nessuna riga si perda. Una telefonata VoIP tra due filiali usa invece <b>UDP</b>, dove conta la velocità.",home:"Scaricare un allegato = TCP (nessun byte perso). Una videochiamata = UDP: meglio perdere un fotogramma che accumulare ritardo."},
+ ip_addr:{kn:"Ogni sede usa indirizzi <b>privati</b> (es. 10.x per i magazzini); il NAT li traduce per uscire su Internet. Così migliaia di dispositivi nel mondo riusano gli stessi range senza conflitti.",home:"Il router di casa ti assegna 192.168.1.x (privato). Verso Internet tutti i tuoi dispositivi condividono <b>un solo</b> IP pubblico."},
+ subnetting:{kn:"Il /24 di una filiale viene diviso in subnet: <b>Magazzino</b> (scanner), <b>Uffici</b>, <b>VoIP</b>, <b>Gestione</b>. Il subnetting isola i reparti e dimensiona ogni rete sul numero reale di dispositivi.",home:"Separare la 'rete di famiglia' dalla 'rete ospiti/IoT' del router è, di fatto, creare due subnet."},
+ boss1:{kn:"Progettazione IP di una <b>nuova filiale</b>: quante subnet servono per magazzino, uffici e telefoni, e con quale block size, senza sprecare indirizzi.",home:"Pianificare quanti indirizzi riservare a ogni zona di casa (smart-home, ospiti, lavoro) prima di configurare il router."},
+ switching:{kn:"Lo switch di magazzino impara i <b>MAC</b> dei palmari nella tabella CAM e inoltra i frame solo alla porta giusta; lo <b>STP</b> evita i loop quando gli armadi sono cablati in ridondanza per non fermare mai le operazioni.",home:"Il tuo switch/router impara i MAC dei dispositivi per non 'gridare' ogni pacchetto a tutti in casa."},
+ vlan_mod:{kn:"Su un unico switch di filiale, scanner del magazzino (<b>VLAN 10</b>), PC uffici (<b>VLAN 20</b>), telefoni VoIP (<b>VLAN 30</b>) e Wi-Fi ospiti (<b>VLAN 99</b>) restano reti separate: più sicurezza e ordine, senza raddoppiare i cavi.",home:"La <b>rete ospiti</b> del tuo router è una VLAN: gli ospiti navigano ma non vedono la tua stampante o il NAS."},
+ routing_s:{kn:"Una piccola filiale con topologia stabile usa una <b>rotta statica di default</b> verso il router che porta alla WAN: semplice, prevedibile, facile da documentare.",home:"Il tuo router ha una sola regola di default: 'tutto ciò che non è locale → mandalo al provider'."},
+ ospf_mod:{kn:"Tra i datacenter regionali e le sedi maggiori, <b>OSPF</b> ricalcola da solo il percorso migliore: se un collegamento tra due hub cade, il traffico delle spedizioni devia in automatico senza intervento umano.",home:"È come un navigatore che ricalcola il percorso quando trova traffico o una strada chiusa."},
+ eigrp_mod:{kn:"Sulle dorsali Cisco, <b>EIGRP</b> tiene già pronto un percorso di backup verificato: se un link si interrompe la riconvergenza è quasi istantanea e le operazioni non si fermano.",home:"Come avere in testa una strada alternativa <b>prima</b> ancora di incontrare l'ingorgo."},
+ boss2:{kn:"Configurare il routing dinamico <b>OSPF</b> sui router che collegano due sedi, come in un vero cambio di topologia di rete aziendale.",home:"Impostare due percorsi verso Internet (fibra + backup 4G) e lasciare che la rete scelga il migliore."},
+ acl_mod:{kn:"Un'<b>ACL</b> permette solo agli host autorizzati di raggiungere il server WMS/gestionale sulla porta applicativa e blocca il resto: il reparto magazzino non può toccare i sistemi amministrativi.",home:"Il parental control o il blocco di un servizio sul router di casa è una ACL semplificata."},
+ nat_mod:{kn:"Centinaia di scanner e PC di una filiale escono su Internet con pochi IP pubblici grazie al <b>PAT</b>; un portale di tracking esposto usa invece un <b>NAT statico 1:1</b>.",home:"Tutti i tuoi dispositivi navigano dietro un unico IP pubblico: è il PAT del router di casa."},
+ ssh_sec:{kn:"Prima di mettere in rete uno switch di filiale, l'IT lo mette in sicurezza: <b>SSH</b> al posto di Telnet, password cifrate e <b>port-security</b> per impedire che qualcuno colleghi un dispositivo abusivo a una porta del magazzino.",home:"Cambiare la password di default del router e disattivare l'accesso remoto in chiaro è esattamente la stessa idea."},
+ boss3:{kn:"<b>Security audit</b> di una filiale: individua porte aperte, servizi insicuri e Telnet in chiaro, e associa la contromisura giusta.",home:"Fare il 'giro di controllo' di casa: porte non chiuse, password deboli, accessi da sistemare."},
+ ipv6_mod:{kn:"Con la crescita di sensori, telecamere e scanner IoT nei magazzini, <b>IPv6</b> offre indirizzi praticamente illimitati e autoconfigurazione (SLAAC), superando l'esaurimento di IPv4.",home:"Il tuo provider probabilmente ti assegna già un indirizzo IPv6 accanto a quello IPv4, senza che tu te ne accorga."},
+ wan_mod:{kn:"Per collegare in sicurezza una nuova filiale alla rete globale si crea una <b>VPN IPSec</b> su Internet invece di una costosa linea dedicata; le sedi principali restano su <b>MPLS</b>.",home:"La VPN aziendale che usi in smart working crea un <b>tunnel cifrato</b> tra casa tua e l'ufficio."},
+ auto_mod:{kn:"Con centinaia di sedi, l'IT non configura gli switch a mano: script <b>Python/Ansible</b> applicano le stesse impostazioni ovunque, in modo ripetibile e verificabile.",home:"Le 'scene' e automazioni della tua smart-home sono lo stesso principio: configuri una volta, la regola si applica sempre uguale."},
+ ccna_cert:{kn:"Con il <b>CCNA</b> capisci e gestisci la rete che tiene in piedi le operazioni logistiche: dal palmare del magazzino fino al datacenter e alla WAN globale.",home:"Le stesse basi ti fanno padrone della rete di casa: dal Wi-Fi lento al port forwarding per il gaming."},
+ wifi_mod:{kn:"In un magazzino, gli scanner RF dei picker si muovono tra le corsie restando sempre connessi: decine di <b>Access Point</b> gestiti da un <b>WLC</b> garantiscono copertura e <b>roaming</b> senza interruzioni durante la raccolta ordini.",home:"Il tuo router di casa è un piccolo AP: cambiare canale (1-6-11) o passare ai 5 GHz risolve i rallentamenti quando i vicini affollano la stessa frequenza."},
+ redun_mod:{kn:"In una filiale la rete non può fermare le spedizioni: gli switch degli armadi sono collegati in doppio (STP evita i loop), i link verso il core sono aggregati con <b>EtherChannel</b> e il gateway è duplicato con <b>HSRP</b>. Se un apparato si guasta, le operazioni continuano.",home:"Avere fibra + backup 4G sul router, con passaggio automatico se la linea principale cade, è la stessa idea di ridondanza dell'HSRP."},
+ ipserv_mod:{kn:"Quando un nuovo palmare si accende in magazzino, il <b>DHCP</b> gli dà l'IP, il <b>DNS</b> gli fa trovare il server WMS per nome, l'<b>NTP</b> allinea l'orario (fondamentale per tracciare gli eventi di spedizione) e <b>SNMP/Syslog</b> avvisano l'IT se qualcosa non va.",home:"Il router di casa fa da server DHCP e DNS per i tuoi dispositivi: per questo si connettono da soli senza configurare nulla a mano."}
+};
+// Ricostruzioni grafiche (SVG inline, tema scuro) per i moduli più visivi
+const DIAGRAM={
+ net_basics:{cap:"I dispositivi locali si parlano tramite lo switch (LAN). Per uscire verso altre sedi o Internet passano dal router alla WAN.",svg:`<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><rect x="6" y="20" width="212" height="168" rx="12" fill="none" stroke="#1f2d3d" stroke-dasharray="4 4"/><text x="18" y="40" fill="#64748b" font-size="11">LAN · sede / casa</text><text x="52" y="84" font-size="24" text-anchor="middle">💻</text><text x="108" y="84" font-size="24" text-anchor="middle">📱</text><text x="164" y="84" font-size="24" text-anchor="middle">🖨️</text><g stroke="#334155" stroke-width="2"><line x1="52" y1="92" x2="92" y2="122"/><line x1="108" y1="92" x2="110" y2="122"/><line x1="164" y1="92" x2="128" y2="122"/></g><rect x="60" y="122" width="100" height="34" rx="7" fill="#0d1117" stroke="#3b82f6"/><text x="110" y="144" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH · L2</text><rect x="250" y="98" width="88" height="42" rx="9" fill="#0d1117" stroke="#f59e0b"/><text x="294" y="123" fill="#f59e0b" font-size="12" text-anchor="middle">ROUTER · L3</text><line x1="160" y1="139" x2="250" y2="121" stroke="#3b82f6" stroke-width="2.5" class="flowline"/><ellipse cx="470" cy="118" rx="76" ry="46" fill="#0d1117" stroke="#06b6d4"/><text x="470" y="114" fill="#06b6d4" font-size="14" text-anchor="middle">WAN</text><text x="470" y="132" fill="#64748b" font-size="10" text-anchor="middle">Internet · MPLS</text><line x1="338" y1="119" x2="396" y2="119" stroke="#06b6d4" stroke-width="2.5" class="flowline"/></svg>`},
+ osi_mod:{cap:"I dati scendono i 7 livelli sul mittente e risalgono sul destinatario. Ogni livello ha la sua PDU.",svg:`<svg viewBox="0 0 560 316" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Incapsulamento ↓ — ogni layer aggiunge un header</text><g><rect x="10" y="26" width="470" height="30" rx="6" fill="#0d1117" stroke="#3b82f6"/><text x="22" y="45" fill="#e2e8f0" font-size="12">7 · Application</text><text x="200" y="45" fill="#64748b" font-size="11">HTTP · DNS · DHCP</text><rect x="10" y="66" width="470" height="30" rx="6" fill="#0d1117" stroke="#4d7bd6"/><text x="22" y="85" fill="#e2e8f0" font-size="12">6 · Presentation</text><text x="200" y="85" fill="#64748b" font-size="11">TLS · codifica</text><rect x="10" y="106" width="470" height="30" rx="6" fill="#0d1117" stroke="#3f8fce"/><text x="22" y="125" fill="#e2e8f0" font-size="12">5 · Session</text><text x="200" y="125" fill="#64748b" font-size="11">sessioni</text><rect x="10" y="146" width="470" height="30" rx="6" fill="#0d1117" stroke="#22a5c6"/><text x="22" y="165" fill="#e2e8f0" font-size="12">4 · Transport</text><text x="200" y="165" fill="#64748b" font-size="11">TCP / UDP</text><text x="392" y="165" fill="#06b6d4" font-size="11">Segmento</text><rect x="10" y="186" width="470" height="30" rx="6" fill="#0d1117" stroke="#06b6d4"/><text x="22" y="205" fill="#e2e8f0" font-size="12">3 · Network</text><text x="200" y="205" fill="#64748b" font-size="11">IP · routing</text><text x="392" y="205" fill="#06b6d4" font-size="11">Pacchetto</text><rect x="10" y="226" width="470" height="30" rx="6" fill="#0d1117" stroke="#10b981"/><text x="22" y="245" fill="#e2e8f0" font-size="12">2 · Data Link</text><text x="200" y="245" fill="#64748b" font-size="11">Ethernet · MAC</text><text x="392" y="245" fill="#10b981" font-size="11">Frame</text><rect x="10" y="266" width="470" height="30" rx="6" fill="#0d1117" stroke="#64748b"/><text x="22" y="285" fill="#e2e8f0" font-size="12">1 · Physical</text><text x="200" y="285" fill="#64748b" font-size="11">cavo · onde</text><text x="392" y="285" fill="#94a3b8" font-size="11">Bit</text></g><line x1="498" y1="30" x2="498" y2="292" stroke="#3b82f6" stroke-width="2" marker-end="" class="flowline"/><text x="512" y="165" fill="#3b82f6" font-size="10" transform="rotate(90 512 165)">DISCESA DATI</text></svg>`},
+ subnetting:{cap:"Un /24 diviso in quattro /26: ogni reparto ha la sua subnet isolata con 62 host utili.",svg:`<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="18" fill="#64748b" font-size="11">192.168.1.0 /24 → 4 subnet /26 · block size 64</text><rect x="10" y="34" width="130" height="46" rx="6" fill="rgba(59,130,246,.10)" stroke="#3b82f6"/><text x="75" y="55" fill="#e2e8f0" font-size="11" text-anchor="middle">.0 – .63</text><text x="75" y="71" fill="#64748b" font-size="9" text-anchor="middle">Magazzino</text><rect x="146" y="34" width="130" height="46" rx="6" fill="rgba(6,182,212,.10)" stroke="#06b6d4"/><text x="211" y="55" fill="#e2e8f0" font-size="11" text-anchor="middle">.64 – .127</text><text x="211" y="71" fill="#64748b" font-size="9" text-anchor="middle">Uffici</text><rect x="282" y="34" width="130" height="46" rx="6" fill="rgba(16,185,129,.10)" stroke="#10b981"/><text x="347" y="55" fill="#e2e8f0" font-size="11" text-anchor="middle">.128 – .191</text><text x="347" y="71" fill="#64748b" font-size="9" text-anchor="middle">VoIP</text><rect x="418" y="34" width="130" height="46" rx="6" fill="rgba(245,158,11,.10)" stroke="#f59e0b"/><text x="483" y="55" fill="#e2e8f0" font-size="11" text-anchor="middle">.192 – .255</text><text x="483" y="71" fill="#64748b" font-size="9" text-anchor="middle">Gestione</text><text x="10" y="104" fill="#10b981" font-size="10">Host utili per subnet: 2⁶ − 2 = 62</text><text x="10" y="122" fill="#64748b" font-size="10">Network = primo indirizzo · Broadcast = ultimo · mask 255.255.255.192</text></svg>`},
+ vlan_mod:{cap:"Un solo switch fisico trasporta più reti logiche. Il trunk 802.1Q porta tutte le VLAN al router (inter-VLAN routing).",svg:`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Un unico switch · reti separate per VLAN</text><rect x="20" y="34" width="150" height="32" rx="7" fill="rgba(239,68,68,.10)" stroke="#ef4444"/><text x="30" y="55" fill="#ef4444" font-size="11">VLAN 10 · Magazzino 📟</text><rect x="20" y="76" width="150" height="32" rx="7" fill="rgba(16,185,129,.10)" stroke="#10b981"/><text x="30" y="97" fill="#10b981" font-size="11">VLAN 20 · Uffici 💻</text><rect x="20" y="118" width="150" height="32" rx="7" fill="rgba(245,158,11,.10)" stroke="#f59e0b"/><text x="30" y="139" fill="#f59e0b" font-size="11">VLAN 30 · VoIP ☎️</text><rect x="215" y="80" width="120" height="40" rx="8" fill="#0d1117" stroke="#3b82f6"/><text x="275" y="105" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH</text><g stroke-width="2.5" fill="none"><path d="M170 50 Q205 70 215 90" stroke="#ef4444"/><path d="M170 92 Q200 96 215 100" stroke="#10b981"/><path d="M170 134 Q200 120 215 110" stroke="#f59e0b"/></g><line x1="335" y1="100" x2="430" y2="100" stroke="#8b5cf6" stroke-width="3" class="flowline"/><text x="382" y="92" fill="#8b5cf6" font-size="9" text-anchor="middle">TRUNK 802.1Q</text><rect x="430" y="80" width="118" height="40" rx="8" fill="#0d1117" stroke="#8b5cf6"/><text x="489" y="100" fill="#8b5cf6" font-size="11" text-anchor="middle">ROUTER</text><text x="489" y="114" fill="#64748b" font-size="9" text-anchor="middle">inter-VLAN</text></svg>`},
+ nat_mod:{cap:"Molti indirizzi privati escono su Internet dietro un solo IP pubblico: è il PAT (NAT overload).",svg:`<svg viewBox="0 0 560 170" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">PAT · molti IP privati → 1 IP pubblico</text><rect x="10" y="30" width="128" height="26" rx="6" fill="#0d1117" stroke="#10b981"/><text x="20" y="47" fill="#10b981" font-size="11">💻 10.0.0.11</text><rect x="10" y="64" width="128" height="26" rx="6" fill="#0d1117" stroke="#10b981"/><text x="20" y="81" fill="#10b981" font-size="11">📱 10.0.0.12</text><rect x="10" y="98" width="128" height="26" rx="6" fill="#0d1117" stroke="#10b981"/><text x="20" y="115" fill="#10b981" font-size="11">🖨️ 10.0.0.13</text><g stroke="#334155" stroke-width="2"><line x1="138" y1="43" x2="220" y2="80" class="flowline"/><line x1="138" y1="77" x2="220" y2="80" class="flowline"/><line x1="138" y1="111" x2="220" y2="80" class="flowline"/></g><rect x="220" y="58" width="112" height="46" rx="9" fill="#0d1117" stroke="#f59e0b"/><text x="276" y="78" fill="#f59e0b" font-size="12" text-anchor="middle">ROUTER</text><text x="276" y="95" fill="#64748b" font-size="10" text-anchor="middle">NAT / PAT</text><text x="360" y="76" fill="#3b82f6" font-size="12">➜ 203.0.113.5</text><text x="360" y="92" fill="#64748b" font-size="10">IP pubblico</text><line x1="332" y1="81" x2="440" y2="81" stroke="#06b6d4" stroke-width="2.5" class="flowline"/><ellipse cx="500" cy="81" rx="52" ry="32" fill="#0d1117" stroke="#06b6d4"/><text x="500" y="86" fill="#06b6d4" font-size="12" text-anchor="middle">Internet</text></svg>`},
+ ospf_mod:{cap:"OSPF usa il percorso a costo minore (verde). Se un link cade, ricalcola e passa al backup (tratteggiato).",svg:`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">OSPF sceglie il percorso migliore e devia se un link cade</text><g stroke-width="3" fill="none"><line x1="84" y1="98" x2="257" y2="62" stroke="#10b981" class="flowline"/><line x1="303" y1="62" x2="476" y2="98" stroke="#10b981" class="flowline"/></g><g stroke-width="2" fill="none" stroke-dasharray="5 5"><line x1="82" y1="124" x2="258" y2="160" stroke="#64748b"/><line x1="302" y1="160" x2="478" y2="124" stroke="#64748b"/></g><circle cx="60" cy="112" r="26" fill="#0d1117" stroke="#3b82f6"/><text x="60" y="117" fill="#06b6d4" font-size="12" text-anchor="middle">R1</text><circle cx="280" cy="52" r="26" fill="#0d1117" stroke="#3b82f6"/><text x="280" y="57" fill="#06b6d4" font-size="12" text-anchor="middle">R2</text><circle cx="280" cy="170" r="26" fill="#0d1117" stroke="#3b82f6"/><text x="280" y="175" fill="#06b6d4" font-size="12" text-anchor="middle">R3</text><circle cx="500" cy="112" r="26" fill="#0d1117" stroke="#3b82f6"/><text x="500" y="117" fill="#06b6d4" font-size="12" text-anchor="middle">R4</text><text x="150" y="48" fill="#10b981" font-size="10">percorso attivo</text><text x="150" y="198" fill="#64748b" font-size="10">percorso di backup</text></svg>`},
+ tcpip_mod:{cap:"TCP apre la connessione con un handshake in 3 passi prima di scambiare dati.",svg:`<svg viewBox="0 0 560 190" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">TCP · apertura connessione (3-way handshake)</text><text x="70" y="42" fill="#06b6d4" font-size="12" text-anchor="middle">CLIENT 💻</text><text x="490" y="42" fill="#f59e0b" font-size="12" text-anchor="middle">SERVER 🖥️</text><line x1="70" y1="50" x2="70" y2="182" stroke="#334155"/><line x1="490" y1="50" x2="490" y2="182" stroke="#334155"/><line x1="70" y1="82" x2="490" y2="102" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="80" fill="#3b82f6" font-size="11" text-anchor="middle">SYN →</text><line x1="490" y1="120" x2="70" y2="140" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="118" fill="#10b981" font-size="11" text-anchor="middle">← SYN-ACK</text><line x1="70" y1="160" x2="490" y2="176" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="158" fill="#3b82f6" font-size="11" text-anchor="middle">ACK → connessione stabilita</text></svg>`},
+ switching:{cap:"Lo switch impara la MAC sorgente su ogni porta (tabella CAM) e da lì inoltra solo alla porta giusta.",svg:`<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Lo switch impara i MAC e inoltra selettivamente</text><text x="60" y="52" font-size="20" text-anchor="middle">💻</text><text x="60" y="70" fill="#64748b" font-size="9" text-anchor="middle">Fa0/1</text><text x="60" y="150" font-size="20" text-anchor="middle">📱</text><text x="60" y="168" fill="#64748b" font-size="9" text-anchor="middle">Fa0/2</text><text x="500" y="52" font-size="20" text-anchor="middle">🖨️</text><text x="500" y="70" fill="#64748b" font-size="9" text-anchor="middle">Fa0/3</text><g stroke="#334155" stroke-width="2"><line x1="74" y1="48" x2="205" y2="84"/><line x1="74" y1="146" x2="205" y2="100"/><line x1="355" y1="90" x2="486" y2="48"/></g><rect x="205" y="72" width="150" height="40" rx="8" fill="#0d1117" stroke="#3b82f6"/><text x="280" y="97" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH · L2</text><rect x="185" y="128" width="190" height="60" rx="6" fill="#020408" stroke="#1f2d3d"/><text x="197" y="146" fill="#10b981" font-size="9">MAC            PORTA</text><text x="197" y="162" fill="#94a3b8" font-size="9">aaaa.1111      Fa0/1</text><text x="197" y="177" fill="#94a3b8" font-size="9">bbbb.2222      Fa0/2</text></svg>`},
+ ipv6_mod:{cap:"128 bit divisi in prefisso di rete (/64) e Interface ID. La compressione elimina gli zeri.",svg:`<svg viewBox="0 0 560 150" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Struttura di un indirizzo IPv6 (128 bit)</text><rect x="20" y="32" width="245" height="46" rx="6" fill="rgba(59,130,246,.10)" stroke="#3b82f6"/><text x="142" y="53" fill="#3b82f6" font-size="11" text-anchor="middle">Prefisso di rete</text><text x="142" y="70" fill="#64748b" font-size="9" text-anchor="middle">64 bit · routing</text><rect x="272" y="32" width="245" height="46" rx="6" fill="rgba(16,185,129,.10)" stroke="#10b981"/><text x="394" y="53" fill="#10b981" font-size="11" text-anchor="middle">Interface ID</text><text x="394" y="70" fill="#64748b" font-size="9" text-anchor="middle">64 bit · host / SLAAC</text><text x="20" y="104" fill="#94a3b8" font-size="11">2001:0db8:0000:0000 : 0000:0000:0000:0001</text><text x="20" y="126" fill="#06b6d4" font-size="11">→ 2001:db8::1  ·  loopback ::1  ·  link-local fe80::/10</text></svg>`},
+ wifi_mod:{cap:"Un WLC gestisce più Access Point; i client si associano allo stesso SSID e passano da un AP all'altro (roaming).",svg:`<svg viewBox="0 0 560 200" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Il WLC gestisce gli AP · i client si associano all'SSID</text><rect x="220" y="28" width="120" height="38" rx="8" fill="#0d1117" stroke="#8b5cf6"/><text x="280" y="52" fill="#8b5cf6" font-size="12" text-anchor="middle">WLC</text><rect x="55" y="100" width="96" height="34" rx="7" fill="#0d1117" stroke="#3b82f6"/><text x="103" y="122" fill="#06b6d4" font-size="12" text-anchor="middle">AP 📡</text><rect x="409" y="100" width="96" height="34" rx="7" fill="#0d1117" stroke="#3b82f6"/><text x="457" y="122" fill="#06b6d4" font-size="12" text-anchor="middle">AP 📡</text><g stroke="#8b5cf6" stroke-width="2" stroke-dasharray="4 3"><line x1="235" y1="64" x2="120" y2="100"/><line x1="325" y1="64" x2="440" y2="100"/></g><text x="103" y="172" font-size="17" text-anchor="middle">📱 💻</text><text x="457" y="172" font-size="17" text-anchor="middle">📟 📱</text><g stroke="#10b981" stroke-width="1.5" class="flowline"><line x1="103" y1="136" x2="103" y2="156"/><line x1="457" y1="136" x2="457" y2="156"/></g><text x="280" y="150" fill="#10b981" font-size="11" text-anchor="middle">SSID: "KN-Warehouse" · WPA3</text></svg>`},
+ redun_mod:{cap:"HSRP dà un gateway virtuale ridondante (Active/Standby); EtherChannel aggrega più link verso lo switch.",svg:`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Gateway ridondante (HSRP) + link aggregati (EtherChannel)</text><rect x="55" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#10b981"/><text x="117" y="60" fill="#10b981" font-size="11" text-anchor="middle">R1 · ACTIVE</text><text x="117" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="380" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#64748b"/><text x="442" y="60" fill="#94a3b8" font-size="11" text-anchor="middle">R2 · STANDBY</text><text x="442" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="220" y="45" width="120" height="32" rx="16" fill="rgba(59,130,246,.10)" stroke="#3b82f6"/><text x="280" y="65" fill="#3b82f6" font-size="11" text-anchor="middle">IP virtuale .1</text><line x1="180" y1="61" x2="220" y2="61" stroke="#3b82f6" stroke-width="2"/><line x1="340" y1="61" x2="380" y2="61" stroke="#64748b" stroke-width="2" stroke-dasharray="4 3"/><rect x="220" y="152" width="120" height="38" rx="8" fill="#0d1117" stroke="#06b6d4"/><text x="280" y="176" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH</text><g stroke="#f59e0b" stroke-width="2.5" class="flowline"><line x1="252" y1="82" x2="264" y2="152"/><line x1="260" y1="82" x2="272" y2="152"/></g><text x="330" y="120" fill="#f59e0b" font-size="9">EtherChannel</text><line x1="120" y1="82" x2="238" y2="152" stroke="#334155" stroke-width="1.5"/><line x1="440" y1="82" x2="322" y2="152" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`},
+ ipserv_mod:{cap:"DHCP assegna l'IP in quattro passi: Discover, Offer, Request, Ack (DORA).",svg:`<svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">DHCP · il client ottiene l'IP in 4 passi (DORA)</text><text x="70" y="42" fill="#06b6d4" font-size="12" text-anchor="middle">CLIENT 📟</text><text x="490" y="42" fill="#f59e0b" font-size="12" text-anchor="middle">DHCP 🖥️</text><line x1="70" y1="50" x2="70" y2="172" stroke="#334155"/><line x1="490" y1="50" x2="490" y2="172" stroke="#334155"/><line x1="70" y1="74" x2="490" y2="88" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="72" fill="#3b82f6" font-size="11" text-anchor="middle">1. Discover →</text><line x1="490" y1="102" x2="70" y2="114" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="100" fill="#10b981" font-size="11" text-anchor="middle">← 2. Offer</text><line x1="70" y1="128" x2="490" y2="140" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="126" fill="#3b82f6" font-size="11" text-anchor="middle">3. Request →</text><line x1="490" y1="154" x2="70" y2="166" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="152" fill="#10b981" font-size="11" text-anchor="middle">← 4. Ack (lease)</text></svg>`}
 };
 const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli};
 // ── FLUSSO LIVELLO ──
@@ -2176,8 +2367,13 @@ function startLevel(mod){
 function renderLearn(mod){
   const b=BRIEF[mod.id];const wrap=_id('play-learn');wrap.style.display='block';wrap.innerHTML='';
   if(!b){startGamePhase(mod);return;}
+  const dg=DIAGRAM[mod.id];
+  if(dg){const cd=el('div','brief-card brief-diagram');cd.appendChild(el('div','brief-label','🖼️ Ricostruzione grafica'));cd.appendChild(el('div','',dg.svg));if(dg.cap)cd.appendChild(el('div','diag-cap',dg.cap));wrap.appendChild(cd);}
   const c1=el('div','brief-card');c1.appendChild(el('div','brief-label','🌍 Nel mondo reale'));c1.style.borderLeftColor='var(--cyan)';
   c1.querySelector('.brief-label').style.color='var(--cyan)';c1.appendChild(el('div','brief-text',b.real));wrap.appendChild(c1);
+  const xt=BRIEF_EXTRA[mod.id];
+  if(xt&&xt.kn){const ck=el('div','brief-card kn');ck.appendChild(el('div','brief-label','🏢 In Kuehne+Nagel<span class="kn-tag">LOGISTICA</span>'));ck.appendChild(el('div','brief-text',xt.kn));wrap.appendChild(ck);}
+  if(xt&&xt.home){const ch=el('div','brief-card home');ch.appendChild(el('div','brief-label','🏠 Nella vita di tutti i giorni'));ch.appendChild(el('div','brief-text',xt.home));wrap.appendChild(ch);}
   const c2=el('div','brief-card');c2.style.borderLeftColor='var(--orange)';const l2=el('div','brief-label','📌 Punti chiave d\'esame');l2.style.color='var(--orange)';c2.appendChild(l2);
   const ul=el('ul','brief-list');b.key.forEach(k=>{const li=document.createElement('li');li.innerHTML=k;ul.appendChild(li);});c2.appendChild(ul);wrap.appendChild(c2);
   if(b.ex){const c3=el('div','brief-card');c3.style.borderLeftColor='var(--green)';const l3=el('div','brief-label','💻 Esempio pratico');l3.style.color='var(--green)';c3.appendChild(l3);c3.appendChild(el('div','brief-code',b.ex));wrap.appendChild(c3);}
@@ -2352,6 +2548,86 @@ function renderCalendar(){
   buildCells(_id('heatmap'),18*7);
 }
 
+// ══════════════════════════════════════
+// GLOSSARIO · ricerca rapida dei termini
+// ══════════════════════════════════════
+const GLOSSARY=[
+ {t:"LAN",d:"Local Area Network — rete locale ad alta velocità in un'area ristretta (ufficio, casa, magazzino)."},
+ {t:"WAN",d:"Wide Area Network — rete che collega sedi distanti, spesso tramite un service provider (Internet, MPLS)."},
+ {t:"Switch",d:"Dispositivo L2 che inoltra i frame in base alla MAC usando la tabella CAM; una porta = un dominio di collisione."},
+ {t:"Router",d:"Dispositivo L3 che instrada i pacchetti tra reti IP diverse e separa i domini di broadcast."},
+ {t:"Hub",d:"Ripetitore L1 obsoleto: rigenera il segnale su tutte le porte (un solo dominio di collisione)."},
+ {t:"Full-duplex",d:"Invio e ricezione simultanei sullo stesso link, senza collisioni (tipico switch–dispositivo)."},
+ {t:"Modello OSI",d:"7 livelli: Application, Presentation, Session, Transport, Network, Data Link, Physical."},
+ {t:"PDU",d:"Protocol Data Unit: Segmento (L4), Pacchetto (L3), Frame (L2), Bit (L1)."},
+ {t:"Incapsulamento",d:"Aggiunta di un header a ogni livello mentre i dati scendono lo stack OSI/TCP-IP."},
+ {t:"TCP",d:"Protocollo di trasporto affidabile e orientato alla connessione (handshake, ritrasmissioni). Es. web, file."},
+ {t:"UDP",d:"Protocollo di trasporto veloce e senza connessione, senza garanzie. Es. VoIP, DNS, streaming."},
+ {t:"3-way handshake",d:"Apertura connessione TCP in tre passi: SYN → SYN-ACK → ACK."},
+ {t:"MAC address",d:"Indirizzo fisico a 48 bit di una scheda di rete; usato a livello 2 per l'inoltro dei frame."},
+ {t:"CAM table",d:"Tabella MAC–porta che lo switch impara automaticamente dalla MAC sorgente dei frame."},
+ {t:"Indirizzo IP privato",d:"RFC 1918: 10/8, 172.16–31/12, 192.168/16. Non instradabili su Internet: servono il NAT."},
+ {t:"APIPA",d:"169.254.x.x — indirizzo auto-assegnato quando il client non riceve risposta dal DHCP."},
+ {t:"Subnet mask",d:"Separa la parte rete dalla parte host di un indirizzo IP tramite un AND logico."},
+ {t:"CIDR",d:"Notazione /n che indica quanti bit compongono il prefisso di rete (es. /24)."},
+ {t:"Block size",d:"256 − valore della mask nell'ottetto interessato; l'incremento tra una subnet e la successiva."},
+ {t:"VLSM",d:"Variable Length Subnet Mask: maschere di lunghezza diversa per dimensionare ogni subnet."},
+ {t:"Network address",d:"Primo indirizzo di una subnet (tutti bit host a 0); identifica la rete, non assegnabile."},
+ {t:"Broadcast address",d:"Ultimo indirizzo di una subnet (tutti bit host a 1); raggiunge tutti gli host della rete."},
+ {t:"VLAN",d:"Virtual LAN: segmenta uno switch in più domini di broadcast logici e separati."},
+ {t:"Trunk / 802.1Q",d:"Link che trasporta più VLAN aggiungendo un tag 802.1Q a ogni frame."},
+ {t:"Access port",d:"Porta switch che appartiene a una sola VLAN, tipicamente collegata a un PC o dispositivo."},
+ {t:"Native VLAN",d:"VLAN il cui traffico viaggia non taggato su un trunk (default VLAN 1)."},
+ {t:"Inter-VLAN routing",d:"Instradamento tra VLAN diverse tramite un dispositivo L3 (router o switch multilayer)."},
+ {t:"STP",d:"Spanning Tree Protocol (802.1D/RSTP): previene i loop L2 bloccando i percorsi ridondanti."},
+ {t:"RSTP",d:"Rapid Spanning Tree (802.1w): variante di STP con convergenza in pochi secondi."},
+ {t:"EtherChannel",d:"Aggregazione di più link fisici in uno logico (LACP/PAgP): più banda e ridondanza."},
+ {t:"HSRP",d:"First Hop Redundancy Protocol Cisco: gateway virtuale ridondante Active/Standby."},
+ {t:"SSID",d:"Nome identificativo di una rete wireless a cui i client si associano."},
+ {t:"Access Point (AP)",d:"Dispositivo che diffonde il segnale wireless 802.11 e collega i client alla rete cablata."},
+ {t:"WLC",d:"Wireless LAN Controller: gestisce centralmente molti AP lightweight (canali, potenza, SSID, roaming)."},
+ {t:"WPA2 / WPA3",d:"Standard di sicurezza wireless; WPA3 è il più recente e robusto. WEP è obsoleto."},
+ {t:"Routing statico",d:"Rotte configurate manualmente dall'amministratore (ip route ...)."},
+ {t:"Default route",d:"Rotta 0.0.0.0/0 usata per tutto il traffico verso destinazioni non presenti in tabella."},
+ {t:"Distanza amministrativa (AD)",d:"Affidabilità di una fonte di routing: Connessa 0, Statica 1, EIGRP 90, OSPF 110, RIP 120."},
+ {t:"OSPF",d:"Protocollo link-state (algoritmo SPF/Dijkstra), AD 110, aree con backbone area 0."},
+ {t:"EIGRP",d:"Protocollo Cisco advanced distance vector (algoritmo DUAL), AD 90, con feasible successor."},
+ {t:"Wildcard mask",d:"Maschera inversa usata in OSPF e nelle ACL (es. 0.0.0.255 = /24)."},
+ {t:"ACL",d:"Access Control List: filtra il traffico. Standard (1-99) solo sorgente; Extended (100-199) src/dst/porta."},
+ {t:"NAT",d:"Network Address Translation: traduce indirizzi privati in pubblici per l'accesso a Internet."},
+ {t:"PAT",d:"NAT overload: molti host privati condividono un solo IP pubblico distinti dai numeri di porta."},
+ {t:"SSH",d:"Accesso remoto cifrato (porta 22), sostituisce Telnet che viaggia in chiaro."},
+ {t:"Port security",d:"Limita quali/quanti MAC possono usare una porta switch; blocca dispositivi non autorizzati."},
+ {t:"AAA",d:"Authentication, Authorization, Accounting: framework per il controllo degli accessi ai dispositivi."},
+ {t:"DHCP",d:"Assegna automaticamente IP, mask, gateway e DNS con lo scambio DORA (Discover, Offer, Request, Ack)."},
+ {t:"DORA",d:"Le quattro fasi del DHCP: Discover → Offer → Request → Ack."},
+ {t:"DNS",d:"Domain Name System: traduce i nomi di dominio in indirizzi IP (porta 53)."},
+ {t:"NTP",d:"Network Time Protocol (UDP 123): sincronizza l'orario dei dispositivi di rete."},
+ {t:"Syslog",d:"Invio centralizzato dei messaggi di log (UDP 514), con livelli di severità 0–7."},
+ {t:"SNMP",d:"Simple Network Management Protocol (161/162): monitoraggio di dispositivi e invio di trap."},
+ {t:"QoS",d:"Quality of Service: classifica e dà priorità al traffico sensibile (voce, video)."},
+ {t:"IPv6",d:"Indirizzi a 128 bit in 8 gruppi esadecimali; prefisso /64 + Interface ID, con autoconfigurazione SLAAC."},
+ {t:"SLAAC",d:"StateLess Address AutoConfiguration: l'host IPv6 si genera l'indirizzo da solo tramite NDP."},
+ {t:"Link-local",d:"Indirizzo IPv6 fe80::/10 valido solo sul segmento locale."},
+ {t:"IPSec",d:"Suite di sicurezza L3 per VPN: ESP cifra il payload, AH autentica."},
+ {t:"MPLS",d:"Label switching usato dai provider per VPN L3 performanti e con QoS."},
+ {t:"SDN",d:"Software-Defined Networking: separa il control plane (decisioni) dal data plane (inoltro)."},
+ {t:"REST API",d:"Interfaccia basata su HTTP (GET/POST/PUT/DELETE) per automatizzare la configurazione."}
+];
+function renderGlossary(q){
+  const list=_id('gloss-list');if(!list)return;
+  q=(q||'').trim().toLowerCase();
+  const items=GLOSSARY.filter(g=>!q||g.t.toLowerCase().includes(q)||g.d.toLowerCase().includes(q))
+    .sort((a,b)=>a.t.localeCompare(b.t,'it'));
+  const cnt=_id('gloss-count');if(cnt)cnt.textContent=items.length+' termini'+(q?' · filtro "'+q+'"':'');
+  list.innerHTML='';
+  if(!items.length){list.innerHTML='<div class="gloss-empty">Nessun termine trovato. Prova un\'altra parola.</div>';return;}
+  items.forEach(g=>{
+    const it=el('div','gloss-item');
+    it.innerHTML='<div class="gloss-term">'+g.t+'</div><div class="gloss-def">'+g.d+'</div>';
+    list.appendChild(it);
+  });
+}
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
