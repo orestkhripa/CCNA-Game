@@ -602,10 +602,28 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .gloss-count{font-family:'JetBrains Mono',monospace;font-size:.62rem;color:var(--muted);letter-spacing:1px;text-transform:uppercase;margin-bottom:14px}
 #gloss-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 @media(max-width:600px){#gloss-list{grid-template-columns:1fr}}
-.gloss-item{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:9px;padding:12px 15px;animation:fadeUp .3s ease both}
+.gloss-item{display:flex;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:9px;padding:12px 15px;animation:fadeUp .3s ease both;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+.gloss-item:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 18px rgba(0,0,0,.28)}
+.gloss-item:active{transform:scale(.99)}
+.gloss-item:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.gloss-item-main{flex:1;min-width:0}
 .gloss-term{font-family:'JetBrains Mono',monospace;font-size:.85rem;font-weight:700;color:var(--cyan);margin-bottom:5px}
+.gloss-badge{font-size:.7rem;vertical-align:middle}
 .gloss-def{font-size:.82rem;line-height:1.55;color:var(--text)}
+.gloss-chev{color:var(--muted);font-size:1.3rem;line-height:1;flex-shrink:0}
+.gloss-item:hover .gloss-chev{color:var(--accent)}
 .gloss-empty{color:var(--muted);font-size:.86rem;padding:24px;text-align:center;grid-column:1/-1}
+/* dettaglio termine */
+.gloss-detail-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--cyan);border-radius:12px;padding:18px;margin-bottom:12px}
+.gloss-detail-term{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;color:var(--cyan);margin-bottom:6px}
+.gloss-sec-h{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--muted);margin:16px 0 6px}
+.gloss-detail-card .gloss-sec-h:first-of-type{margin-top:8px}
+.gloss-detail-def{font-size:.9rem;line-height:1.6;color:var(--text)}
+.gloss-detail-more{font-size:.9rem;line-height:1.7;color:var(--text)}
+.gloss-rel{display:flex;flex-wrap:wrap;gap:7px}
+.gloss-rel-chip{background:var(--surface);border:1px solid var(--border);color:var(--accent);border-radius:20px;padding:6px 13px;font-size:.76rem;cursor:pointer;font-family:'DM Sans',sans-serif;transition:all .15s}
+.gloss-rel-chip:hover{border-color:var(--accent);background:rgba(59,130,246,.08)}
+.gloss-rel-chip:active{transform:scale(.97)}
 /* hint sui moduli bloccati */
 .mod-lock-hint{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--muted);line-height:1.35;margin-top:7px;border-top:1px dashed var(--border);padding-top:5px}
 .mod-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
@@ -3097,8 +3115,74 @@ const GLOSSARY=[
  {t:"SDN",d:"Software-Defined Networking: separa il control plane (decisioni) dal data plane (inoltro)."},
  {t:"REST API",d:"Interfaccia basata su HTTP (GET/POST/PUT/DELETE) per automatizzare la configurazione."}
 ];
+// Approfondimenti + diagramma collegato (chiave in DIAGRAM) per ogni termine
+const GLOSS_MORE={
+ "LAN":{more:"Tipicamente Ethernet cablata o Wi-Fi, gestita da switch. Alta velocità (1-10 Gbps) e bassa latenza perché tutto è locale.",diag:"net_basics"},
+ "WAN":{more:"Non possiedi l'infrastruttura: ti appoggi a un provider (fibra, MPLS, Internet). Più lenta e costosa della LAN, con latenza maggiore.",diag:"net_basics"},
+ "Switch":{more:"Costruisce la tabella CAM imparando i MAC sorgente. Ogni porta è un dominio di collisione separato; di default tutte le porte sono nello stesso dominio di broadcast (una VLAN).",diag:"switching"},
+ "Router":{more:"Ogni interfaccia sta in una rete IP diversa e separa i domini di broadcast. Usa la tabella di routing per scegliere il percorso ed è il default gateway degli host.",diag:"net_basics"},
+ "Hub":{more:"Dispositivo legacy: crea un unico dominio di collisione condiviso, quindi half-duplex e collisioni. Sostituito ovunque dagli switch.",diag:"net_basics"},
+ "Full-duplex":{more:"Invio e ricezione contemporanei, senza collisioni: standard tra switch e dispositivi moderni. L'half-duplex (hub) invece condivide il mezzo."},
+ "Modello OSI":{more:"Modello di riferimento a 7 livelli per capire e diagnosticare le reti. Mnemonico dal 7 all'1: All People Seem To Need Data Processing.",diag:"osi_mod"},
+ "PDU":{more:"Il nome dell'unità dati cambia per livello: L4 Segmento, L3 Pacchetto, L2 Frame, L1 Bit. Aiuta a indicare a che livello avviene un problema.",diag:"osi_mod"},
+ "Incapsulamento":{more:"Scendendo lo stack ogni livello aggiunge il proprio header (e L2 anche un trailer). In ricezione avviene il processo inverso: de-incapsulamento.",diag:"osi_mod"},
+ "TCP":{more:"Affidabile: numeri di sequenza, ACK e ritrasmissioni garantiscono consegna ordinata. Apre la sessione con il 3-way handshake. Web, email, file.",diag:"tcpip_mod"},
+ "UDP":{more:"Senza connessione e senza garanzie, ma con pochissimo overhead e bassa latenza. Ideale per VoIP, streaming, DNS e giochi online."},
+ "3-way handshake":{more:"SYN (il client propone), SYN-ACK (il server conferma e propone), ACK (il client conferma). Solo dopo inizia lo scambio dei dati.",diag:"tcpip_mod"},
+ "MAC address":{more:"48 bit in esadecimale (es. 00:1A:2B:...). I primi 24 bit sono l'OUI del produttore. Ha valore solo nella rete locale (L2).",diag:"switching"},
+ "CAM table":{more:"Associa MAC ↔ porta. Se la destinazione non è in tabella lo switch fa flooding su tutte le porte tranne quella d'ingresso.",diag:"switching"},
+ "Indirizzo IP privato":{more:"Non instradabile su Internet: per uscire serve il NAT. Range RFC 1918: 10/8, 172.16-31/12, 192.168/16.",diag:"nat_mod"},
+ "APIPA":{more:"169.254.0.0/16: se il client non riceve risposta dal DHCP se lo auto-assegna. Vederlo segnala quasi sempre un problema DHCP.",diag:"ipserv_mod"},
+ "Subnet mask":{more:"I bit a 1 indicano la parte rete, i bit a 0 la parte host. Con un AND logico tra IP e mask si ottiene l'indirizzo di rete.",diag:"subnetting"},
+ "CIDR":{more:"La /n conta i bit di rete: /24 = 255.255.255.0. Più alto il numero, più piccola la rete (meno host disponibili).",diag:"subnetting"},
+ "Block size":{more:"256 − valore della mask nell'ottetto interessante. È l'intervallo tra una subnet e la successiva (es. /26 → 64).",diag:"subnetting"},
+ "VLSM":{more:"Usare maschere diverse per subnet diverse, dimensionando ciascuna sul numero reale di host. Evita lo spreco di indirizzi.",diag:"subnetting"},
+ "Network address":{more:"Bit host tutti a 0. Identifica la rete e non è assegnabile a un host.",diag:"subnetting"},
+ "Broadcast address":{more:"Bit host tutti a 1. Raggiunge tutti gli host della subnet; non assegnabile a un singolo host.",diag:"subnetting"},
+ "VLAN":{more:"Segmenta logicamente uno switch in reti separate. Ogni VLAN è un dominio di broadcast; per comunicare tra VLAN serve un dispositivo L3.",diag:"vlan_mod"},
+ "Trunk / 802.1Q":{more:"Link che trasporta più VLAN aggiungendo un tag da 4 byte a ogni frame (tranne la native VLAN). Usato tra switch o verso il router.",diag:"vlan_mod"},
+ "Access port":{more:"Appartiene a una sola VLAN e invia frame non taggati verso il dispositivo finale (PC, stampante, telefono).",diag:"vlan_mod"},
+ "Native VLAN":{more:"L'unica VLAN che viaggia non taggata su un trunk (default VLAN 1). Deve coincidere ai due capi del trunk.",diag:"vlan_mod"},
+ "Inter-VLAN routing":{more:"Instradamento tra VLAN diverse tramite router (router-on-a-stick con subinterfacce) o switch multilayer con interfacce SVI.",diag:"vlan_mod"},
+ "STP":{more:"Elegge un Root Bridge e mette in blocco le porte ridondanti, lasciando una sola via attiva. Evita i loop di broadcast a L2.",diag:"redun_mod"},
+ "RSTP":{more:"Evoluzione di STP (802.1w): converge in pochi secondi grazie a nuovi ruoli e stati delle porte. Retrocompatibile con STP.",diag:"redun_mod"},
+ "EtherChannel":{more:"Aggrega 2-8 link fisici in uno logico (Port-channel); STP lo vede come un unico link. Negoziato con LACP (standard) o PAgP (Cisco).",diag:"redun_mod"},
+ "HSRP":{more:"Più router condividono un IP e un MAC virtuale: l'Active inoltra, lo Standby subentra se cade. Per gli host il gateway non cambia mai.",diag:"redun_mod"},
+ "SSID":{more:"Il nome della rete wireless annunciato dagli AP. Più AP possono condividere lo stesso SSID per permettere il roaming senza riconnessioni.",diag:"wifi_mod"},
+ "Access Point (AP)":{more:"Ponte tra il wireless (802.11) e la rete cablata. In modalità lightweight è gestito da un WLC; autonomo ha configurazione locale.",diag:"wifi_mod"},
+ "WLC":{more:"Configura e coordina molti AP lightweight: canali, potenza, SSID, sicurezza e roaming, tutto da un punto centrale.",diag:"wifi_mod"},
+ "WPA2 / WPA3":{more:"Cifratura del Wi-Fi: WPA2 (AES/CCMP) è lo standard diffuso, WPA3 è più robusto. WEP è insicuro e da non usare.",diag:"wifi_mod"},
+ "Routing statico":{more:"Rotte scritte a mano dall'amministratore. Semplici e prevedibili ma non si adattano ai cambiamenti: ideali per reti piccole o stub."},
+ "Default route":{more:"0.0.0.0/0: usata quando nessuna rotta più specifica corrisponde. È il 'gateway of last resort', tipicamente verso Internet."},
+ "Distanza amministrativa (AD)":{more:"Se più fonti offrono la stessa rotta vince l'AD più bassa: Connessa 0, Statica 1, EIGRP 90, OSPF 110, RIP 120."},
+ "OSPF":{more:"Link-state open standard: ogni router costruisce la mappa della rete e con SPF (Dijkstra) calcola i percorsi. Organizzato in aree attorno all'area 0.",diag:"ospf_mod"},
+ "EIGRP":{more:"Advanced distance vector Cisco: algoritmo DUAL, con successor (miglior percorso) e feasible successor (backup pronto) per riconvergere subito.",diag:"ospf_mod"},
+ "Wildcard mask":{more:"La mask invertita (0 = 'deve corrispondere', 1 = 'ignora'). /24 → 0.0.0.255. Usata in OSPF (network) e nelle ACL."},
+ "ACL":{more:"Elenco ordinato di regole permit/deny valutate dall'alto; in fondo c'è un deny implicito. Standard filtra la sorgente, Extended anche dst/protocollo/porta."},
+ "NAT":{more:"Traduce indirizzi tra 'inside' (privato) e 'outside' (pubblico). Permette di riusare gli indirizzi privati e nasconde la rete interna.",diag:"nat_mod"},
+ "PAT":{more:"NAT overload: un solo IP pubblico per molti host, distinti dal numero di porta sorgente. È ciò che fa il router di casa.",diag:"nat_mod"},
+ "SSH":{more:"Accesso remoto cifrato alla CLI (porta 22). Richiede hostname, ip domain-name e chiavi RSA. Sostituisce Telnet, che è in chiaro."},
+ "Port security":{more:"Limita quali e quanti MAC possono usare una porta access. Con 'sticky' impara il MAC; in violazione può spegnere la porta."},
+ "AAA":{more:"Authentication (chi sei), Authorization (cosa puoi fare), Accounting (cosa hai fatto). Spesso centralizzato con RADIUS o TACACS+."},
+ "DHCP":{more:"Assegna automaticamente IP, mask, gateway e DNS con lo scambio DORA. Server su UDP 67, client su UDP 68.",diag:"ipserv_mod"},
+ "DORA":{more:"Discover (broadcast del client) → Offer (proposta del server) → Request → Ack (assegnazione del lease).",diag:"ipserv_mod"},
+ "DNS":{more:"Risolve i nomi in IP con un sistema gerarchico (root, TLD, autoritativi). Porta 53. Senza DNS navigheresti solo per indirizzo.",diag:"ipserv_mod"},
+ "NTP":{more:"Sincronizza l'orologio dei dispositivi (UDP 123) con una gerarchia di stratum. Orari coerenti sono vitali per log e certificati.",diag:"ipserv_mod"},
+ "Syslog":{more:"Invia i messaggi di log a un server centrale (UDP 514), con severità da 0 (emergency) a 7 (debug). Fondamentale nel troubleshooting.",diag:"ipserv_mod"},
+ "SNMP":{more:"Monitoraggio: un NMS interroga i dispositivi (UDP 161) e riceve trap non sollecitate (UDP 162). La v3 aggiunge autenticazione e cifratura.",diag:"ipserv_mod"},
+ "QoS":{more:"Classifica e marca il traffico (es. DSCP) per dare priorità a voce e video quando la banda è congestionata, riducendo ritardo e jitter."},
+ "IPv6":{more:"128 bit in 8 gruppi esadecimali. Compressione: togli gli zeri iniziali di ogni gruppo e sostituisci UNA sequenza di zeri con ::.",diag:"ipv6_mod"},
+ "SLAAC":{more:"L'host IPv6 si genera l'indirizzo da solo usando il prefisso annunciato dal router (RA) + Interface ID, senza server DHCP.",diag:"ipv6_mod"},
+ "Link-local":{more:"fe80::/10, valido solo sul segmento locale e generato automaticamente su ogni interfaccia IPv6. Usato da NDP e OSPFv3.",diag:"ipv6_mod"},
+ "IPSec":{more:"Protegge le VPN a L3: ESP cifra il payload, AH autentica. Negozia chiavi e parametri con IKE. Spesso combinato con GRE per il multicast."},
+ "MPLS":{more:"Il provider inoltra in base a etichette invece che all'IP: percorsi più rapidi e prevedibili, con supporto a VPN L3 e QoS."},
+ "SDN":{more:"Separa il control plane (le decisioni, in un controller centrale) dal data plane (l'inoltro). Programmabile via API northbound/southbound."},
+ "REST API":{more:"Interfaccia web (HTTP) per automatizzare i dispositivi: GET legge, POST crea, PUT aggiorna, DELETE elimina. Dati in JSON; 2xx=OK, 4xx/5xx=errore."}
+};
 function renderGlossary(q){
   const list=_id('gloss-list');if(!list)return;
+  const det=_id('gloss-detail');if(det)det.style.display='none';
+  _id('gloss-search').style.display='';const cnt0=_id('gloss-count');if(cnt0)cnt0.style.display='';list.style.display='';
   q=(q||'').trim().toLowerCase();
   const items=GLOSSARY.filter(g=>!q||g.t.toLowerCase().includes(q)||g.d.toLowerCase().includes(q))
     .sort((a,b)=>a.t.localeCompare(b.t,'it'));
@@ -3106,10 +3190,48 @@ function renderGlossary(q){
   list.innerHTML='';
   if(!items.length){list.innerHTML='<div class="gloss-empty">Nessun termine trovato. Prova un\'altra parola.</div>';return;}
   items.forEach(g=>{
+    const x=GLOSS_MORE[g.t]||{};
     const it=el('div','gloss-item');
-    it.innerHTML='<div class="gloss-term">'+g.t+'</div><div class="gloss-def">'+g.d+'</div>';
+    it.innerHTML='<div class="gloss-item-main"><div class="gloss-term">'+g.t+(x.diag?' <span class="gloss-badge">📊</span>':'')+'</div><div class="gloss-def">'+g.d+'</div></div><span class="gloss-chev">›</span>';
+    it.tabIndex=0;it.setAttribute('role','button');it.setAttribute('aria-label',g.t+' — apri approfondimento');
+    it.onclick=()=>openGloss(g);
+    it.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();openGloss(g);}};
     list.appendChild(it);
   });
+}
+function openGloss(g){
+  const x=GLOSS_MORE[g.t]||{};
+  _id('gloss-search').style.display='none';
+  const cnt=_id('gloss-count');if(cnt)cnt.style.display='none';
+  _id('gloss-list').style.display='none';
+  let d=_id('gloss-detail');
+  if(!d){d=el('div');d.id='gloss-detail';_id('view-gloss').appendChild(d);}
+  d.style.display='block';
+  const dg=x.diag&&DIAGRAM[x.diag];
+  d.innerHTML='<button class="ts-back" onclick="closeGloss()">‹ Torna al glossario</button>'+
+    '<div class="gloss-detail-card">'+
+      '<div class="gloss-detail-term">'+g.t+'</div>'+
+      '<div class="gloss-sec-h">Definizione</div><div class="gloss-detail-def">'+g.d+'</div>'+
+      (x.more?'<div class="gloss-sec-h">🔎 Approfondimento</div><div class="gloss-detail-more">'+x.more+'</div>':'')+
+      (dg?'<div class="gloss-sec-h">🖼️ Esempio grafico</div><div class="brief-diagram">'+dg.svg+(dg.cap?'<div class="diag-cap">'+dg.cap+'</div>':'')+'</div>':'')+
+    '</div>';
+  // termini collegati (stesso diagramma)
+  if(x.diag){
+    const rel=GLOSSARY.filter(o=>o.t!==g.t&&(GLOSS_MORE[o.t]||{}).diag===x.diag).slice(0,6);
+    if(rel.length){
+      const box=el('div');box.innerHTML='<div class="gloss-sec-h">↔ Termini collegati</div>';
+      const chips=el('div','gloss-rel');
+      rel.forEach(o=>{const b=el('button','gloss-rel-chip',o.t);b.onclick=()=>openGloss(o);chips.appendChild(b);});
+      box.appendChild(chips);d.appendChild(box);
+    }
+  }
+  const v=document.getElementById('view-gloss');if(v)v.scrollIntoView({block:'start'});
+}
+function closeGloss(){
+  const d=_id('gloss-detail');if(d)d.style.display='none';
+  _id('gloss-search').style.display='';
+  const cnt=_id('gloss-count');if(cnt)cnt.style.display='';
+  _id('gloss-list').style.display='';
 }
 // ══════════════════════════════════════
 // INIT
