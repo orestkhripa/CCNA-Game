@@ -355,6 +355,29 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .bits-disp2{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text);margin:4px 0 10px}
 .bits-disp2 b{color:var(--cyan)}
 @media(max-width:420px){.bit-btn{width:38px;padding:8px 0}.bit-btn .bit-v{font-size:1rem}}
+/* ─── GIOCO: SUBNET VISUALIZER (slider CIDR) ─── */
+.svz-cidr{font-family:'JetBrains Mono',monospace;font-size:2.1rem;font-weight:700;color:var(--cyan);text-align:center}
+.svz-bar{display:flex;height:16px;border-radius:6px;overflow:hidden;margin-top:12px;border:1px solid var(--border)}
+.svz-net{background:var(--accent)}.svz-host{background:var(--green)}
+.svz-legend{display:flex;justify-content:center;gap:16px;margin-top:8px;font-size:.66rem;color:var(--muted)}
+.svz-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:4px;vertical-align:middle}
+.svz-legend .svz-net{background:var(--accent)}.svz-legend .svz-host{background:var(--green)}
+.svz-slider{width:100%;margin:14px 0;accent-color:var(--accent);cursor:pointer}
+.svz-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.svz-box{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:9px 11px;display:flex;flex-direction:column;gap:2px}
+.svz-box span{font-size:.58rem;color:var(--muted);text-transform:uppercase;letter-spacing:1px}
+.svz-box b{font-family:'JetBrains Mono',monospace;font-size:.92rem;color:var(--cyan)}
+/* ─── GIOCO: CONFIG ASSEMBLER (tessere comandi) ─── */
+.asm-out{background:#020408;border:1px solid var(--border);border-radius:8px;padding:12px 14px;min-height:44px;margin-bottom:12px}
+.asm-title{font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:2px;color:var(--muted);margin-bottom:6px}
+.asm-line{font-family:'JetBrains Mono',monospace;font-size:.78rem;line-height:1.9;color:var(--green);animation:fadeUp .25s ease both}
+.asm-ps{color:var(--muted)}
+.asm-pool{display:flex;flex-direction:column;gap:7px;margin-bottom:10px}
+.asm-tile{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:11px 13px;font-family:'JetBrains Mono',monospace;font-size:.8rem;cursor:pointer;transition:all .15s}
+.asm-tile:hover{border-color:var(--accent);color:var(--accent)}
+.asm-tile:active{transform:scale(.98)}
+.asm-tile.used{display:none}
+.asm-tile.asm-ko{animation:shake .4s;border-color:var(--red);color:var(--red)}
 /* ─── HERO RESTYLE ─── */
 .home-hero{position:relative;overflow:hidden}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(59,130,246,.16) 1px,transparent 0);background-size:24px 24px;-webkit-mask-image:linear-gradient(120deg,#000,transparent 68%);mask-image:linear-gradient(120deg,#000,transparent 68%);pointer-events:none}
@@ -2256,6 +2279,70 @@ function engineFlow(arena,data,onDone){
   }
   render();
 }
+// ── MOTORE: SUBNET VISUALIZER (slider CIDR con calcolo live) ──
+function engineSubnetViz(arena,data,onDone){
+  const rounds=data.rounds||[{need:50},{need:500},{need:2},{need:100},{need:10}];
+  const MINC=8,MAXC=30;let ri=0;
+  const hosts=c=>Math.pow(2,32-c)-2;
+  const maskFor=c=>intToIp((0xffffffff<<(32-c))>>>0);
+  const correctFor=need=>{for(let c=MAXC;c>=MINC;c--){if(hosts(c)>=need)return c;}return MINC;};
+  function render(){
+    if(ri>=rounds.length){addXP(10);setTimeout(onDone,400);return;}
+    const r=rounds[ri],target=correctFor(r.need);let cur=24;
+    arena.innerHTML='';
+    arena.appendChild(el('div','game-instr','🎚️ '+(r.label||('Serve una subnet con almeno <b>'+r.need+'</b> host utili. Trova il CIDR <b>più efficiente</b> (che spreca meno indirizzi).'))+' &nbsp;·&nbsp; Round '+(ri+1)+'/'+rounds.length));
+    const card=el('div','match-card');card.innerHTML='<div class="svz-cidr">/<span id="svz-c">24</span></div><div class="svz-bar" id="svz-bar"></div><div class="svz-legend"><span><i class="svz-net"></i> bit rete</span><span><i class="svz-host"></i> bit host</span></div>';
+    arena.appendChild(card);
+    const slider=document.createElement('input');slider.type='range';slider.min=MINC;slider.max=MAXC;slider.value=24;slider.className='svz-slider';slider.setAttribute('aria-label','CIDR');
+    arena.appendChild(slider);
+    const grid=el('div','svz-grid');arena.appendChild(grid);
+    const btn=el('button','check-btn','Conferma');arena.appendChild(btn);
+    const fb=el('div','fb-strip');arena.appendChild(fb);
+    function upd(){
+      cur=+slider.value;_id('svz-c').textContent=cur;
+      _id('svz-bar').innerHTML='<span class="svz-net" style="flex:'+cur+'"></span><span class="svz-host" style="flex:'+(32-cur)+'"></span>';
+      grid.innerHTML='<div class="svz-box"><span>Subnet mask</span><b>'+maskFor(cur)+'</b></div>'+
+        '<div class="svz-box"><span>Host utili</span><b>'+hosts(cur).toLocaleString('it')+'</b></div>'+
+        '<div class="svz-box"><span>Indirizzi totali</span><b>'+Math.pow(2,32-cur).toLocaleString('it')+'</b></div>'+
+        '<div class="svz-box"><span>Bit host</span><b>'+(32-cur)+'</b></div>';
+    }
+    slider.oninput=upd;upd();
+    btn.onclick=()=>{
+      if(cur===target){fb.className='fb-strip show ok';fb.textContent='✓ Esatto: /'+target+' → '+hosts(target)+' host utili, il più efficiente.';ri++;setTimeout(render,950);}
+      else if(hosts(cur)<r.need){fb.className='fb-strip show ko';fb.textContent='✗ Troppo pochi host ('+hosts(cur)+'). Ne servono almeno '+r.need+': allarga la parte host (CIDR più piccolo).';}
+      else{fb.className='fb-strip show ko';fb.textContent='✗ Basterebbe ('+hosts(cur)+' host) ma sprechi indirizzi. Cerca il CIDR più grande che è ancora sufficiente.';}
+    };
+  }
+  render();
+}
+// ── MOTORE: CONFIG ASSEMBLER (comandi a tessere) ──
+function engineAssemble(arena,data,onDone){
+  const rounds=data.rounds;let ri=0;
+  function render(){
+    if(ri>=rounds.length){addXP(10);setTimeout(onDone,400);return;}
+    const r=rounds[ri];arena.innerHTML='';
+    arena.appendChild(el('div','game-instr','🔧 '+r.instruction+' &nbsp;·&nbsp; Round '+(ri+1)+'/'+rounds.length));
+    const outBox=el('div','asm-out','<div class="asm-title">CONFIGURAZIONE</div>');arena.appendChild(outBox);
+    arena.appendChild(el('div','play-progress','Tocca i comandi nell\'ordine corretto:'));
+    const pool=el('div','asm-pool');arena.appendChild(pool);
+    const fb=el('div','fb-strip');arena.appendChild(fb);
+    let expected=0;
+    qShuffle(r.tiles.map((s,idx)=>({s,idx}))).forEach(o=>{
+      const t=el('div','asm-tile',o.s);
+      t.onclick=()=>{
+        if(t.dataset.done)return;
+        if(o.idx===expected){
+          t.dataset.done='1';t.classList.add('used');
+          outBox.appendChild(el('div','asm-line','<span class="asm-ps">R1(config)#</span> '+o.s));
+          addXP(4);expected++;
+          if(expected>=r.tiles.length){fb.className='fb-strip show ok';fb.textContent='✓ Configurazione corretta!';ri++;setTimeout(render,850);}
+        }else{t.classList.add('asm-ko');fb.className='fb-strip show ko';fb.textContent='✗ Non è il comando giusto in questa posizione. Segui l\'ordine logico.';setTimeout(()=>t.classList.remove('asm-ko'),400);}
+      };
+      pool.appendChild(t);
+    });
+  }
+  render();
+}
 // ══════════════════════════════════════
 // DATI DEI 21 LIVELLI (allineati CCNA 200-301)
 // ══════════════════════════════════════
@@ -2284,7 +2371,7 @@ const LEVELS={
    {n:"127.0.0.1",c:"Loopback"},{n:"169.254.10.20",c:"APIPA"},
    {n:"224.0.0.5",c:"Multicast"},{n:"239.1.1.1",c:"Multicast"}
  ]}},
- subnetting:{engine:"calc",data:{instruction:"Calcola i parametri della subnet.",gen:()=>makeSubnetRound(25,30),count:3}},
+ subnetting:{engine:"subnetviz",data:{rounds:[{need:50},{need:500},{need:2},{need:100},{need:10}]}},
  boss1:{engine:"calc",data:{instruction:"BOSS · Subnet Gauntlet: risolvi 5 subnet.",gen:()=>makeSubnetRound(26,30),count:5}},
  switching:{engine:"match",data:{instruction:"Quale dispositivo/tecnologia corrisponde a ciascuna caratteristica?",cats:["Switch","Hub","Router"],items:[
    {n:"Separa i domini di collisione (uno per porta)",c:"Switch"},
@@ -2296,14 +2383,9 @@ const LEVELS={
    {n:"Previene i loop L2 con STP",c:"Switch"},
    {n:"Opera al livello 3 (IP)",c:"Router"}
  ]}},
- vlan_mod:{engine:"match",data:{instruction:"Che tipo di porta/VLAN descrive ciascuno scenario?",cats:["Access","Trunk","Native VLAN"],items:[
-   {n:"Porta collegata a un singolo PC",c:"Access"},
-   {n:"Link tra due switch che trasporta più VLAN",c:"Trunk"},
-   {n:"Appartiene a una sola VLAN",c:"Access"},
-   {n:"Usa i tag 802.1Q",c:"Trunk"},
-   {n:"Traffico non taggato sul trunk (default VLAN 1)",c:"Native VLAN"},
-   {n:"switchport mode access",c:"Access"},
-   {n:"switchport mode trunk",c:"Trunk"}
+ vlan_mod:{engine:"assemble",data:{rounds:[
+   {instruction:"Crea la VLAN 10 \"Sales\" e assegna la porta Fa0/1 in modalità accesso.",tiles:["vlan 10","name Sales","interface Fa0/1","switchport mode access","switchport access vlan 10"]},
+   {instruction:"Configura la porta Fa0/24 come trunk 802.1Q che trasporta le VLAN 10, 20 e 30.",tiles:["interface Fa0/24","switchport mode trunk","switchport trunk allowed vlan 10,20,30"]}
  ]}},
  routing_s:{engine:"cli",data:{brief:"Su R1: entra in modalità privilegiata e di configurazione, aggiungi una rotta statica verso 10.0.0.0/24 via 192.168.1.2, una default route via 192.168.1.1, poi salva.",hints:["enable","configure terminal","ip route 10.0.0.0 255.255.255.0 192.168.1.2","ip route 0.0.0.0 0.0.0.0 192.168.1.1","end","copy running-config startup-config"],steps:[
    {p:"R1>",cmd:"enable",msg:"Modalità privilegiata."},
@@ -2499,7 +2581,7 @@ const DIAGRAM={
  redun_mod:{cap:"HSRP dà un gateway virtuale ridondante (Active/Standby); EtherChannel aggrega più link verso lo switch.",svg:`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Gateway ridondante (HSRP) + link aggregati (EtherChannel)</text><rect x="55" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#10b981"/><text x="117" y="60" fill="#10b981" font-size="11" text-anchor="middle">R1 · ACTIVE</text><text x="117" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="380" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#64748b"/><text x="442" y="60" fill="#94a3b8" font-size="11" text-anchor="middle">R2 · STANDBY</text><text x="442" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="220" y="45" width="120" height="32" rx="16" fill="rgba(59,130,246,.10)" stroke="#3b82f6"/><text x="280" y="65" fill="#3b82f6" font-size="11" text-anchor="middle">IP virtuale .1</text><line x1="180" y1="61" x2="220" y2="61" stroke="#3b82f6" stroke-width="2"/><line x1="340" y1="61" x2="380" y2="61" stroke="#64748b" stroke-width="2" stroke-dasharray="4 3"/><rect x="220" y="152" width="120" height="38" rx="8" fill="#0d1117" stroke="#06b6d4"/><text x="280" y="176" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH</text><g stroke="#f59e0b" stroke-width="2.5" class="flowline"><line x1="252" y1="82" x2="264" y2="152"/><line x1="260" y1="82" x2="272" y2="152"/></g><text x="330" y="120" fill="#f59e0b" font-size="9">EtherChannel</text><line x1="120" y1="82" x2="238" y2="152" stroke="#334155" stroke-width="1.5"/><line x1="440" y1="82" x2="322" y2="152" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`},
  ipserv_mod:{cap:"DHCP assegna l'IP in quattro passi: Discover, Offer, Request, Ack (DORA).",svg:`<svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">DHCP · il client ottiene l'IP in 4 passi (DORA)</text><text x="70" y="42" fill="#06b6d4" font-size="12" text-anchor="middle">CLIENT 📟</text><text x="490" y="42" fill="#f59e0b" font-size="12" text-anchor="middle">DHCP 🖥️</text><line x1="70" y1="50" x2="70" y2="172" stroke="#334155"/><line x1="490" y1="50" x2="490" y2="172" stroke="#334155"/><line x1="70" y1="74" x2="490" y2="88" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="72" fill="#3b82f6" font-size="11" text-anchor="middle">1. Discover →</text><line x1="490" y1="102" x2="70" y2="114" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="100" fill="#10b981" font-size="11" text-anchor="middle">← 2. Offer</text><line x1="70" y1="128" x2="490" y2="140" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="126" fill="#3b82f6" font-size="11" text-anchor="middle">3. Request →</text><line x1="490" y1="154" x2="70" y2="166" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="152" fill="#10b981" font-size="11" text-anchor="middle">← 4. Ack (lease)</text></svg>`}
 };
-const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli,bits:engineBits,flow:engineFlow};
+const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli,bits:engineBits,flow:engineFlow,subnetviz:engineSubnetViz,assemble:engineAssemble};
 // ── FLUSSO LIVELLO ──
 function setPlayStep(s){
   const order=['learn','game','quiz','done'];const idx=order.indexOf(s);
@@ -2659,23 +2741,63 @@ const FUN_FACTS=[
   {i:'🏠',t:"Gli indirizzi <b>192.168.x.x</b> sono privati (RFC 1918): non instradabili su Internet, richiedono il NAT."},
   {i:'🔌',t:"<b>Ping</b> usa il protocollo ICMP e prende il nome dal suono del sonar dei sottomarini."},
   {i:'🤝',t:"<b>TCP</b> apre ogni connessione con un saluto in 3 mosse: SYN → SYN-ACK → ACK."},
-  {i:'🎯',t:"L'esame <b>CCNA 200-301</b> dura 120 minuti e copre 6 aree, dal networking di base all'automazione."}
+  {i:'🎯',t:"L'esame <b>CCNA 200-301</b> dura 120 minuti e copre 6 aree, dal networking di base all'automazione."},
+  {i:'🌍',t:"Il <b>DNS</b> è la rubrica di Internet: traduce i nomi (es. google.com) in indirizzi IP. Porta 53."},
+  {i:'📮',t:"<b>UDP</b> è \"spara e dimentica\": nessuna conferma di consegna. Ideale per streaming, giochi e VoIP."},
+  {i:'🔁',t:"<b>DHCP</b> assegna gli IP in 4 mosse: <b>D</b>iscover, <b>O</b>ffer, <b>R</b>equest, <b>A</b>ck (DORA)."},
+  {i:'🕳️',t:"Il <b>NAT</b> permette a decine di dispositivi di navigare con un solo indirizzo IP pubblico."},
+  {i:'⏱️',t:"<b>RSTP</b> (802.1w) converge in pochi secondi, contro i ~30-50s dello Spanning Tree classico."},
+  {i:'🔐',t:"<b>SSH</b> (porta 22) cifra la sessione; <b>Telnet</b> (23) manda tutto in chiaro, password comprese."},
+  {i:'🧩',t:"<b>127.0.0.1</b> è il <b>loopback</b>: il tuo stesso computer. In IPv6 diventa <b>::1</b>."},
+  {i:'📶',t:"Il Wi-Fi a <b>5 GHz</b> è più veloce ma copre meno; i <b>2.4 GHz</b> arrivano più lontano."},
+  {i:'🚪',t:"Le porte TCP/UDP vanno da 0 a <b>65535</b>: esattamente 16 bit di possibilità."},
+  {i:'🧭',t:"La <b>default route</b> 0.0.0.0/0 è il \"gateway of last resort\": dove va ciò che non ha una rotta specifica."},
+  {i:'🔗',t:"<b>EtherChannel</b> unisce più cavi in un solo link logico: più banda e ridondanza insieme."},
+  {i:'🪞',t:"Un <b>hub</b> ripete tutto a tutte le porte; uno <b>switch</b> impara e inoltra solo dove serve."},
+  {i:'🌐',t:"<b>ARP</b> scopre l'indirizzo MAC corrispondente a un IP nella rete locale."},
+  {i:'📏',t:"La <b>/24</b> (255.255.255.0) offre 254 host utili: la subnet più comune nelle LAN."},
+  {i:'🧷',t:"Il <b>trunk 802.1Q</b> aggiunge un \"tag\" ai frame per trasportare più VLAN su un solo cavo."},
+  {i:'♻️',t:"<b>HSRP</b> fa condividere a due router un IP virtuale: se l'attivo cade, subentra lo standby."},
+  {i:'🧨',t:"Un <b>loop di livello 2</b> può paralizzare una rete in pochi secondi: per questo esiste lo STP."},
+  {i:'🔎',t:"<b>show ip interface brief</b> è il primo comando per capire se le interfacce sono up/up."},
+  {i:'📚',t:"La <b>tabella CAM</b> di uno switch associa gli indirizzi MAC alle porte fisiche."},
+  {i:'⏰',t:"<b>NTP</b> tiene sincronizzato l'orario dei dispositivi: essenziale per log e certificati."},
+  {i:'🧯',t:"<b>Port security</b> blocca la porta se si collega un dispositivo con MAC non autorizzato."},
+  {i:'🌉',t:"Il <b>router</b> collega reti diverse e separa i domini di broadcast; lo switch no."},
+  {i:'🧠',t:"La <b>wildcard mask</b> è la subnet mask \"al contrario\": /24 → 0.0.0.255 in OSPF e nelle ACL."},
+  {i:'📦',t:"<b>Incapsulamento</b>: Dati → Segmento → Pacchetto → Frame → Bit, un header a ogni livello."},
+  {i:'🛜',t:"Un <b>WLC</b> gestisce decine di access point da un punto solo: canali, potenza e roaming."},
+  {i:'💡',t:"<b>0xFF</b> in esadecimale vale 255: due cifre hex corrispondono a un byte (8 bit)."},
+  {i:'🧮',t:"Con <b>8 bit</b> conti da 0 a 255: sono i valori possibili di ogni ottetto di un IPv4."},
+  {i:'🛰️',t:"<b>OSPF</b> usa l'algoritmo di Dijkstra (SPF) per calcolare il percorso a costo minore."},
+  {i:'🏢',t:"Ogni <b>VLAN</b> è un dominio di broadcast separato: meno traffico inutile e più sicurezza."},
+  {i:'🔟',t:"Gli indirizzi <b>10.0.0.0/8</b> danno oltre 16 milioni di host privati: usati dalle grandi reti aziendali."}
 ];
-let factsIdx=0,factsTimer=null;
+let FACTS=[],factsIdx=0,factsTimer=null;
+function pickFacts(){FACTS=qShuffle(FUN_FACTS.slice()).slice(0,12);}
+function buildFactDots(){
+  const dots=_id('fact-dots');if(!dots)return;dots.innerHTML='';
+  FACTS.forEach((_,i)=>{const d=el('span','facts-dot'+(i===factsIdx?' on':''));d.onclick=()=>{factsIdx=i;renderFact();factsResume();};dots.appendChild(d);});
+}
 function renderFact(){
-  const f=FUN_FACTS[factsIdx];
+  const f=FACTS[factsIdx];if(!f)return;
   const tx=_id('fact-text'),ic=_id('fact-ico');
   if(!tx)return;
   tx.style.opacity=0;ic.style.transform='scale(.6)';
   setTimeout(()=>{tx.innerHTML=f.t;ic.textContent=f.i;tx.style.opacity=1;ic.style.transform='scale(1)';},180);
   document.querySelectorAll('#fact-dots .facts-dot').forEach((d,i)=>d.classList.toggle('on',i===factsIdx));
 }
-function factsGo(d){factsIdx=(factsIdx+d+FUN_FACTS.length)%FUN_FACTS.length;renderFact();factsResume();}
+function factsGo(d){
+  factsIdx+=d;
+  if(factsIdx>=FACTS.length){pickFacts();factsIdx=0;buildFactDots();}   // fine giro → nuovo batch mescolato
+  else if(factsIdx<0){factsIdx=FACTS.length-1;}
+  renderFact();factsResume();
+}
 function factsPause(){clearInterval(factsTimer);factsTimer=null;}
 function factsResume(){factsPause();factsTimer=setInterval(()=>factsGo(1),6500);}
 function initFacts(){
-  const dots=_id('fact-dots');if(!dots)return;dots.innerHTML='';
-  FUN_FACTS.forEach((_,i)=>{const d=el('span','facts-dot'+(i===0?' on':''));d.onclick=()=>{factsIdx=i;renderFact();factsResume();};dots.appendChild(d);});
+  if(!_id('fact-dots'))return;
+  pickFacts();factsIdx=0;buildFactDots();
   renderFact();factsResume();
 }
 
