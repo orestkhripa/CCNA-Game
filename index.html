@@ -326,6 +326,22 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .order-num{width:22px;height:22px;border-radius:50%;background:var(--dim);display:flex;align-items:center;justify-content:center;font-family:'JetBrains Mono',monospace;font-size:.62rem;min-width:22px}
 .order-slot.ok .order-num{background:var(--green);color:var(--bg)}
 .play-progress{font-family:'JetBrains Mono',monospace;font-size:.66rem;color:var(--muted);margin:6px 0}
+/* ─── GIOCO: SMISTA (match interattivo) ─── */
+.sort-board{display:grid;grid-template-columns:repeat(auto-fit,minmax(148px,1fr));gap:10px;margin-bottom:14px}
+.sort-bin{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:10px;min-height:66px;cursor:pointer;transition:border-color .15s,background .15s}
+.sort-bin:hover{border-color:var(--accent);background:rgba(59,130,246,.04)}
+.sort-bin:active{transform:scale(.99)}
+.sort-bin-h{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px;text-align:center}
+.sort-bin-body{display:flex;flex-direction:column;gap:5px;min-height:22px}
+.sort-bin.shake-bin{animation:shake .42s;border-color:var(--red)}
+.sort-pool-wrap{margin-bottom:12px}
+.sort-pool-lbl{font-size:.74rem;color:var(--muted);margin-bottom:8px}
+.sort-pool{display:flex;flex-wrap:wrap;gap:7px;min-height:42px;padding:11px;background:var(--surface);border:1px dashed var(--dim);border-radius:10px}
+.sort-chip{background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:9px 13px;font-size:.82rem;font-weight:600;cursor:pointer;transition:all .15s;user-select:none}
+.sort-chip:hover{border-color:var(--accent);color:var(--accent)}
+.sort-chip.sel{border-color:var(--accent);background:rgba(59,130,246,.14);color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.14)}
+.sort-chip.chip-ko{animation:shake .42s;border-color:var(--red);color:var(--red)}
+.sort-chip.placed-ok{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08);cursor:default;font-size:.76rem;padding:6px 10px;animation:popIn .3s}
 /* ─── HERO RESTYLE ─── */
 .home-hero{position:relative;overflow:hidden}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(59,130,246,.16) 1px,transparent 0);background-size:24px 24px;-webkit-mask-image:linear-gradient(120deg,#000,transparent 68%);mask-image:linear-gradient(120deg,#000,transparent 68%);pointer-events:none}
@@ -2041,28 +2057,44 @@ function makeSubnetRound(minC,maxC){
     {label:'N. host validi',answer:String(hosts)}
   ]};
 }
-// ── MOTORE: ABBINA (categorizza) ──
+// ── MOTORE: SMISTA (abbina interattivo, stile lab · a tocco) ──
 function engineMatch(arena,data,onDone){
-  const queue=qShuffle(data.items.slice());let i=0,correct=0;
-  function render(){
-    if(i>=queue.length){addXP(15);setTimeout(onDone,300);return;}
-    const it=queue[i];arena.innerHTML='';
-    arena.appendChild(el('div','game-instr',data.instruction));
-    const card=el('div','match-card');card.appendChild(el('div','match-name',it.n));if(it.h)card.appendChild(el('div','match-hint',it.h));arena.appendChild(card);
-    const grid=el('div','cat-grid','');
-    qShuffle(data.cats.slice()).forEach(cat=>{
-      const b=el('button','cat-btn',cat);
-      b.onclick=()=>{
-        if(grid.dataset.done)return;
-        if(cat===it.c){b.classList.add('ok');correct++;addXP(5);grid.dataset.done='1';i++;setTimeout(render,450);}
-        else{b.classList.add('ko');grid.dataset.done='1';[...grid.children].forEach(x=>{if(x.textContent===it.c)x.classList.add('ok');});i++;setTimeout(render,1000);}
-      };
-      grid.appendChild(b);
-    });
-    arena.appendChild(grid);
-    arena.appendChild(el('div','play-progress','Elemento '+(i+1)+'/'+queue.length+' · Corretti: '+correct));
+  arena.innerHTML='';
+  arena.appendChild(el('div','game-instr',data.instruction));
+  const board=el('div','sort-board');const bins={};
+  data.cats.forEach(cat=>{
+    const bin=el('div','sort-bin');bin.appendChild(el('div','sort-bin-h',cat));
+    const body=el('div','sort-bin-body');bin.appendChild(body);bins[cat]=body;
+    bin.onclick=()=>place(cat,bin);
+    board.appendChild(bin);
+  });
+  arena.appendChild(board);
+  const poolWrap=el('div','sort-pool-wrap');
+  poolWrap.appendChild(el('div','sort-pool-lbl','👆 Tocca un elemento, poi lo scomparto giusto'));
+  const pool=el('div','sort-pool');poolWrap.appendChild(pool);
+  arena.appendChild(poolWrap);
+  const fb=el('div','fb-strip');arena.appendChild(fb);
+  const prog=el('div','play-progress');arena.appendChild(prog);
+  let selected=null,placed=0,errors=0;const total=data.items.length;
+  qShuffle(data.items.slice()).forEach(it=>{
+    const chip=el('div','sort-chip',it.n);chip.dataset.cat=it.c;if(it.h)chip.dataset.hint=it.h;
+    chip.onclick=()=>{if(chip.classList.contains('locked'))return;if(selected)selected.classList.remove('sel');selected=chip;chip.classList.add('sel');};
+    pool.appendChild(chip);
+  });
+  function upd(){prog.textContent='Smistati: '+placed+'/'+total+(errors?' · errori: '+errors:'');}
+  upd();
+  function place(cat,bin){
+    if(!selected){fb.className='fb-strip show ko';fb.textContent='Prima tocca un elemento da smistare.';return;}
+    if(selected.dataset.cat===cat){
+      const ch=selected;selected=null;ch.classList.remove('sel');ch.classList.add('locked','placed-ok');ch.onclick=null;
+      bins[cat].appendChild(ch);placed++;addXP(4);upd();fb.className='fb-strip';
+      if(placed>=total){fb.className='fb-strip show ok';fb.textContent='✓ Tutto smistato correttamente!';addXP(10);setTimeout(onDone,750);}
+    }else{
+      errors++;upd();bin.classList.add('shake-bin');const ch=selected;ch.classList.add('chip-ko');
+      const h=ch.dataset.hint;fb.className='fb-strip show ko';fb.textContent='✗ Scomparto sbagliato'+(h?' — indizio: '+h:'')+'. Riprova.';
+      setTimeout(()=>{bin.classList.remove('shake-bin');ch.classList.remove('chip-ko');},420);
+    }
   }
-  render();
 }
 // ── MOTORE: CALCOLA/DIGITA ──
 function engineCalc(arena,data,onDone){
@@ -2448,15 +2480,29 @@ function startConsolidation(){
   _id('play-quiz').style.display='block';
   const mod=LP.mod;const pool=qShuffle(questionsForModule(mod));
   const n=mod.type==='cert'?20:mod.type==='boss'?6:4;
-  LP.quiz={pool:pool.slice(0,Math.min(n,pool.length)),cur:0,ok:0,answered:false,wrong:[]};
+  LP.quiz={base:pool.slice(0,Math.min(n,pool.length)),pool:[],cur:0,ok:0,answered:false,wrong:[],round:1};
+  startRound(1);
+}
+function startRound(r){
+  const Q=LP.quiz;Q.round=r;Q.cur=0;Q.ok=0;Q.wrong=[];Q.pool=qShuffle(Q.base.slice());
   renderCons();
+}
+function renderRoundTransition(){
+  const wrap=_id('play-quiz');wrap.innerHTML='';const Q=LP.quiz;
+  const c=el('div','q-box');c.style.textAlign='center';
+  c.innerHTML='<div class="q-tag" style="color:var(--green)">✓ GIRO 1 · IMPARA — COMPLETATO</div>'+
+    '<div class="q-text">Hai totalizzato '+Q.ok+'/'+Q.pool.length+' al primo giro.</div>'+
+    '<p style="color:var(--muted);font-size:.85rem;margin-top:10px;line-height:1.6">Ora il <b style="color:var(--cyan)">Giro 2 · Verifica</b>: rispondi di nuovo alle stesse domande (in ordine diverso). Nel resoconto finale contano <b>solo gli errori di questo secondo giro</b>.</p>';
+  const btn=el('button','hero-cta','▶ Inizia il Giro 2');btn.onclick=()=>startRound(2);
+  wrap.appendChild(c);wrap.appendChild(btn);
 }
 function renderCons(){
   const wrap=_id('play-quiz');wrap.innerHTML='';const Q=LP.quiz,mod=LP.mod;
-  if(Q.cur>=Q.pool.length){finishLevel();return;}
+  if(Q.cur>=Q.pool.length){ if(Q.round===1){renderRoundTransition();}else{finishLevel();} return; }
   Q.answered=false;
   const q=prepQuestion(Q.pool[Q.cur],mod.title);Q.currentQ=q;
-  wrap.appendChild(el('div','game-instr','🧠 Consolidamento · Domanda '+(Q.cur+1)+'/'+Q.pool.length));
+  const rlabel=Q.round===1?'Giro 1 · Impara':'Giro 2 · Verifica';
+  wrap.appendChild(el('div','game-instr','🧠 '+rlabel+' · Domanda '+(Q.cur+1)+'/'+Q.pool.length));
   wrap.appendChild(el('div','q-box','<div class="q-text">'+q.question+'</div>'));
   const grid=el('div','opts-grid','');
   const fb=el('div','feedback','');
@@ -2466,9 +2512,12 @@ function renderCons(){
     b.onclick=()=>{
       if(Q.answered)return;Q.answered=true;
       grid.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add('ok');});
-      if(i!==q.correct){b.classList.add('ko');Q.wrong.push({q:q.question,tua:q.options[i],giusta:q.options[q.correct],perche:q.explanation});}else{Q.ok++;addXP(8);}
-      fb.className='feedback show '+(i===q.correct?'ok':'ko');
-      fb.innerHTML='<div class="feedback-title">'+(i===q.correct?'✓ Corretto':'✗ Errato')+'</div><div>'+q.explanation+'</div>';
+      const ok=i===q.correct;
+      if(!ok){b.classList.add('ko');Q.wrong.push({q:q.question,tua:q.options[i],giusta:q.options[q.correct],perche:q.explanation});}else{Q.ok++;addXP(8);}
+      fb.className='feedback show '+(ok?'ok':'ko');
+      fb.innerHTML='<div class="feedback-title">'+(ok?'✓ Corretto':'✗ Errato')+'</div>'+
+        (ok?'':'<div style="margin-bottom:6px"><b style="color:var(--green)">✓ Risposta corretta:</b> '+q.options[q.correct]+'</div>')+
+        '<div>'+q.explanation+'</div>';
       nb.classList.add('show');
     };
     grid.appendChild(b);
@@ -2483,7 +2532,7 @@ function finishLevel(){
   if(passed&&!G.modules[mod.id].completed) completeModule(mod.id);
   _id('play-done-pct').textContent=passed?'✓':'✗';
   _id('play-done-pct').style.color=passed?'var(--green)':'var(--orange)';
-  _id('play-done-msg').innerHTML=(passed?'Livello completato! ':'Ci sei quasi. ')+'Quiz: '+LP.quiz.ok+'/'+LP.quiz.pool.length+(passed?' &nbsp;·&nbsp; +'+mod.xp+' XP':' — ripeti per sbloccare il modulo');
+  _id('play-done-msg').innerHTML=(passed?'Livello completato! ':'Ci sei quasi. ')+'Verifica (Giro 2): '+LP.quiz.ok+'/'+LP.quiz.pool.length+(passed?' &nbsp;·&nbsp; +'+mod.xp+' XP':' — ripeti per sbloccare il modulo');
   // ── RESOCONTO + REVISIONE ERRORI ──
   const rc=_id('play-recap');rc.innerHTML='';
   const b=BRIEF[mod.id];
@@ -2496,7 +2545,7 @@ function finishLevel(){
   const w=LP.quiz.wrong||[];
   if(w.length){
     const card=el('div','brief-card');card.style.borderLeftColor='var(--red)';
-    const l=el('div','brief-label','🔁 Revisione errori ('+w.length+')');l.style.color='var(--red)';card.appendChild(l);
+    const l=el('div','brief-label','🔁 Errori del Giro 2 — da rivedere ('+w.length+')');l.style.color='var(--red)';card.appendChild(l);
     w.forEach(e=>{
       const it=el('div','recap-err');
       it.innerHTML='<div class="recap-q">'+e.q+'</div>'+
@@ -2508,7 +2557,7 @@ function finishLevel(){
     rc.appendChild(card);
   }else if(LP.quiz.pool.length){
     const card=el('div','brief-card');card.style.borderLeftColor='var(--green)';
-    card.innerHTML='<div class="brief-text">🎉 Nessun errore nel consolidamento — perfetto!</div>';
+    card.innerHTML='<div class="brief-text">🎉 Nessun errore nel Giro 2 — perfetto!</div>';
     rc.appendChild(card);
   }
 }
