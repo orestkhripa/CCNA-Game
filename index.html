@@ -342,6 +342,19 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .sort-chip.sel{border-color:var(--accent);background:rgba(59,130,246,.14);color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.14)}
 .sort-chip.chip-ko{animation:shake .42s;border-color:var(--red);color:var(--red)}
 .sort-chip.placed-ok{border-color:var(--green);color:var(--green);background:rgba(16,185,129,.08);cursor:default;font-size:.76rem;padding:6px 10px;animation:popIn .3s}
+/* ─── GIOCO: BIT BUILDER (binario) ─── */
+.bits-row{display:flex;gap:6px;justify-content:center;flex-wrap:wrap;margin:14px 0}
+.bit-btn{display:flex;flex-direction:column;align-items:center;gap:3px;background:var(--panel);border:1px solid var(--border);border-radius:9px;padding:10px 0;width:52px;cursor:pointer;transition:all .15s;font-family:'JetBrains Mono',monospace}
+.bit-btn .bit-w{font-size:.58rem;color:var(--muted)}
+.bit-btn .bit-v{font-size:1.2rem;font-weight:700;color:var(--muted)}
+.bit-btn.on{border-color:var(--accent);background:rgba(59,130,246,.12)}
+.bit-btn.on .bit-v{color:var(--cyan)}
+.bit-btn:hover:not(:disabled){border-color:var(--accent)}
+.bit-btn:active{transform:scale(.95)}
+.bit-btn:disabled{opacity:.75;cursor:default}
+.bits-disp2{text-align:center;font-family:'JetBrains Mono',monospace;font-size:.9rem;color:var(--text);margin:4px 0 10px}
+.bits-disp2 b{color:var(--cyan)}
+@media(max-width:420px){.bit-btn{width:38px;padding:8px 0}.bit-btn .bit-v{font-size:1rem}}
 /* ─── HERO RESTYLE ─── */
 .home-hero{position:relative;overflow:hidden}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(59,130,246,.16) 1px,transparent 0);background-size:24px 24px;-webkit-mask-image:linear-gradient(120deg,#000,transparent 68%);mask-image:linear-gradient(120deg,#000,transparent 68%);pointer-events:none}
@@ -2177,28 +2190,83 @@ function engineCli(arena,data,onDone){
   });
   setTimeout(()=>field.focus(),60);
 }
+// ── MOTORE: BIT BUILDER (binario a interruttori) ──
+function engineBits(arena,data,onDone){
+  const rounds=data.rounds||[{target:192},{target:224},{target:240},{target:128},{target:255}];
+  const weights=[128,64,32,16,8,4,2,1];let idx=0;
+  function render(){
+    const r=rounds[idx];arena.innerHTML='';
+    arena.appendChild(el('div','game-instr',(data.instruction||'Attiva i bit per costruire il valore decimale richiesto.')+' &nbsp;·&nbsp; <b>Round '+(idx+1)+'/'+rounds.length+'</b>'));
+    const card=el('div','match-card');card.innerHTML='<div style="font-family:JetBrains Mono,monospace;font-size:.62rem;letter-spacing:2px;color:var(--muted);text-transform:uppercase">Costruisci il valore</div><div class="match-name" style="font-size:2.2rem">'+r.target+'</div>';
+    arena.appendChild(card);
+    const state=weights.map(()=>0);
+    const row=el('div','bits-row'),disp=el('div','bits-disp2'),fb=el('div','fb-strip');
+    weights.forEach((w,i)=>{
+      const b=el('button','bit-btn','<span class="bit-w">'+w+'</span><span class="bit-v">0</span>');
+      b.onclick=()=>{state[i]^=1;b.classList.toggle('on',!!state[i]);b.querySelector('.bit-v').textContent=state[i];upd();};
+      row.appendChild(b);
+    });
+    function upd(){
+      const sum=state.reduce((a,s,i)=>a+(s?weights[i]:0),0);
+      disp.innerHTML='Binario: <b>'+state.join('')+'</b> &nbsp;=&nbsp; Decimale: <b>'+sum+'</b>';
+      if(sum===r.target){
+        fb.className='fb-strip show ok';fb.textContent='✓ '+state.join('')+' = '+r.target;
+        row.querySelectorAll('.bit-btn').forEach(x=>x.disabled=true);addXP(8);
+        idx++;if(idx>=rounds.length)setTimeout(onDone,750);else setTimeout(render,850);
+      }
+    }
+    arena.appendChild(row);arena.appendChild(disp);arena.appendChild(fb);upd();
+  }
+  render();
+}
+// ── MOTORE: PACKET FLOW (percorso del pacchetto, animato) ──
+function engineFlow(arena,data,onDone){
+  arena.innerHTML='';
+  arena.appendChild(el('div','game-instr',data.instruction));
+  const diag=el('div','net-diag');
+  data.devices.forEach((d,i)=>{
+    diag.appendChild(el('div','net-dev','<div class="dev-ico'+(i===0?' active':'')+'" id="fdev'+i+'">'+d.ico+'</div><div class="dev-lbl">'+d.lbl+'</div>'));
+    if(i<data.devices.length-1) diag.appendChild(el('div','link-seg','<div class="pkt-dot" id="fpkt'+i+'"></div>'));
+  });
+  arena.appendChild(diag);
+  const qbox=el('div');arena.appendChild(qbox);
+  const prog=el('div','play-progress');arena.appendChild(prog);
+  let si=0;
+  function render(){
+    if(si>=data.steps.length){addXP(10);setTimeout(onDone,500);return;}
+    const s=data.steps[si];qbox.innerHTML='';prog.textContent='Tappa '+(si+1)+'/'+data.steps.length;
+    qbox.appendChild(el('div','q-box','<div class="q-text">'+s.q+'</div>'));
+    const grid=el('div','ai-opts'),fb=el('div','explainer');
+    qShuffle(s.options.map((o,i)=>({o,i}))).forEach(({o,i})=>{
+      const b=el('div','ai-opt','<span class="opt-l">'+String.fromCharCode(65+grid.children.length)+'</span><span>'+o+'</span>');
+      b.onclick=()=>{
+        if(grid.dataset.done)return;
+        if(i===s.correct){
+          grid.dataset.done='1';b.classList.add('ok');
+          const d0=document.getElementById('fdev'+si);if(d0)d0.classList.remove('active');
+          const pkt=document.getElementById('fpkt'+si);if(pkt)pkt.classList.add('go');
+          const d1=document.getElementById('fdev'+(si+1));if(d1)d1.classList.add('recv');
+          addXP(6);if(s.note){fb.className='explainer show';fb.innerHTML=s.note;}
+          si++;setTimeout(render,1200);
+        }else b.classList.add('ko');
+      };
+      grid.appendChild(b);
+    });
+    qbox.appendChild(grid);qbox.appendChild(fb);
+  }
+  render();
+}
 // ══════════════════════════════════════
 // DATI DEI 21 LIVELLI (allineati CCNA 200-301)
 // ══════════════════════════════════════
 const LEVELS={
- net_basics:{engine:"match",data:{instruction:"A quale livello OSI opera ciascun dispositivo o mezzo?",cats:["L1 Fisico","L2 Data Link","L3 Network"],items:[
-   {n:"Hub",h:"Ripete il segnale a tutte le porte",c:"L1 Fisico"},
-   {n:"Ripetitore",h:"Rigenera il segnale elettrico",c:"L1 Fisico"},
-   {n:"Cavo UTP / Fibra",h:"Mezzo trasmissivo",c:"L1 Fisico"},
-   {n:"Switch",h:"Inoltra in base alla MAC",c:"L2 Data Link"},
-   {n:"Bridge",h:"Collega segmenti a livello 2",c:"L2 Data Link"},
-   {n:"Access Point",h:"Wi-Fi 802.11",c:"L2 Data Link"},
-   {n:"Router",h:"Instrada in base all'indirizzo IP",c:"L3 Network"},
-   {n:"Switch multilayer (L3)",h:"Routing tra VLAN",c:"L3 Network"}
+ net_basics:{engine:"flow",data:{instruction:"Segui il pacchetto dal PC fino al server: scegli cosa accade a ogni tappa.",devices:[{ico:'💻',lbl:'PC'},{ico:'🔀',lbl:'Switch'},{ico:'📡',lbl:'Router'},{ico:'🖥️',lbl:'Server'}],steps:[
+   {q:"Il PC deve raggiungere un server su un'altra rete. A chi invia il frame per primo?",options:["Al proprio default gateway (il router), passando dallo switch","Direttamente al server, che è su un'altra rete","In broadcast a tutta Internet"],correct:0,note:"Per uscire dalla propria rete il PC invia il frame al <b>gateway</b>; lo switch lo inoltra verso il router."},
+   {q:"Lo switch riceve il frame. Come sceglie la porta di uscita?",options:["Consulta la tabella MAC (CAM) e inoltra solo alla porta giusta","Guarda l'indirizzo IP di destinazione","Invia sempre a tutte le porte"],correct:0,note:"Lo switch lavora a <b>L2</b>: usa la tabella MAC per inoltrare in modo selettivo."},
+   {q:"Il router riceve il pacchetto. Come decide dove inoltrarlo?",options:["Consulta la tabella di routing in base all'IP di destinazione","Usa l'indirizzo MAC del PC mittente","Usa il numero di porta TCP"],correct:0,note:"Il router lavora a <b>L3</b>: sceglie il percorso in base all'IP e alla tabella di routing."},
+   {q:"Il pacchetto arriva al server. Quale livello legge la porta TCP (es. 443)?",options:["Transport (L4)","Network (L3)","Data Link (L2)"],correct:0,note:"La porta TCP è gestita dal livello <b>Transport (L4)</b>."}
  ]}},
- binary:{engine:"calc",data:{instruction:"Conversioni binario / decimale / esadecimale.",list:[
-   {prompt:"11000000  →  decimale",fields:[{label:"Decimale",answer:"192"}]},
-   {prompt:"10101100  →  decimale",fields:[{label:"Decimale",answer:"172"}]},
-   {prompt:"200  →  binario (8 bit)",fields:[{label:"Binario",answer:"11001000"}]},
-   {prompt:"0xFF  →  decimale",fields:[{label:"Decimale",answer:"255"}]},
-   {prompt:"15  →  esadecimale",fields:[{label:"Hex",answer:"f"}]},
-   {prompt:"11111111  →  decimale",fields:[{label:"Decimale",answer:"255"}]}
- ]}},
+ binary:{engine:"bits",data:{instruction:"Attiva i bit (128 64 32 16 8 4 2 1) per costruire il valore decimale.",rounds:[{target:192},{target:224},{target:240},{target:128},{target:255}]}},
  osi_mod:{engine:"match",data:{instruction:"A quale livello OSI appartiene ciascun protocollo?",cats:["Application (7)","Transport (4)","Network (3)","Data Link (2)","Physical (1)"],items:[
    {n:"HTTP",c:"Application (7)"},{n:"DNS",c:"Application (7)"},{n:"FTP",c:"Application (7)"},{n:"SMTP",c:"Application (7)"},
    {n:"TCP",c:"Transport (4)"},{n:"UDP",c:"Transport (4)"},
@@ -2431,7 +2499,7 @@ const DIAGRAM={
  redun_mod:{cap:"HSRP dà un gateway virtuale ridondante (Active/Standby); EtherChannel aggrega più link verso lo switch.",svg:`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Gateway ridondante (HSRP) + link aggregati (EtherChannel)</text><rect x="55" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#10b981"/><text x="117" y="60" fill="#10b981" font-size="11" text-anchor="middle">R1 · ACTIVE</text><text x="117" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="380" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#64748b"/><text x="442" y="60" fill="#94a3b8" font-size="11" text-anchor="middle">R2 · STANDBY</text><text x="442" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="220" y="45" width="120" height="32" rx="16" fill="rgba(59,130,246,.10)" stroke="#3b82f6"/><text x="280" y="65" fill="#3b82f6" font-size="11" text-anchor="middle">IP virtuale .1</text><line x1="180" y1="61" x2="220" y2="61" stroke="#3b82f6" stroke-width="2"/><line x1="340" y1="61" x2="380" y2="61" stroke="#64748b" stroke-width="2" stroke-dasharray="4 3"/><rect x="220" y="152" width="120" height="38" rx="8" fill="#0d1117" stroke="#06b6d4"/><text x="280" y="176" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH</text><g stroke="#f59e0b" stroke-width="2.5" class="flowline"><line x1="252" y1="82" x2="264" y2="152"/><line x1="260" y1="82" x2="272" y2="152"/></g><text x="330" y="120" fill="#f59e0b" font-size="9">EtherChannel</text><line x1="120" y1="82" x2="238" y2="152" stroke="#334155" stroke-width="1.5"/><line x1="440" y1="82" x2="322" y2="152" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`},
  ipserv_mod:{cap:"DHCP assegna l'IP in quattro passi: Discover, Offer, Request, Ack (DORA).",svg:`<svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">DHCP · il client ottiene l'IP in 4 passi (DORA)</text><text x="70" y="42" fill="#06b6d4" font-size="12" text-anchor="middle">CLIENT 📟</text><text x="490" y="42" fill="#f59e0b" font-size="12" text-anchor="middle">DHCP 🖥️</text><line x1="70" y1="50" x2="70" y2="172" stroke="#334155"/><line x1="490" y1="50" x2="490" y2="172" stroke="#334155"/><line x1="70" y1="74" x2="490" y2="88" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="72" fill="#3b82f6" font-size="11" text-anchor="middle">1. Discover →</text><line x1="490" y1="102" x2="70" y2="114" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="100" fill="#10b981" font-size="11" text-anchor="middle">← 2. Offer</text><line x1="70" y1="128" x2="490" y2="140" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="126" fill="#3b82f6" font-size="11" text-anchor="middle">3. Request →</text><line x1="490" y1="154" x2="70" y2="166" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="152" fill="#10b981" font-size="11" text-anchor="middle">← 4. Ack (lease)</text></svg>`}
 };
-const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli};
+const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli,bits:engineBits,flow:engineFlow};
 // ── FLUSSO LIVELLO ──
 function setPlayStep(s){
   const order=['learn','game','quiz','done'];const idx=order.indexOf(s);
