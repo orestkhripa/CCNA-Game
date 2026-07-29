@@ -509,6 +509,29 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .brief-card.home{border-left-color:var(--green)}
 .brief-card.home .brief-label{color:var(--green)}
 .brief-card .kn-tag{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:.52rem;letter-spacing:1px;color:#818cf8;border:1px solid rgba(129,140,248,.35);border-radius:5px;padding:1px 6px;margin-left:6px;vertical-align:middle}
+/* ─── TROUBLESHOOTING LAB ─── */
+.lab-intro{font-size:.83rem;color:var(--muted);line-height:1.6;margin-bottom:16px}
+.ts-cmd{font-family:'JetBrains Mono',monospace;color:var(--cyan);background:rgba(6,182,212,.08);padding:1px 6px;border-radius:4px;font-size:.9em}
+.ts-list{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+@media(max-width:600px){.ts-list{grid-template-columns:1fr}}
+.ts-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--accent);border-radius:10px;padding:14px 16px;cursor:pointer;transition:transform .15s,border-color .15s,box-shadow .15s}
+.ts-card:hover{transform:translateY(-2px);border-color:var(--accent);box-shadow:0 6px 20px rgba(0,0,0,.3)}
+.ts-card:active{transform:scale(.98)}
+.ts-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.ts-card.solved{border-left-color:var(--green)}
+.ts-card-top{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.ts-card-top h4{font-family:'Syne',sans-serif;font-size:.92rem;font-weight:700}
+.ts-diff{margin-left:auto;font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:6px}
+.ts-diff.easy{color:var(--green);background:rgba(16,185,129,.12)}
+.ts-diff.med{color:var(--orange);background:rgba(245,158,11,.12)}
+.ts-diff.hard{color:var(--red);background:rgba(239,68,68,.12)}
+.ts-card p{font-size:.78rem;color:var(--muted);line-height:1.5}
+.ts-obj{background:rgba(6,182,212,.06);border:1px solid rgba(6,182,212,.25);border-radius:10px;padding:14px 16px;margin-bottom:14px;font-size:.86rem;line-height:1.55}
+.ts-obj-h{font-family:'JetBrains Mono',monospace;font-size:.6rem;letter-spacing:2px;text-transform:uppercase;color:var(--cyan);margin-bottom:6px}
+.ts-topo{font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--text);background:#020408;border:1px solid var(--border);border-radius:6px;padding:8px 11px;margin:9px 0;overflow-x:auto;white-space:nowrap}
+.ts-sym{color:#fca5a5;font-size:.8rem}
+.ts-back{margin-bottom:12px;background:transparent;border:1px solid var(--border);color:var(--muted);padding:7px 14px;border-radius:8px;cursor:pointer;font-size:.78rem;font-family:'DM Sans',sans-serif;transition:all .15s}
+.ts-back:hover{color:var(--text);border-color:var(--dim)}
 /* ─── GLOSSARIO ─── */
 .gloss-search{width:100%;padding:13px 16px;background:var(--panel);border:1px solid var(--border);border-radius:10px;color:var(--text);font-family:'DM Sans',sans-serif;font-size:.92rem;outline:none;transition:border-color .15s;margin-bottom:10px}
 .gloss-search:focus{border-color:var(--accent);box-shadow:0 0 0 3px rgba(59,130,246,.12)}
@@ -676,6 +699,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="lab-tab" onclick="selLabTab('cli',this)">💻 CLI</button>
     <button class="lab-tab" onclick="selLabTab('packet',this)">📦 Packet Flow</button>
     <button class="lab-tab" onclick="selLabTab('vlan',this)">🔀 VLAN</button>
+    <button class="lab-tab" onclick="selLabTab('tshoot',this)">🧪 Troubleshooting</button>
     <button class="lab-tab" onclick="selLabTab('ailab',this)">🎲 Quiz rapido</button>
   </div>
 
@@ -805,6 +829,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     </div>
     <div class="err-box" id="lab-ai-err"></div>
   </div>
+
+  <!-- TROUBLESHOOTING · simulatore IOS con stato reale -->
+  <div class="lab-content" id="lab-tshoot">
+    <p class="lab-intro">🧪 <b>Simulazione pratica</b> — diagnostica e ripara reti guaste come nelle simulazioni dell'esame CCNA. Usa i comandi <span class="ts-cmd">show</span> per trovare il problema, correggilo in configurazione e verifica con <span class="ts-cmd">ping</span>. Il router risponde in base allo stato reale.</p>
+    <div class="ts-list" id="ts-list"></div>
+    <div id="ts-arena"></div>
+  </div>
 </div>
 
 <!-- ══════════════ SCHEMAS ══════════════ -->
@@ -878,6 +909,7 @@ let G=loadG();
 if(!G.days)G.days={};
 if(G.bestStreak==null)G.bestStreak=0;
 if(G.dailyGoal==null)G.dailyGoal=60;
+if(!G.labs)G.labs={};
 function todayStr(d){d=d||new Date();return d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0');}
 function recordActivity(n){
   const t=todayStr();G.days[t]=(G.days[t]||0)+n;
@@ -933,7 +965,7 @@ function showView(v){
   _id('nb-'+v).classList.add('active');
   if(v==='home'){renderTree();updateHeroProgress();}
   if(v==='quiz') initQuizMenu();
-  if(v==='lab')  {initOsi();initSubnet();initCli();initPacket();initVlan();initLabTopics();}
+  if(v==='lab')  {initOsi();initSubnet();initCli();initPacket();initVlan();initLabTopics();initTshoot();}
   if(v==='cal') renderCalendar();
   if(v==='schemas') renderSchema('osi');
   if(v==='gloss') renderGlossary((_id('gloss-search')||{}).value||'');
@@ -2571,6 +2603,189 @@ function renderCalendar(){
   buildCells(_id('heatmap'),18*7);
 }
 
+// ══════════════════════════════════════
+// TROUBLESHOOTING LAB · simulatore IOS con stato reale
+//   reti guaste da diagnosticare e riparare (stile esame)
+// ══════════════════════════════════════
+function tsIsIp(s){return /^\d{1,3}(\.\d{1,3}){3}$/.test(s)&&s.split('.').every(o=>+o<=255);}
+function tsMaskLen(m){let n=ipToInt(m),c=0;for(let i=0;i<32;i++){if(n&0x80000000)c++;n<<=1;}return c;}
+function tsNet(ip,mask){return intToIp(ipToInt(ip)&ipToInt(mask));}
+function tsInSub(ip,net,mask){const m=ipToInt(mask);return (ipToInt(ip)&m)===(ipToInt(net)&m);}
+function tsConnected(state){return state.ifaces.filter(i=>i.up&&i.ip&&i.mask);}
+function tsReachable(state,dst){
+  if(!tsIsIp(dst))return false;
+  const conn=tsConnected(state);
+  if(conn.some(i=>tsInSub(dst,i.ip,i.mask)))return true;
+  const routes=(state.routes||[]).slice().sort((a,b)=>tsMaskLen(b.mask)-tsMaskLen(a.mask));
+  for(const r of routes){ if(tsInSub(dst,r.net,r.mask)&&conn.some(i=>tsInSub(r.via,i.ip,i.mask)))return true; }
+  return false;
+}
+function tsNormIf(s){
+  s=s.trim().toLowerCase();const m=s.match(/([a-z]+)\s*([\d]+\/[\d]+(?:\/[\d]+)?)/);if(!m)return null;
+  const t=m[1];let p= t[0]==='g'?'Gi': t[0]==='f'?'Fa': t[0]==='s'?'Se': t[0]==='e'?'Et':'Gi';
+  return p+m[2];
+}
+const TSHOOT_SCENARIOS=[
+ {id:'ts_shut',icon:'🔌',diff:'easy',xp:25,title:'Interfaccia spenta',
+  desc:"R1 non raggiunge Internet. Trova l'interfaccia giù e riattivala.",
+  goal:"R1 deve raggiungere Internet (ping 8.8.8.8).",topo:"LAN 192.168.1.0/24 —[Gi0/0] R1 [Gi0/1]— ISP 203.0.113.1",
+  symptom:"Il ping da R1 verso 8.8.8.8 fallisce.",target:'8.8.8.8',hostname:'R1',
+  hints:['enable','show ip interface brief','configure terminal','interface Gi0/1','no shutdown','end','ping 8.8.8.8'],
+  explain:"L'interfaccia WAN Gi0/1 era in stato 'administratively down'. Senza di essa il router non raggiungeva il next-hop, quindi la default route era inutilizzabile. 'no shutdown' l'ha riattivata.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:false}
+  ],routes:[{net:'0.0.0.0',mask:'0.0.0.0',via:'203.0.113.1',type:'S'}]}},
+ {id:'ts_defroute',icon:'🧭',diff:'easy',xp:30,title:'Rotta di default mancante',
+  desc:"Le interfacce sono su, ma Internet è irraggiungibile. Manca qualcosa nella tabella di routing.",
+  goal:"R1 deve raggiungere Internet (ping 8.8.8.8).",topo:"LAN 192.168.1.0/24 —[Gi0/0] R1 [Gi0/1]— ISP 203.0.113.1",
+  symptom:"Il ping verso 8.8.8.8 fallisce anche se le interfacce sono up/up.",target:'8.8.8.8',hostname:'R1',
+  hints:['enable','show ip route','configure terminal','ip route 0.0.0.0 0.0.0.0 203.0.113.1','end','ping 8.8.8.8'],
+  explain:"Mancava la rotta di default: il router non sapeva dove instradare il traffico verso reti sconosciute. 'ip route 0.0.0.0 0.0.0.0 203.0.113.1' ha impostato il gateway of last resort.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:true}
+  ],routes:[]}},
+ {id:'ts_mask',icon:'🎭',diff:'med',xp:35,title:'Subnet mask errata (WAN)',
+  desc:"L'interfaccia WAN è su ma il next-hop non risponde. Controlla l'indirizzamento.",
+  goal:"R1 deve raggiungere Internet (ping 8.8.8.8).",topo:"R1 [Gi0/1] 203.0.113.2/30 — ISP 203.0.113.1/30",
+  symptom:"Gi0/1 è up/up ma il next-hop 203.0.113.1 non è raggiungibile.",target:'8.8.8.8',hostname:'R1',
+  hints:['enable','show ip interface brief','show ip route','configure terminal','interface Gi0/1','ip address 203.0.113.2 255.255.255.252','end','ping 8.8.8.8'],
+  explain:"L'IP dell'interfaccia WAN era 203.0.113.6/30, cioè nella subnet 203.0.113.4/30. Il next-hop 203.0.113.1 sta invece in 203.0.113.0/30: non erano nella stessa rete. Correggendo l'IP a 203.0.113.2/30 il next-hop torna direttamente connesso.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.6',mask:'255.255.255.252',up:true}
+  ],routes:[{net:'0.0.0.0',mask:'0.0.0.0',via:'203.0.113.1',type:'S'}]}},
+ {id:'ts_nexthop',icon:'➡️',diff:'med',xp:35,title:'Next-hop sbagliato',
+  desc:"C'è una rotta di default, ma punta all'indirizzo sbagliato.",
+  goal:"R1 deve raggiungere Internet (ping 8.8.8.8).",topo:"R1 [Gi0/1] 203.0.113.2/30 — ISP 203.0.113.1/30",
+  symptom:"La default route esiste ma il ping verso 8.8.8.8 fallisce.",target:'8.8.8.8',hostname:'R1',
+  hints:['enable','show ip route','show ip interface brief','configure terminal','ip route 0.0.0.0 0.0.0.0 203.0.113.1','end','ping 8.8.8.8'],
+  explain:"La rotta di default puntava a 203.0.113.9, un next-hop fuori dalla rete WAN (203.0.113.0/30) e quindi irraggiungibile. Impostando il next-hop corretto 203.0.113.1 il traffico trova la strada.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:true}
+  ],routes:[{net:'0.0.0.0',mask:'0.0.0.0',via:'203.0.113.9',type:'S'}]}},
+ {id:'ts_lanip',icon:'🏷️',diff:'med',xp:35,title:'IP LAN nella subnet sbagliata',
+  desc:"Il server del magazzino non risponde. L'interfaccia LAN ha l'indirizzo giusto?",
+  goal:"R1 deve raggiungere il server LAN 192.168.10.20.",topo:"Server 192.168.10.20 —[Gi0/0] R1",
+  symptom:"Il ping verso il server 192.168.10.20 fallisce.",target:'192.168.10.20',hostname:'R1',
+  hints:['enable','show ip interface brief','configure terminal','interface Gi0/0','ip address 192.168.10.1 255.255.255.0','end','ping 192.168.10.20'],
+  explain:"L'interfaccia LAN aveva 192.168.1.1/24, ma il server è nella rete 192.168.10.0/24. Riconfigurando Gi0/0 con 192.168.10.1/24 la LAN del server diventa direttamente connessa e raggiungibile.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:true}
+  ],routes:[]}},
+ {id:'ts_combo',icon:'💥',diff:'hard',xp:45,title:'Doppio guasto',
+  desc:"Niente Internet, e i sintomi sono più d'uno. Diagnosi completa richiesta.",
+  goal:"R1 deve raggiungere Internet (ping 8.8.8.8).",topo:"LAN 192.168.1.0/24 —[Gi0/0] R1 [Gi0/1]— ISP 203.0.113.1",
+  symptom:"Il ping verso 8.8.8.8 fallisce e la tabella di routing sembra incompleta.",target:'8.8.8.8',hostname:'R1',
+  hints:['enable','show ip interface brief','show ip route','configure terminal','interface Gi0/1','no shutdown','exit','ip route 0.0.0.0 0.0.0.0 203.0.113.1','end','ping 8.8.8.8'],
+  explain:"Due problemi insieme: l'interfaccia WAN Gi0/1 era spenta E mancava la rotta di default. Servivano entrambe le correzioni ('no shutdown' + 'ip route 0.0.0.0 0.0.0.0 203.0.113.1').",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:false}
+  ],routes:[]}}
+];
+function initTshoot(){
+  const list=_id('ts-list');if(!list)return;
+  _id('ts-arena').innerHTML='';list.style.display='';list.innerHTML='';
+  const DIFF={easy:'Facile',med:'Medio',hard:'Difficile'};
+  TSHOOT_SCENARIOS.forEach(sc=>{
+    const done=G.labs&&G.labs[sc.id];
+    const c=el('div','ts-card'+(done?' solved':''));
+    c.innerHTML='<div class="ts-card-top"><span style="font-size:1.15rem">'+(done?'✅':sc.icon)+'</span><h4>'+sc.title+'</h4><span class="ts-diff '+sc.diff+'">'+DIFF[sc.diff]+'</span></div><p>'+sc.desc+'</p>';
+    c.tabIndex=0;c.setAttribute('role','button');c.setAttribute('aria-label',sc.title+' — '+DIFF[sc.diff]);
+    c.onclick=()=>launchTshoot(sc);
+    c.onkeydown=e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();launchTshoot(sc);}};
+    list.appendChild(c);
+  });
+}
+function launchTshoot(sc){
+  const list=_id('ts-list'),arena=_id('ts-arena');
+  list.style.display='none';arena.innerHTML='';
+  const back=el('button','ts-back','‹ Tutti gli scenari');back.onclick=initTshoot;arena.appendChild(back);
+  const host=el('div');arena.appendChild(host);
+  engineTshoot(host,sc,()=>{
+    if(!G.labs)G.labs={};
+    if(!G.labs[sc.id]){G.labs[sc.id]=true;saveG();addXP(sc.xp||25);showToast('🧪 Scenario risolto! +'+(sc.xp||25)+' XP','var(--green)');}
+    else showToast('✓ Risolto di nuovo','var(--green)');
+  });
+}
+function engineTshoot(arena,sc,onDone){
+  const state=JSON.parse(JSON.stringify(sc.state));state.hostname=sc.hostname||'R1';
+  let mode='user',curIf=null,solved=false;
+  arena.innerHTML='';
+  const obj=el('div','ts-obj','<div class="ts-obj-h">🎯 Obiettivo</div><div>'+sc.goal+'</div><div class="ts-topo">'+sc.topo+'</div><div class="ts-sym">⚠️ '+sc.symptom+'</div>');
+  arena.appendChild(obj);
+  const wrap=el('div','cli-wrap','<div class="cli-bar"><div class="cli-dot" style="background:#ff5f57"></div><div class="cli-dot" style="background:#ffbd2e"></div><div class="cli-dot" style="background:#28c840"></div><span style="font-family:JetBrains Mono,monospace;font-size:.65rem;color:var(--muted);margin-left:8px;letter-spacing:2px">CISCO IOS · '+state.hostname+'</span></div><div class="cli-out"></div><div class="cli-inp"><span class="cli-ps"></span><input class="cli-field" autocomplete="off" spellcheck="false" placeholder="es. show ip interface brief · ping ..."></div>');
+  arena.appendChild(wrap);
+  const out=wrap.querySelector('.cli-out'),ps=wrap.querySelector('.cli-ps'),field=wrap.querySelector('.cli-field');
+  if(sc.hints){const hr=el('div','hint-row');sc.hints.forEach(h=>{const c=el('span','hint-chip',h);c.onclick=()=>{field.value=h;field.focus();};hr.appendChild(c);});obj.appendChild(hr);}
+  function pr(){const h=state.hostname;return mode==='priv'?h+'#':mode==='config'?h+'(config)#':mode==='if'?h+'(config-if)#':h+'>';}
+  function setPs(){ps.textContent=pr();}
+  function P(t,cls){const l=el('div','cl '+(cls||'cl-o'));l.textContent=t;out.appendChild(l);out.scrollTop=out.scrollHeight;}
+  function showBrief(){
+    P('Interface              IP-Address       OK? Method Status                 Protocol','cl-i');
+    state.ifaces.forEach(i=>P((i.full||i.name).padEnd(23)+(i.ip||'unassigned').padEnd(17)+'YES manual '+(i.up?'up':'administratively down').padEnd(24)+(i.up?'up':'down')));
+  }
+  function showRoute(){
+    P('Codes: C - connected, S - static, S* - candidate default','cl-c');P(' ');
+    const def=state.routes.find(r=>r.net==='0.0.0.0'&&r.mask==='0.0.0.0');
+    P(def&&tsReachable(state,def.via)?('Gateway of last resort is '+def.via+' to network 0.0.0.0'):'Gateway of last resort is not set','cl-i');P(' ');
+    tsConnected(state).forEach(i=>P('C    '+tsNet(i.ip,i.mask)+'/'+tsMaskLen(i.mask)+' is directly connected, '+i.name,'cl-s'));
+    state.routes.forEach(r=>P((r.net==='0.0.0.0'&&r.mask==='0.0.0.0')?('S*   0.0.0.0/0 [1/0] via '+r.via):('S    '+tsNet(r.net,r.mask)+'/'+tsMaskLen(r.mask)+' [1/0] via '+r.via)));
+  }
+  function showRun(){
+    P('!','cl-c');P('hostname '+state.hostname);
+    state.ifaces.forEach(i=>{P('!','cl-c');P('interface '+(i.full||i.name));P(i.ip?(' ip address '+i.ip+' '+i.mask):' no ip address');P(i.up?' no shutdown':' shutdown');});
+    P('!','cl-c');state.routes.forEach(r=>P('ip route '+r.net+' '+r.mask+' '+r.via));P('!','cl-c');P('end');
+  }
+  function win(){
+    P(' ');P('✓ CONNETTIVITÀ RIPRISTINATA — scenario risolto!','cl-s');
+    if(sc.explain){const e=el('div','cl');e.style.whiteSpace='normal';e.style.color='#93c5fd';e.style.lineHeight='1.6';e.style.marginTop='6px';e.textContent='ℹ '+sc.explain;out.appendChild(e);out.scrollTop=out.scrollHeight;}
+    onDone&&onDone();
+  }
+  function doPing(dst){
+    if(!tsIsIp(dst)){P('% Bad IP address','cl-e');return;}
+    const ok=tsReachable(state,dst);
+    P('Type escape sequence to abort.','cl-c');
+    P('Sending 5, 100-byte ICMP Echos to '+dst+', timeout is 2 seconds:','cl-c');
+    P(ok?'!!!!!':'.....',ok?'cl-s':'cl-e');
+    P('Success rate is '+(ok?'100':'0')+' percent ('+(ok?'5':'0')+'/5)',ok?'cl-s':'cl-e');
+    if(ok&&dst===sc.target&&!solved){solved=true;win();}
+  }
+  function handle(raw){
+    const c=raw.replace(/\s+/g,' ').trim(),lc=c.toLowerCase();
+    if(lc==='cls'||lc==='clear'){out.innerHTML='';return;}
+    if(lc==='?'||lc==='help'){P('Comandi: show ip interface brief · show ip route · show running-config · ping <ip> · enable · configure terminal · interface <if> · no shutdown / shutdown · ip address <ip> <mask> · ip route <net> <mask> <nexthop> · exit · end','cl-c');return;}
+    if(lc.startsWith('ping ')){if(mode==='config'||mode==='if'){P('% Esci dalla configurazione per usare ping (end).','cl-e');return;}doPing(c.split(' ')[1]);return;}
+    if(/^(sh|show) ip int(erface)? br(ief)?$/.test(lc)){showBrief();return;}
+    if(/^(sh|show) ip rou(te)?$/.test(lc)){showRoute();return;}
+    if(/^(sh|show) run(ning-config)?$/.test(lc)){showRun();return;}
+    if(lc==='enable'||lc==='en'){if(mode==='user')mode='priv';setPs();return;}
+    if(lc==='disable'){mode='user';setPs();return;}
+    if(lc==='configure terminal'||lc==='conf t'||lc==='config t'){if(mode==='priv'){mode='config';P('Enter configuration commands, one per line. End with CNTL/Z.','cl-c');setPs();}else P('% Prima entra in modalità privilegiata: enable','cl-e');return;}
+    if(lc==='end'){if(mode==='config'||mode==='if'){mode='priv';setPs();}return;}
+    if(lc==='exit'){if(mode==='if')mode='config';else if(mode==='config')mode='priv';else if(mode==='priv')mode='user';setPs();return;}
+    if(mode==='config'||mode==='if'){
+      if(lc.startsWith('interface ')||lc.startsWith('int ')){const nm=tsNormIf(c.replace(/^interface\s+|^int\s+/i,''));const f=nm&&state.ifaces.find(i=>i.name.toLowerCase()===nm.toLowerCase());if(f){curIf=f;mode='if';setPs();}else P('% Interfaccia non valida','cl-e');return;}
+      if(lc.startsWith('ip route ')){const p=c.split(' ');if(p.length>=5&&tsIsIp(p[2])&&tsIsIp(p[3])&&tsIsIp(p[4])){state.routes.push({net:p[2],mask:p[3],via:p[4],type:'S'});}else P('% Incomplete command.','cl-e');return;}
+      if(lc.startsWith('no ip route ')){const p=c.split(' ');state.routes=state.routes.filter(r=>!(r.net===p[3]&&r.mask===p[4]&&(!p[5]||r.via===p[5])));return;}
+    }
+    if(mode==='if'){
+      if(lc==='no shutdown'||lc==='no shut'){curIf.up=true;P('%LINK-3-UPDOWN: Interface '+curIf.name+', changed state to up','cl-i');P('%LINEPROTO-5-UPDOWN: Line protocol on Interface '+curIf.name+', changed state to up','cl-i');return;}
+      if(lc==='shutdown'||lc==='shut'){curIf.up=false;P('%LINK-5-CHANGED: Interface '+curIf.name+', changed state to administratively down','cl-i');return;}
+      if(lc.startsWith('ip address ')){const p=c.split(' ');if(p.length>=4&&tsIsIp(p[2])&&tsIsIp(p[3])){curIf.ip=p[2];curIf.mask=p[3];}else P('% Incomplete command.','cl-e');return;}
+      if(lc==='no ip address'){curIf.ip=null;return;}
+    }
+    if(lc==='write'||lc==='wr'||lc==='copy run start'||lc==='copy running-config startup-config'){P('Building configuration...','cl-c');P('[OK]','cl-s');return;}
+    P('% Comando non riconosciuto in questa modalità. Digita ? per l\'aiuto.','cl-e');
+  }
+  setPs();P("Diagnostica il guasto: parti da 'show ip interface brief' e 'show ip route'.",'cl-c');
+  field.addEventListener('keydown',e=>{if(e.key!=='Enter')return;const v=field.value;field.value='';if(!v.trim())return;P(pr()+' '+v,'cl-p');handle(v);});
+  setTimeout(()=>field.focus(),60);
+}
 // ══════════════════════════════════════
 // GLOSSARIO · ricerca rapida dei termini
 // ══════════════════════════════════════
