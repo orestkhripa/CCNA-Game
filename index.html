@@ -378,6 +378,18 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .asm-tile:active{transform:scale(.98)}
 .asm-tile.used{display:none}
 .asm-tile.asm-ko{animation:shake .4s;border-color:var(--red);color:var(--red)}
+/* ─── GIOCO: VERO / FALSO ─── */
+.tf-card{background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:12px;padding:22px 20px;font-size:1rem;line-height:1.55;text-align:center;margin-bottom:14px;min-height:64px;display:flex;align-items:center;justify-content:center}
+.tf-row{display:flex;gap:10px;margin-bottom:6px}
+.tf-btn{flex:1;padding:16px;border-radius:10px;font-family:'Syne',sans-serif;font-weight:700;font-size:1rem;cursor:pointer;border:2px solid;background:transparent;transition:all .15s}
+.tf-true{border-color:var(--green);color:var(--green)}
+.tf-true:hover:not(:disabled){background:rgba(16,185,129,.1)}
+.tf-false{border-color:var(--red);color:var(--red)}
+.tf-false:hover:not(:disabled){background:rgba(239,68,68,.1)}
+.tf-btn:active{transform:scale(.97)}
+.tf-btn.ok{background:rgba(16,185,129,.18)}
+.tf-btn.ko{background:rgba(239,68,68,.18)}
+.tf-btn:disabled{cursor:default}
 /* ─── HERO RESTYLE ─── */
 .home-hero{position:relative;overflow:hidden}
 .home-hero::before{content:'';position:absolute;inset:0;background-image:radial-gradient(circle at 1px 1px,rgba(59,130,246,.16) 1px,transparent 0);background-size:24px 24px;-webkit-mask-image:linear-gradient(120deg,#000,transparent 68%);mask-image:linear-gradient(120deg,#000,transparent 68%);pointer-events:none}
@@ -2343,6 +2355,31 @@ function engineAssemble(arena,data,onDone){
   }
   render();
 }
+// ── MOTORE: VERO / FALSO rapido ──
+function engineTrueFalse(arena,data,onDone){
+  const items=qShuffle(data.items.slice());let i=0,ok=0;
+  function render(){
+    if(i>=items.length){addXP(10);setTimeout(onDone,400);return;}
+    const it=items[i];arena.innerHTML='';
+    arena.appendChild(el('div','game-instr',(data.instruction||'Vero o Falso?')+' &nbsp;·&nbsp; '+(i+1)+'/'+items.length+' · Giuste: '+ok));
+    arena.appendChild(el('div','tf-card',it.s));
+    const row=el('div','tf-row'),fb=el('div','explainer');
+    const bt=el('button','tf-btn tf-true','✓ VERO'),bf=el('button','tf-btn tf-false','✗ FALSO');
+    function answer(val,btn){
+      if(row.dataset.done)return;row.dataset.done='1';
+      const correct=(val===it.t);
+      [bt,bf].forEach(b=>b.disabled=true);
+      (it.t?bt:bf).classList.add('ok');
+      if(!correct)btn.classList.add('ko');else{ok++;addXP(6);}
+      fb.className='explainer show';fb.innerHTML='<b>'+(correct?'✓ Giusto':'✗ Sbagliato')+'.</b> La frase è <b>'+(it.t?'VERA':'FALSA')+'</b>. '+(it.e||'');
+      const nb=el('button','next-small show','Prossima →');nb.onclick=()=>{i++;render();};
+      arena.appendChild(nb);
+    }
+    bt.onclick=()=>answer(true,bt);bf.onclick=()=>answer(false,bf);
+    row.appendChild(bt);row.appendChild(bf);arena.appendChild(row);arena.appendChild(fb);
+  }
+  render();
+}
 // ══════════════════════════════════════
 // DATI DEI 21 LIVELLI (allineati CCNA 200-301)
 // ══════════════════════════════════════
@@ -2373,15 +2410,13 @@ const LEVELS={
  ]}},
  subnetting:{engine:"subnetviz",data:{rounds:[{need:50},{need:500},{need:2},{need:100},{need:10}]}},
  boss1:{engine:"calc",data:{instruction:"BOSS · Subnet Gauntlet: risolvi 5 subnet.",gen:()=>makeSubnetRound(26,30),count:5}},
- switching:{engine:"match",data:{instruction:"Quale dispositivo/tecnologia corrisponde a ciascuna caratteristica?",cats:["Switch","Hub","Router"],items:[
-   {n:"Separa i domini di collisione (uno per porta)",c:"Switch"},
-   {n:"Un solo dominio di collisione condiviso",c:"Hub"},
-   {n:"Instrada pacchetti tra reti IP diverse",c:"Router"},
-   {n:"Usa la tabella MAC (CAM)",c:"Switch"},
-   {n:"Ripete il traffico a tutte le porte",c:"Hub"},
-   {n:"Separa i domini di broadcast",c:"Router"},
-   {n:"Previene i loop L2 con STP",c:"Switch"},
-   {n:"Opera al livello 3 (IP)",c:"Router"}
+ switching:{engine:"truefalse",data:{instruction:"Switching & Ethernet — Vero o Falso?",items:[
+   {s:"Uno switch inoltra i frame in base all'indirizzo IP di destinazione.",t:false,e:"Lo switch lavora a L2: usa la MAC e la tabella CAM. L'IP è competenza del router (L3)."},
+   {s:"Ogni porta di uno switch è un dominio di collisione separato.",t:true,e:"La micro-segmentazione e il full-duplex eliminano le collisioni su ogni porta."},
+   {s:"Lo Spanning Tree Protocol serve a prevenire i loop di livello 2.",t:true,e:"STP/RSTP blocca i percorsi ridondanti per evitare i loop di broadcast."},
+   {s:"Un hub inoltra il traffico solo alla porta di destinazione.",t:false,e:"L'hub ripete il segnale a tutte le porte; è lo switch a inoltrare selettivamente."},
+   {s:"Se la MAC di destinazione è sconosciuta, lo switch fa flooding su tutte le porte tranne quella d'ingresso.",t:true,e:"È l'unknown unicast flooding: il frame raggiunge comunque il destinatario."},
+   {s:"Lo switch impara gli indirizzi MAC dalla MAC di destinazione dei frame.",t:false,e:"Li impara dalla MAC sorgente: associa il mittente alla porta da cui è arrivato."}
  ]}},
  vlan_mod:{engine:"assemble",data:{rounds:[
    {instruction:"Crea la VLAN 10 \"Sales\" e assegna la porta Fa0/1 in modalità accesso.",tiles:["vlan 10","name Sales","interface Fa0/1","switchport mode access","switchport access vlan 10"]},
@@ -2396,18 +2431,13 @@ const LEVELS={
    {p:"R1#",re:"^(copy running-config startup-config|copy run start|write memory|wr)$",msg:"Configurazione salvata in NVRAM."}
  ]}},
  ospf_mod:{engine:"order",data:{instruction:"Ordina gli stati di adiacenza OSPF (dal primo fino a Full):",steps:["Down","Init","2-Way","ExStart","Exchange","Loading","Full"]}},
- eigrp_mod:{engine:"match",data:{instruction:"L'affermazione è vera per EIGRP, OSPF o entrambi?",cats:["EIGRP","OSPF","Entrambi"],items:[
-   {n:"Distanza amministrativa 90",c:"EIGRP"},
-   {n:"Distanza amministrativa 110",c:"OSPF"},
-   {n:"Usa l'algoritmo DUAL",c:"EIGRP"},
-   {n:"Usa l'algoritmo SPF (Dijkstra)",c:"OSPF"},
-   {n:"Protocollo link-state con aree",c:"OSPF"},
-   {n:"Metrica basata su bandwidth e delay",c:"EIGRP"},
-   {n:"Ha successor e feasible successor",c:"EIGRP"},
-   {n:"Multicast 224.0.0.10",c:"EIGRP"},
-   {n:"Multicast 224.0.0.5",c:"OSPF"},
-   {n:"Usa pacchetti Hello per i vicini",c:"Entrambi"},
-   {n:"Sviluppato da Cisco",c:"EIGRP"}
+ eigrp_mod:{engine:"truefalse",data:{instruction:"EIGRP & routing dinamico — Vero o Falso?",items:[
+   {s:"EIGRP ha una distanza amministrativa di 90.",t:true,e:"90 (interno). OSPF è 110, RIP 120."},
+   {s:"OSPF usa l'algoritmo DUAL.",t:false,e:"DUAL è di EIGRP. OSPF usa SPF (Dijkstra)."},
+   {s:"Il feasible successor è un percorso di backup già pronto in EIGRP.",t:true,e:"È il backup precalcolato: se il successor cade, la riconvergenza è quasi istantanea."},
+   {s:"EIGRP è un protocollo link-state.",t:false,e:"EIGRP è un advanced distance vector; OSPF è link-state."},
+   {s:"In OSPF l'area 0 è la backbone a cui si collegano le altre aree.",t:true,e:"Tutte le aree devono connettersi all'area 0."},
+   {s:"EIGRP calcola la metrica di default usando bandwidth e delay.",t:true,e:"Di default usa banda e ritardo (K1 e K3)."}
  ]}},
  boss2:{engine:"cli",data:{brief:"BOSS · Configura OSPF su R1: process 1, annuncia le reti 192.168.1.0/24 e 10.0.0.0/24 in area 0.",hints:["enable","configure terminal","router ospf 1","network 192.168.1.0 0.0.0.255 area 0","network 10.0.0.0 0.0.0.255 area 0","end"],steps:[
    {p:"R1>",cmd:"enable",msg:"OK"},
@@ -2417,23 +2447,13 @@ const LEVELS={
    {p:"R1(config-router)#",cmd:"network 10.0.0.0 0.0.0.255 area 0",msg:"Rete annunciata in area 0."},
    {p:"R1(config-router)#",cmd:"end",msg:"OSPF configurato."}
  ]}},
- acl_mod:{engine:"match",data:{instruction:"La caratteristica riguarda una ACL Standard o Extended?",cats:["Standard","Extended"],items:[
-   {n:"Numerazione 1-99",c:"Standard"},
-   {n:"Numerazione 100-199",c:"Extended"},
-   {n:"Filtra solo l'IP sorgente",c:"Standard"},
-   {n:"Filtra sorgente, destinazione, protocollo e porta",c:"Extended"},
-   {n:"Va posizionata vicino alla destinazione",c:"Standard"},
-   {n:"Va posizionata vicino alla sorgente",c:"Extended"},
-   {n:"Può permettere solo la porta 443",c:"Extended"},
-   {n:"Considera solo l'origine del pacchetto",c:"Standard"}
+ acl_mod:{engine:"assemble",data:{rounds:[
+   {instruction:"Crea una ACL estesa 101 che permette solo HTTP e HTTPS dalla LAN 192.168.1.0/24, poi applicala in ingresso su Gi0/0.",tiles:["access-list 101 permit tcp 192.168.1.0 0.0.0.255 any eq 80","access-list 101 permit tcp 192.168.1.0 0.0.0.255 any eq 443","access-list 101 deny ip any any","interface Gi0/0","ip access-group 101 in"]}
  ]}},
- nat_mod:{engine:"match",data:{instruction:"Quale tipo di NAT descrive lo scenario?",cats:["Static NAT","Dynamic NAT","PAT (overload)"],items:[
-   {n:"Mappatura 1:1 fissa per un web server esposto",c:"Static NAT"},
-   {n:"Molti host privati condividono 1 IP pubblico via porte",c:"PAT (overload)"},
-   {n:"Pool di IP pubblici assegnati on-demand",c:"Dynamic NAT"},
-   {n:"Tipico router di casa/ufficio",c:"PAT (overload)"},
-   {n:"Usa i numeri di porta per distinguere le sessioni",c:"PAT (overload)"},
-   {n:"Server mail sempre raggiungibile allo stesso IP",c:"Static NAT"}
+ nat_mod:{engine:"flow",data:{instruction:"Un PC privato naviga su Internet: segui la traduzione NAT/PAT.",devices:[{ico:'💻',lbl:'PC 10.0.0.5'},{ico:'📡',lbl:'Router NAT'},{ico:'🌐',lbl:'Web'}],steps:[
+   {q:"Il PC 10.0.0.5 (privato) invia una richiesta al web. Può viaggiare così com'è su Internet?",options:["No: l'IP privato va tradotto dal NAT in uno pubblico","Sì, gli indirizzi privati sono instradabili su Internet","Sì, ma solo con IPv6"],correct:0,note:"Gli indirizzi privati (RFC 1918) non sono instradabili: serve il <b>NAT</b>."},
+   {q:"Il router applica il PAT. Cosa modifica nel pacchetto?",options:["L'IP sorgente (→ pubblico) e registra la porta nella tabella NAT","L'IP di destinazione","Nulla, lo inoltra così com'è"],correct:0,note:"Il <b>PAT</b> sostituisce l'IP sorgente e usa la porta per distinguere le sessioni."},
+   {q:"Il web risponde all'IP pubblico. Come fa il router a consegnare al PC giusto?",options:["Consulta la tabella delle traduzioni (IP+porta → host interno)","Invia in broadcast a tutta la LAN","Chiede al DNS"],correct:0,note:"La <b>tabella NAT</b> riporta la sessione all'host interno corretto."}
  ]}},
  ssh_sec:{engine:"cli",data:{brief:"Metti in sicurezza R1: hostname, password enable cifrata, dominio, chiavi RSA e accesso SSH sulle linee VTY.",hints:["enable","configure terminal","hostname R1","enable secret cisco123","ip domain-name lab.local","crypto key generate rsa","line vty 0 4","transport input ssh","login local"],steps:[
    {p:"Router>",cmd:"enable",msg:"OK"},
@@ -2446,14 +2466,9 @@ const LEVELS={
    {p:"R1(config-line)#",cmd:"transport input ssh",msg:"Solo SSH ammesso (niente Telnet)."},
    {p:"R1(config-line)#",cmd:"login local",msg:"Autenticazione con utenti locali."}
  ]}},
- boss3:{engine:"match",data:{instruction:"BOSS · Security Audit: abbina ogni minaccia alla contromisura corretta.",cats:["Port Security","SSH","ACL","enable secret","Shutdown porta"],items:[
-   {n:"MAC flooding sulla tabella CAM",c:"Port Security"},
-   {n:"Sessione Telnet in chiaro intercettabile",c:"SSH"},
-   {n:"Traffico non autorizzato verso un server",c:"ACL"},
-   {n:"Password enable visibile in chiaro",c:"enable secret"},
-   {n:"Porta switch inutilizzata lasciata attiva",c:"Shutdown porta"},
-   {n:"Host non autorizzato collegato a una porta access",c:"Port Security"},
-   {n:"Filtrare per IP/porta il traffico in ingresso",c:"ACL"}
+ boss3:{engine:"assemble",data:{rounds:[
+   {instruction:"BOSS · Metti in sicurezza R1: hostname, password enable cifrata e accesso SSH sulle linee VTY.",tiles:["hostname R1","enable secret cisco123","ip domain-name lab.local","crypto key generate rsa","line vty 0 4","transport input ssh","login local"]},
+   {instruction:"BOSS · Proteggi una porta access con la port security (max 1 MAC, sticky).",tiles:["interface Fa0/1","switchport mode access","switchport port-security","switchport port-security maximum 1","switchport port-security mac-address sticky"]}
  ]}},
  ipv6_mod:{engine:"calc",data:{instruction:"Comprimi / riconosci gli indirizzi IPv6.",list:[
    {prompt:"Comprimi: 2001:0db8:0000:0000:0000:0000:0000:0001",fields:[{label:"Forma compressa",answer:"2001:db8::1"}]},
@@ -2462,20 +2477,21 @@ const LEVELS={
    {prompt:"Indirizzo di loopback IPv6?",fields:[{label:"Loopback",answer:"::1"}]},
    {prompt:"Prefisso degli indirizzi link-local?",fields:[{label:"Prefisso",answer:"fe80::/10"}]}
  ]}},
- wan_mod:{engine:"match",data:{instruction:"Quale tecnologia WAN/VPN corrisponde a ciascuna caratteristica?",cats:["IPSec","MPLS","GRE","Leased line","PPP"],items:[
-   {n:"Cifratura e autenticazione del traffico (ESP/AH)",c:"IPSec"},
-   {n:"Inoltro tramite etichette (label switching)",c:"MPLS"},
-   {n:"Tunnel che incapsula vari protocolli, senza cifratura",c:"GRE"},
-   {n:"Circuito dedicato punto-punto sempre attivo",c:"Leased line"},
-   {n:"Incapsulamento seriale con autenticazione PAP/CHAP",c:"PPP"},
-   {n:"ESP protegge la riservatezza del payload",c:"IPSec"},
-   {n:"Usato dai provider per VPN L3 e QoS",c:"MPLS"}
+ wan_mod:{engine:"truefalse",data:{instruction:"WAN & VPN — Vero o Falso?",items:[
+   {s:"IPSec fornisce cifratura e autenticazione per le VPN.",t:true,e:"ESP cifra il payload, AH autentica: sicurezza a L3."},
+   {s:"GRE cifra il traffico che incapsula.",t:false,e:"GRE incapsula vari protocolli ma NON cifra; spesso si combina con IPSec."},
+   {s:"MPLS inoltra i pacchetti in base a etichette (label), non solo all'IP.",t:true,e:"Il label switching abilita VPN L3 performanti e QoS."},
+   {s:"Una leased line è un circuito condiviso con altri clienti.",t:false,e:"È un circuito dedicato punto-punto, sempre attivo."},
+   {s:"PPP può autenticare il collegamento con PAP o CHAP.",t:true,e:"CHAP (challenge) è più sicuro di PAP (in chiaro)."},
+   {s:"Una VPN site-to-site collega due intere reti attraverso Internet.",t:true,e:"Crea un tunnel sicuro tra i gateway di due sedi."}
  ]}},
- auto_mod:{engine:"match",data:{instruction:"A quale categoria appartiene ciascun elemento dell'automazione?",cats:["Formato dati","API / Protocollo","Strumento","Concetto SDN"],items:[
-   {n:"JSON",c:"Formato dati"},{n:"YAML",c:"Formato dati"},{n:"XML",c:"Formato dati"},
-   {n:"REST",c:"API / Protocollo"},{n:"GET / POST / PUT / DELETE",c:"API / Protocollo"},
-   {n:"Ansible",c:"Strumento"},{n:"Python",c:"Strumento"},
-   {n:"Control plane centralizzato",c:"Concetto SDN"},{n:"Northbound / Southbound API",c:"Concetto SDN"}
+ auto_mod:{engine:"truefalse",data:{instruction:"Automazione & SDN — Vero o Falso?",items:[
+   {s:"SDN separa il control plane dal data plane.",t:true,e:"Il control plane centralizzato decide, il data plane inoltra."},
+   {s:"In REST il metodo GET serve a creare una nuova risorsa.",t:false,e:"GET legge; POST crea, PUT aggiorna, DELETE elimina."},
+   {s:"JSON e YAML sono formati per rappresentare dati strutturati.",t:true,e:"Usati per configurazioni e payload delle API."},
+   {s:"Ansible richiede un agente installato su ogni dispositivo gestito.",t:false,e:"Ansible è agentless: opera via SSH/API."},
+   {s:"Un codice di risposta HTTP 200 indica una richiesta andata a buon fine.",t:true,e:"2xx = successo, 4xx = errore client, 5xx = errore server."},
+   {s:"L'Infrastructure as Code permette di versionare la configurazione come software.",t:true,e:"Config dichiarata, ripetibile e tracciata (es. in git)."}
  ]}},
  wifi_mod:{engine:"match",data:{instruction:"A quale elemento del wireless si riferisce ciascuna descrizione?",cats:["SSID","Access Point","WLC","Sicurezza"],items:[
    {n:"Nome della rete Wi-Fi visibile ai client",c:"SSID"},
@@ -2487,25 +2503,15 @@ const LEVELS={
    {n:"Imposta canali e potenza degli AP da un punto unico",c:"WLC"},
    {n:"WEP è obsoleto e insicuro",c:"Sicurezza"}
  ]}},
- redun_mod:{engine:"match",data:{instruction:"A quale tecnologia di ridondanza appartiene ciascuna caratteristica?",cats:["STP","EtherChannel","HSRP"],items:[
-   {n:"Previene i loop L2 bloccando i link ridondanti",c:"STP"},
-   {n:"Aggrega più link fisici in uno logico",c:"EtherChannel"},
-   {n:"Gateway virtuale ridondante (Active/Standby)",c:"HSRP"},
-   {n:"RSTP (802.1w) converge in pochi secondi",c:"STP"},
-   {n:"Usa LACP o PAgP per negoziare il bundle",c:"EtherChannel"},
-   {n:"Due router condividono un IP virtuale",c:"HSRP"},
-   {n:"Elegge un Root Bridge",c:"STP"},
-   {n:"Somma la banda di più collegamenti",c:"EtherChannel"}
+ redun_mod:{engine:"assemble",data:{rounds:[
+   {instruction:"Crea un EtherChannel LACP aggregando le porte Fa0/1 e Fa0/2, poi imposta il canale come trunk.",tiles:["interface range Fa0/1 - 2","channel-group 1 mode active","interface Port-channel 1","switchport mode trunk"]},
+   {instruction:"Configura HSRP su Gi0/0: IP virtuale 192.168.1.1, priorità 110 e preemption.",tiles:["interface Gi0/0","standby 1 ip 192.168.1.1","standby 1 priority 110","standby 1 preempt"]}
  ]}},
- ipserv_mod:{engine:"match",data:{instruction:"Quale servizio IP corrisponde a ciascuna funzione?",cats:["DHCP","DNS","NTP","Syslog","SNMP"],items:[
-   {n:"Assegna automaticamente IP, mask e gateway (DORA)",c:"DHCP"},
-   {n:"Traduce i nomi di dominio in indirizzi IP",c:"DNS"},
-   {n:"Sincronizza l'orario dei dispositivi",c:"NTP"},
-   {n:"Raccoglie i messaggi di log centralizzati",c:"Syslog"},
-   {n:"Monitora CPU, interfacce e traffico (trap)",c:"SNMP"},
-   {n:"Porte UDP 67 e 68",c:"DHCP"},
-   {n:"Porta UDP/TCP 53",c:"DNS"},
-   {n:"Porta UDP 123",c:"NTP"}
+ ipserv_mod:{engine:"flow",data:{instruction:"Un nuovo dispositivo chiede un indirizzo IP: segui lo scambio DHCP (DORA).",devices:[{ico:'📟',lbl:'Client'},{ico:'🖥️',lbl:'Server DHCP'}],steps:[
+   {q:"1) Il client non ha ancora un IP. Come trova il server DHCP?",options:["Invia un DHCP Discover in broadcast","Contatta il server direttamente al suo IP","Interroga il DNS"],correct:0,note:"Senza IP, il client manda un <b>Discover</b> in broadcast."},
+   {q:"2) Il server risponde con...",options:["Un DHCP Offer che propone un indirizzo","Un Ack immediato","Un ping di prova"],correct:0,note:"Il server propone un IP con l'<b>Offer</b>."},
+   {q:"3) Il client accetta l'offerta inviando...",options:["Un DHCP Request per l'indirizzo proposto","Un nuovo Discover","Un Release"],correct:0,note:"Il <b>Request</b> (in broadcast) conferma la scelta anche agli altri server."},
+   {q:"4) Il server chiude lo scambio con...",options:["Un DHCP Ack che assegna il lease (IP, mask, gateway, DNS)","Un altro Offer","Un Discover"],correct:0,note:"L'<b>Ack</b> conferma il lease: la configurazione è completa."}
  ]}}
 };
 // ══════════════════════════════════════
@@ -2581,7 +2587,7 @@ const DIAGRAM={
  redun_mod:{cap:"HSRP dà un gateway virtuale ridondante (Active/Standby); EtherChannel aggrega più link verso lo switch.",svg:`<svg viewBox="0 0 560 210" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">Gateway ridondante (HSRP) + link aggregati (EtherChannel)</text><rect x="55" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#10b981"/><text x="117" y="60" fill="#10b981" font-size="11" text-anchor="middle">R1 · ACTIVE</text><text x="117" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="380" y="40" width="125" height="42" rx="8" fill="#0d1117" stroke="#64748b"/><text x="442" y="60" fill="#94a3b8" font-size="11" text-anchor="middle">R2 · STANDBY</text><text x="442" y="75" fill="#64748b" font-size="9" text-anchor="middle">HSRP</text><rect x="220" y="45" width="120" height="32" rx="16" fill="rgba(59,130,246,.10)" stroke="#3b82f6"/><text x="280" y="65" fill="#3b82f6" font-size="11" text-anchor="middle">IP virtuale .1</text><line x1="180" y1="61" x2="220" y2="61" stroke="#3b82f6" stroke-width="2"/><line x1="340" y1="61" x2="380" y2="61" stroke="#64748b" stroke-width="2" stroke-dasharray="4 3"/><rect x="220" y="152" width="120" height="38" rx="8" fill="#0d1117" stroke="#06b6d4"/><text x="280" y="176" fill="#06b6d4" font-size="12" text-anchor="middle">SWITCH</text><g stroke="#f59e0b" stroke-width="2.5" class="flowline"><line x1="252" y1="82" x2="264" y2="152"/><line x1="260" y1="82" x2="272" y2="152"/></g><text x="330" y="120" fill="#f59e0b" font-size="9">EtherChannel</text><line x1="120" y1="82" x2="238" y2="152" stroke="#334155" stroke-width="1.5"/><line x1="440" y1="82" x2="322" y2="152" stroke="#334155" stroke-width="1.5" stroke-dasharray="4 3"/></svg>`},
  ipserv_mod:{cap:"DHCP assegna l'IP in quattro passi: Discover, Offer, Request, Ack (DORA).",svg:`<svg viewBox="0 0 560 180" xmlns="http://www.w3.org/2000/svg" font-family="JetBrains Mono, monospace"><text x="10" y="16" fill="#64748b" font-size="11">DHCP · il client ottiene l'IP in 4 passi (DORA)</text><text x="70" y="42" fill="#06b6d4" font-size="12" text-anchor="middle">CLIENT 📟</text><text x="490" y="42" fill="#f59e0b" font-size="12" text-anchor="middle">DHCP 🖥️</text><line x1="70" y1="50" x2="70" y2="172" stroke="#334155"/><line x1="490" y1="50" x2="490" y2="172" stroke="#334155"/><line x1="70" y1="74" x2="490" y2="88" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="72" fill="#3b82f6" font-size="11" text-anchor="middle">1. Discover →</text><line x1="490" y1="102" x2="70" y2="114" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="100" fill="#10b981" font-size="11" text-anchor="middle">← 2. Offer</text><line x1="70" y1="128" x2="490" y2="140" stroke="#3b82f6" stroke-width="2" class="flowline"/><text x="280" y="126" fill="#3b82f6" font-size="11" text-anchor="middle">3. Request →</text><line x1="490" y1="154" x2="70" y2="166" stroke="#10b981" stroke-width="2" class="flowline"/><text x="280" y="152" fill="#10b981" font-size="11" text-anchor="middle">← 4. Ack (lease)</text></svg>`}
 };
-const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli,bits:engineBits,flow:engineFlow,subnetviz:engineSubnetViz,assemble:engineAssemble};
+const ENGINES={match:engineMatch,calc:engineCalc,order:engineOrder,cli:engineCli,bits:engineBits,flow:engineFlow,subnetviz:engineSubnetViz,assemble:engineAssemble,truefalse:engineTrueFalse};
 // ── FLUSSO LIVELLO ──
 function setPlayStep(s){
   const order=['learn','game','quiz','done'];const idx=order.indexOf(s);
