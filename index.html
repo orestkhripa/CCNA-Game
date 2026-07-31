@@ -3448,6 +3448,27 @@ const VIDEO_NOTES={
    {q:"Nella spine-leaf, quali dispositivi NON si collegano tra loro?",o:["Leaf con leaf e spine con spine","Leaf con spine","Server con leaf","Spine con i router"],c:0,e:"Il full mesh è solo tra leaf e spine; i leaf non si collegano tra loro e nemmeno gli spine tra loro."},
    {q:"Quale famiglia di switch Cisco è progettata per i data center?",o:["Nexus","Catalyst","Meraki","Aironet"],c:0,e:"I Nexus sono per il data center (throughput elevatissimo); i Catalyst per il campus/accesso."},
    {q:"Nel design a 3 livelli, come si chiama lo switch in cima a ogni rack?",o:["Top-of-Rack (ToR) / Access","Core","Spine","Distribution"],c:0,e:"Il ToR è lo switch di accesso in cima al rack a cui si collegano i server; nel modello spine-leaf diventa il 'leaf'."}
+ ]},
+ "xPi4uZu4uF0":{ep:"EP 8",mod:"wan_mod",sections:[
+   {h:"🌐 LAN vs WAN",b:"La LAN è la rete interna di un singolo sito (ufficio, data center, casa). La WAN collega tra loro siti geograficamente separati: filiali, sede centrale, data center. Serve perché i servizi sono centralizzati: telefonia (es. CUCM), email, database, siti web, gestionali e POS vivono nel data center/sede, e le filiali devono raggiungerli in modo affidabile."},
+   {h:"🧵 Vecchie tecnologie: Leased line",b:"La leased line è un collegamento dedicato punto-punto, privato e sempre attivo. Velocità storiche: T1 ≈ 1,5 Mbps, T3 ≈ 45 Mbps (in Europa E1/E3). Vantaggio: banda garantita solo per te. Svantaggi: costosa e difficile collegare molti siti a maglia. Frame Relay e ATM erano alternative più vecchie (non più nel CCNA)."},
+   {h:"🏷️ MPLS",b:"MPLS (Multiprotocol Label Switching) collega tutti i tuoi siti tramite la rete del carrier con una sola connessione per sito. È privato grazie ai circuiti virtuali basati su etichette (label), NON sulla cifratura → per questo si parla di 'MPLS VPN' (virtuale e privata, ma non cifrata). Opera a 'Layer 2.5'. Il router del cliente è il CE (Customer Edge), quello del provider il PE (Provider Edge). Supporta la QoS per dare priorità al traffico (es. voce)."},
+   {h:"🚇 Metro Ethernet",b:"Metro E è come un cavo tra due siti nell'area metropolitana, su fibra del provider sotto la città. Opera a Layer 2, velocità 1/10 Gbps, spesso con 2 link ridondanti. Varianti: E-Line = punto-punto (EVC, Ethernet Virtual Circuit), E-LAN = full mesh multipunto ('switch nel cielo'), E-Tree = hub-and-spoke. Tipica per data center↔sede o data center↔data center (disaster recovery)."},
+   {h:"🔒 Internet + VPN e SD-WAN",b:"Per le piccole filiali la via economica è una normale connessione Internet pubblica + una VPN site-to-site che cifra il traffico. Svantaggi: Internet è meno affidabile e senza QoS garantita. SD-WAN (Software-Defined WAN) è il rimpiazzo moderno di MPLS: usa le connessioni Internet standard ottimizzandole, ottimo anche per il traffico verso il cloud. MPLS sta calando ma non è morto."}
+ ],key:[
+   "LAN = rete di un sito · WAN = collega siti geograficamente separati",
+   "Leased line = collegamento dedicato punto-punto privato (T1 ≈1,5 Mbps · T3 ≈45 Mbps)",
+   "MPLS = label switching ('Layer 2.5'), privato via circuiti virtuali (NON cifrato), supporta QoS",
+   "Router WAN: CE = Customer Edge (cliente) · PE = Provider Edge (carrier)",
+   "Metro Ethernet = L2: E-Line (punto-punto), E-LAN (full mesh), E-Tree (hub-and-spoke)",
+   "Filiali economiche: Internet pubblica + VPN site-to-site (cifrata) · SD-WAN sostituisce MPLS"
+ ],quiz:[
+   {q:"Qual è la differenza tra LAN e WAN?",o:["La LAN è la rete interna di un sito; la WAN collega siti geograficamente separati","La LAN è sempre più lenta della WAN","La WAN funziona solo via fibra","La LAN è sempre pubblica"],c:0,e:"La LAN copre un singolo sito (ufficio, data center); la WAN collega sedi, filiali e data center distanti tra loro."},
+   {q:"Cos'è una leased line?",o:["Un collegamento dedicato punto-punto privato, sempre attivo","Una connessione Internet condivisa","Un tunnel cifrato su Internet","Una VLAN estesa"],c:0,e:"La leased line è un circuito dedicato solo per te (es. T1 ~1,5 Mbps): banda garantita ma costosa e difficile da estendere a molti siti."},
+   {q:"In MPLS, come resta separato e privato il traffico di ogni cliente?",o:["Con circuiti virtuali basati su etichette (label), non con la cifratura","Cifrando tutto con IPSec","Con indirizzi MAC dedicati","Con una VLAN per cliente"],c:0,e:"MPLS usa il label switching per creare circuiti virtuali privati: il traffico è isolato ('MPLS VPN') ma non necessariamente cifrato."},
+   {q:"Come si chiama il router del cliente al confine con la rete MPLS del provider?",o:["CE (Customer Edge)","PE (Provider Edge)","Core router","Router-on-a-stick"],c:0,e:"Il CE (Customer Edge) è dal lato cliente; il PE (Provider Edge) è il router del carrier a cui il CE si collega."},
+   {q:"Quale variante di Metro Ethernet è un collegamento punto-punto?",o:["E-Line","E-LAN","E-Tree","E-Mesh"],c:0,e:"E-Line = punto-punto (EVC). E-LAN = full mesh multipunto ('switch nel cielo'); E-Tree = hub-and-spoke."},
+   {q:"Per collegare una piccola filiale in modo economico su Internet pubblico, cosa serve?",o:["Una VPN site-to-site che cifra il traffico","Una leased line dedicata","Una connessione Metro Ethernet","Un circuito MPLS"],c:0,e:"Su Internet pubblico il traffico va cifrato con una VPN site-to-site tra filiale e data center: economico ma senza QoS garantita."}
  ]}
 };
 function openVideoNote(id){
