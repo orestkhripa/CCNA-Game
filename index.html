@@ -130,6 +130,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .opt.ok{border-color:var(--green);background:rgba(16,185,129,.08);color:var(--green)}
 .opt.ko{border-color:var(--red);background:rgba(239,68,68,.08);color:var(--red)}
 .opt:disabled{cursor:default}
+.opts-grid.nohover .opt:hover:not(:disabled){border-color:var(--border);color:var(--text)}
 .opt-lbl{font-family:'JetBrains Mono',monospace;font-size:.65rem;color:var(--muted);min-width:16px;margin-top:2px}
 .ok .opt-lbl,.ko .opt-lbl{color:inherit}
 .feedback{background:var(--panel);border-radius:8px;padding:14px 18px;margin-bottom:12px;font-size:.85rem;line-height:1.6;display:none}
@@ -164,8 +165,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .rbtn-home{background:transparent;border:1px solid var(--dim);color:var(--muted)}
 .rbtn-home:hover{border-color:var(--text);color:var(--text)}
 /* XP TOAST */
-.xp-toast{position:fixed;top:64px;left:50%;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:.85rem;font-weight:600;z-index:9999;transform:translate(-50%,-220%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:340px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
-.xp-toast.show{transform:translate(-50%,0)}
+.xp-toast{position:fixed;top:64px;left:50%;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:.85rem;font-weight:600;z-index:9999;opacity:0;visibility:hidden;pointer-events:none;transform:translate(-50%,-14px);transition:opacity .3s ease,transform .3s ease;max-width:340px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.xp-toast.show{opacity:1;visibility:visible;pointer-events:auto;transform:translate(-50%,0)}
 /* SCHEMAS */
 .schema-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
 .schema-nav-btn{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;transition:all .15s;font-family:'DM Sans',sans-serif}
@@ -1045,6 +1046,13 @@ function showToast(msg,col){
   t.classList.add('show');clearTimeout(toastT);
   toastT=setTimeout(()=>t.classList.remove('show'),2500);
 }
+// evita che una casella appena renderizzata resti "evidenziata" dall'hover col cursore fermo
+function suppressHover(grid){
+  if(!grid)return;grid.classList.add('nohover');
+  const clr=()=>{grid.classList.remove('nohover');document.removeEventListener('mousemove',clr);document.removeEventListener('touchstart',clr);};
+  document.addEventListener('mousemove',clr,{once:true});
+  document.addEventListener('touchstart',clr,{once:true});
+}
 
 // ── VIEWS ──
 function showView(v){
@@ -1571,6 +1579,7 @@ function renderQuestion(q){
     b.onclick=()=>{if(!quizState.answered)answerQ(i,b);};
     grid.appendChild(b);
   });
+  suppressHover(grid);
   startTimer();
 }
 function startTimer(){
@@ -2681,9 +2690,13 @@ function genSubnetMCQ(){const c=rnd(24,30);if(rnd(0,1)===0){const hosts=Math.pow
 const QGEN={osi_mod:genFromMatch,ip_addr:genFromMatch,wifi_mod:genFromMatch,switching:genFromTF,eigrp_mod:genFromTF,wan_mod:genFromTF,auto_mod:genFromTF,binary:genBinaryMCQ,subnetting:genSubnetMCQ,boss1:genSubnetMCQ};
 function genQuizFor(modId,k){const f=QGEN[modId];if(!f)return[];const seen={},out=[];let t=0;while(out.length<k&&t<k*6){t++;const q=f(modId);if(q&&!seen[q.q]){seen[q.q]=1;out.push(q);}}return out;}
 function moduleOfQuestion(text){for(const k in QBANK){if(QBANK[k].some(q=>q.q===text))return k;}return LP.mod?LP.mod.id:'osi_mod';}
-const SCHEMA_MAP={net_basics:'osi',binary:'subnet',osi_mod:'osi',tcpip_mod:'osi',ip_addr:'subnet',subnetting:'subnet',boss1:'subnet',switching:'vlan',vlan_mod:'vlan',routing_s:'cli',ospf_mod:'cli',eigrp_mod:'cli',boss2:'cli',acl_mod:'acl',nat_mod:'nat',ssh_sec:'cli',boss3:'acl',ipv6_mod:'ipv6',wan_mod:'cli',auto_mod:'cli',wifi_mod:'vlan',redun_mod:'vlan',ipserv_mod:'subnet',ccna_cert:'osi'};
-const SCHEMA_ORDER=['osi','subnet','cli','vlan','nat','acl','ipv6'];
-function openTheory(modId){const s=SCHEMA_MAP[modId]||'osi';showView('schemas');const b=document.querySelectorAll('.schema-nav-btn')[SCHEMA_ORDER.indexOf(s)];selSchema(s,b);try{window.scrollTo(0,0);}catch(e){}}
+// mappa modulo -> termine del glossario (scheda con definizione, approfondimento e diagramma)
+const GLOSS_MAP={net_basics:"LAN",binary:"Subnet mask",osi_mod:"Modello OSI",tcpip_mod:"TCP",ip_addr:"Indirizzo IP privato",subnetting:"CIDR",boss1:"CIDR",switching:"Switch",vlan_mod:"VLAN",routing_s:"Routing statico",ospf_mod:"OSPF",eigrp_mod:"EIGRP",boss2:"OSPF",acl_mod:"ACL",nat_mod:"NAT",ssh_sec:"SSH",boss3:"Port security",ipv6_mod:"IPv6",wan_mod:"IPSec",auto_mod:"SDN",wifi_mod:"SSID",redun_mod:"STP",ipserv_mod:"DHCP",ccna_cert:"Modello OSI"};
+function glossForQuestion(text,modId){
+  if(text){const lo=text.toLowerCase();const cand=GLOSSARY.filter(g=>lo.indexOf(g.t.toLowerCase())>=0&&g.t.length>=4).sort((a,b)=>b.t.length-a.t.length);if(cand.length)return cand[0];}
+  const term=GLOSS_MAP[modId];return term&&GLOSSARY.find(x=>x.t===term);
+}
+function openTheory(modId,qtext){const g=glossForQuestion(qtext,modId)||(GLOSS_MAP[modId]&&GLOSSARY.find(x=>x.t===GLOSS_MAP[modId]));showView('gloss');if(g){openGloss(g);}try{window.scrollTo(0,0);}catch(e){}}
 function startConsolidation(){
   setPlayStep('quiz');
   _id('play-game').style.display='none';_id('play-done').style.display='none';
@@ -2747,6 +2760,7 @@ function renderCons(){
   });
   nb.onclick=()=>{Q.cur++;renderCons();};
   wrap.appendChild(grid);wrap.appendChild(fb);wrap.appendChild(nb);
+  suppressHover(grid);
 }
 function finishLevel(){
   const mod=LP.mod;setPlayStep('done');
@@ -2775,7 +2789,7 @@ function finishLevel(){
       const it=el('div','recap-err '+(a.ok?'good':'bad'));
       const head=el('div','recap-head','');
       head.appendChild(el('div','recap-q',(a.ok?'🟢 ':'🔴 ')+a.q));
-      const btn=el('button','approf-btn','Approfondisci ↗');btn.onclick=()=>openTheory(a.mod);head.appendChild(btn);
+      const btn=el('button','approf-btn','Approfondisci ↗');btn.onclick=()=>openTheory(a.mod,a.q);head.appendChild(btn);
       it.appendChild(head);
       it.appendChild(el('div','recap-line '+(a.ok?'ok':'ko'),(a.ok?'✓':'✗')+' Tua risposta: '+a.tua));
       if(!a.ok) it.appendChild(el('div','recap-line ok','✓ Corretta: '+a.giusta));
