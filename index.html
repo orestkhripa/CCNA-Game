@@ -461,6 +461,11 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .vid-link{flex:1;color:var(--text);text-decoration:none;font-size:.86rem;font-weight:500;line-height:1.4}
 .vid-link:hover .vid-name{color:var(--accent)}
 .vid-play{color:var(--red);font-size:1rem;text-decoration:none;flex-shrink:0}
+.vid-badge{font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:1px;text-transform:uppercase;color:var(--purple);background:rgba(139,92,246,.12);border:1px solid rgba(139,92,246,.3);padding:1px 6px;border-radius:6px;margin-left:6px;white-space:nowrap}
+.vid-riass{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border:1px solid var(--purple);color:var(--purple);background:rgba(139,92,246,.06);border-radius:6px;cursor:pointer;white-space:nowrap;transition:all .15s}
+.vid-riass:hover{background:var(--purple);color:#fff}
+.vid-note-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;margin:12px 0 8px}
+.vid-note-info{font-size:.74rem;color:var(--muted);margin-top:12px;font-style:italic;line-height:1.5}
 /* ─── CALENDAR / HEATMAP ─── */
 .cal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .cal-stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
@@ -1016,6 +1021,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="vid-progress-track"><div class="vid-progress-fill" id="vid-progress-fill" style="width:0%"></div></div>
   </div>
   <div id="vid-list"></div>
+  <div id="vid-detail" style="display:none"></div>
 </div>
 
 <div class="xp-toast" id="xp-toast"></div>
@@ -3381,26 +3387,127 @@ function resetVideos(){G.watched={};saveG();renderVideos();}
 function renderVideos(){
   const list=_id('vid-list');if(!list)return;
   if(!G.watched)G.watched={};
+  const d=_id('vid-detail');if(d)d.style.display='none';list.style.display='';
   list.innerHTML='';
   let done=0;
   VIDEOS.forEach((v,i)=>{
     const seen=!!G.watched[v.id];if(seen)done++;
+    const note=VIDEO_NOTES[v.id];
     const row=el('div','vid-item'+(seen?' seen':''));
     const ck=el('button','vid-check',seen?'✓':'');ck.title=seen?'Segna come non visto':'Segna come visto';ck.onclick=()=>toggleVideo(v.id);
     const num=el('span','vid-num',(i+1<10?'0':'')+(i+1));
-    const a=el('a','vid-link','<span class="vid-name">'+v.t+'</span>');a.href=vidUrl(v.id);a.target='_blank';a.rel='noopener';
-    const play=el('a','vid-play','▶');play.href=vidUrl(v.id);play.target='_blank';play.rel='noopener';play.title='Guarda su YouTube';
-    row.appendChild(ck);row.appendChild(num);row.appendChild(a);row.appendChild(play);
+    const a=el('a','vid-link','<span class="vid-name">'+v.t+(note?' <span class="vid-badge">📄 riassunto</span>':'')+'</span>');a.href=vidUrl(v.id);a.target='_blank';a.rel='noopener';
+    row.appendChild(ck);row.appendChild(num);row.appendChild(a);
+    if(note){const rb=el('button','vid-riass','📄 Riassunto');rb.onclick=()=>openVideoNote(v.id);row.appendChild(rb);}
+    const play=el('a','vid-play','▶');play.href=vidUrl(v.id);play.target='_blank';play.rel='noopener';play.title='Guarda su YouTube';row.appendChild(play);
     list.appendChild(row);
   });
   const pct=Math.round(done/VIDEOS.length*100);
   _id('vid-count').textContent=done+' / '+VIDEOS.length+' visti ('+pct+'%)';
   _id('vid-progress-fill').style.width=pct+'%';
 }
+// ── Riassunti interattivi dei video (si integrano nei quiz dei livelli) ──
+const VIDEO_NOTES={
+ "wwwAXlE4OtU":{ep:"EP 6",mod:"net_basics",sections:[
+   {h:"🚫 La rete sbagliata",b:"Molte piccole aziende partono con una rete 'da casa': un unico dispositivo che fa router + switch + modem + access point, e switch collegati a catena (daisy-chain). Ogni collegamento diventa un single point of failure: se un cavo o uno switch cade, tutto ciò che sta a valle va giù."},
+   {h:"🔁 Ridondanza",b:"Regola d'oro: elimina più single point of failure possibile. Devi poter perdere un cavo, uno switch o un router e restare operativo. La ridondanza costa (più dispositivi = più spesa), quindi si bilancia col budget."},
+   {h:"🏗️ Design a 2 livelli (collapsed core)",b:"Access layer = switch di accesso a cui si collegano PC, server e AP. Distribution layer (o aggregation) = switch multilayer (L3) potenti che fanno inter-VLAN routing, ACL, routing, summarization. Si aggiungono distribution e router ridondanti per togliere i SPOF. Le funzioni del core sono 'collassate' nel distribution → collapsed core."},
+   {h:"🧠 Switch multilayer (Layer 3)",b:"Uno switch L3 gestisce sia MAC (L2) sia IP (L3): fa switching e routing insieme, velocissimo. È il cuore del distribution layer."},
+   {h:"🏛️ Design a 3 livelli",b:"Access + Distribution + Core. Il Core è il backbone: velocissimo, bassa latenza, altissima affidabilità, gestisce enormi volumi di traffico. Serve nei campus grandi con più edifici: i distribution di ogni edificio si collegano al core (non full mesh tra edifici), rendendo la rete scalabile."}
+ ],key:[
+   "Single point of failure = se un elemento cade, gran parte della rete va giù → si evita con la ridondanza",
+   "Two-tier (collapsed core) = Access + Distribution (che assume anche i compiti del core)",
+   "Three-tier = Access + Distribution + Core (backbone), per campus grandi",
+   "Distribution/Core usano switch multilayer L3: inter-VLAN routing, ACL, routing",
+   "Non fare daisy-chain degli switch: crea catene di single point of failure",
+   "Catalyst = switch da campus (access/distribution/core)"
+ ],quiz:[
+   {q:"Cos'è un 'single point of failure' in una rete?",o:["Un elemento il cui guasto fa cadere gran parte della rete","Un cavo di riserva","Un tipo di indirizzo IP","Una porta dello switch"],c:0,e:"Un SPOF è un componente non ridondato: se si guasta, tutto ciò che dipende da esso va offline. Si elimina con link e dispositivi ridondanti."},
+   {q:"Nel design gerarchico Cisco, quali sono i tre livelli?",o:["Access, Distribution, Core","Leaf, Spine, Backbone","LAN, WAN, MAN","Fisico, Dati, Rete"],c:0,e:"Il modello a 3 livelli è Access (accesso ai dispositivi), Distribution (aggregazione/routing/ACL) e Core (backbone velocissimo)."},
+   {q:"Come si chiama il design a due livelli (Access + Distribution)?",o:["Collapsed core","Spine-leaf","Full mesh","Bus"],c:0,e:"Nel two-tier le funzioni del core sono 'collassate' nel distribution layer: da qui il nome collapsed core."},
+   {q:"Quale dispositivo gestisce sia MAC (L2) sia IP (L3)?",o:["Switch multilayer (Layer 3)","Hub","Modem","Access point"],c:0,e:"Uno switch multilayer/L3 unisce switching e routing: tipico del distribution e del core layer."},
+   {q:"Quale compito NON appartiene tipicamente al distribution layer?",o:["Collegare direttamente i singoli PC e telefoni","Inter-VLAN routing","Applicare le ACL","Summarization delle rotte"],c:0,e:"Collegare i dispositivi finali è compito dell'access layer; il distribution aggrega, instrada tra VLAN e applica le policy."},
+   {q:"Perché NON conviene collegare gli switch a catena (daisy-chain)?",o:["Crea una serie di single point of failure","È troppo veloce","Consuma troppa corrente","Richiede il cloud"],c:0,e:"Nel daisy-chain la caduta di un cavo/switch isola tutti quelli a valle: meglio collegamenti ridondanti verso il distribution."}
+ ]},
+ "6-66D9J5PkY":{ep:"EP 7",mod:"switching",sections:[
+   {h:"🏢 Dove vivono i server",b:"Quasi ogni risorsa online sta in un data center. Un'azienda può avere un DC proprio (anche un solo rack), affittare spazio/rack (colocation) o usare il cloud (AWS/Azure/GCP = data center di altri). Spesso un mix = hybrid cloud."},
+   {h:"🏛️ Vecchio modello: 3-tier (campus)",b:"Access = switch Top-of-Rack (ToR) in cima al rack → Distribution/Aggregation → Core (switch multi-chassis, in coppia per ridondanza). Ottimizzato per il traffico North-South (utente ↔ Internet ↔ server)."},
+   {h:"⚠️ Il problema",b:"Con la virtualizzazione il traffico dominante è diventato East-West (server ↔ server), ~70-80% del totale. Nel 3-tier servono troppi hop e latenza imprevedibile; lo Spanning Tree blocca metà dei link ridondanti."},
+   {h:"🌿 Nuovo modello: Spine-Leaf (Clos)",b:"Leaf = accesso (ex ToR); Spine = backbone. Full mesh leaf↔spine; mai leaf-leaf né spine-spine. Sempre esattamente 2 hop tra due server qualsiasi → prevedibile e velocissimo."},
+   {h:"🔀 Link L3 e hardware",b:"I link leaf↔spine sono Layer 3 (routed): niente blocco da Spanning Tree, load-balancing su tutti i collegamenti con banda piena. Cisco: Nexus per il data center, Catalyst per il campus; i Nexus 9300 fanno da leaf o spine. Sopra l'underlay spine-leaf si costruisce un overlay (Cisco ACI, VXLAN)."}
+ ],key:[
+   "East-West (server↔server) ≈ 70-80% del traffico nei data center moderni",
+   "Spine-Leaf: leaf↔spine full mesh, mai leaf-leaf/spine-spine, sempre max 2 hop",
+   "Link leaf-spine = L3 routed → niente STP blocking, load-balancing su tutti i link",
+   "Nexus = data center · Catalyst = campus",
+   "3-tier = Access (ToR) / Distribution / Core"
+ ],quiz:[
+   {q:"In una topologia data center spine-leaf, quanti hop separano al massimo due server qualsiasi?",o:["2","1","3","Variabile"],c:0,e:"Ogni leaf è connesso a ogni spine: il percorso server→leaf→spine→leaf→server è sempre di 2 hop, quindi prevedibile."},
+   {q:"Quale tipo di traffico costituisce circa il 70-80% in un data center moderno?",o:["East-West (server-server)","North-South (utente-Internet)","Broadcast","Multicast"],c:0,e:"Con la virtualizzazione i server comunicano molto tra loro (east-west), rendendo obsoleto il vecchio design orientato al north-south."},
+   {q:"Perché nella spine-leaf i link leaf-spine sono di Livello 3 (routed)?",o:["Per evitare il blocco da STP e fare load-balancing su tutti i link","Perché il L2 è più veloce","Per usare gli indirizzi MAC","Perché lo richiede il cloud"],c:0,e:"Instradando a L3 non serve lo Spanning Tree (che bloccherebbe i link ridondanti) e si bilancia il carico su tutti i collegamenti."},
+   {q:"Nella spine-leaf, quali dispositivi NON si collegano tra loro?",o:["Leaf con leaf e spine con spine","Leaf con spine","Server con leaf","Spine con i router"],c:0,e:"Il full mesh è solo tra leaf e spine; i leaf non si collegano tra loro e nemmeno gli spine tra loro."},
+   {q:"Quale famiglia di switch Cisco è progettata per i data center?",o:["Nexus","Catalyst","Meraki","Aironet"],c:0,e:"I Nexus sono per il data center (throughput elevatissimo); i Catalyst per il campus/accesso."},
+   {q:"Nel design a 3 livelli, come si chiama lo switch in cima a ogni rack?",o:["Top-of-Rack (ToR) / Access","Core","Spine","Distribution"],c:0,e:"Il ToR è lo switch di accesso in cima al rack a cui si collegano i server; nel modello spine-leaf diventa il 'leaf'."}
+ ]}
+};
+function openVideoNote(id){
+  const n=VIDEO_NOTES[id];if(!n)return;
+  const v=VIDEOS.find(x=>x.id===id)||{t:''};
+  _id('vid-list').style.display='none';
+  const head=document.querySelector('#view-video .vid-head');if(head)head.style.display='none';
+  const pw=document.querySelector('#view-video .vid-progress-wrap');if(pw)pw.style.display='none';
+  const sc=document.querySelector('#view-video .sec-title');if(sc)sc.style.display='none';
+  const d=_id('vid-detail');d.style.display='block';d.innerHTML='';
+  const back=el('button','ts-back','‹ Torna ai video');back.onclick=closeVideoNote;d.appendChild(back);
+  d.appendChild(el('div','vid-note-title','📄 '+(n.ep?n.ep+' · ':'')+v.t));
+  const open=el('a','vid-open-pl',"▶ Guarda l'episodio ↗");open.href=vidUrl(id);open.target='_blank';open.rel='noopener';open.style.display='inline-block';open.style.marginBottom='14px';d.appendChild(open);
+  n.sections.forEach(s=>{const c=el('div','brief-card');c.style.borderLeftColor='var(--cyan)';const l=el('div','brief-label',s.h);l.style.color='var(--cyan)';c.appendChild(l);c.appendChild(el('div','brief-text',s.b));d.appendChild(c);});
+  if(n.key){const c=el('div','brief-card');c.style.borderLeftColor='var(--orange)';const l=el('div','brief-label',"📌 Punti chiave d'esame");l.style.color='var(--orange)';c.appendChild(l);const ul=el('ul','brief-list');n.key.forEach(k=>{const li=document.createElement('li');li.innerHTML=k;ul.appendChild(li);});c.appendChild(ul);d.appendChild(c);}
+  if(n.quiz&&n.quiz.length){d.appendChild(el('div','sec-title','Mettiti alla prova'));const qbox=el('div');renderNoteQuiz(qbox,n.quiz);d.appendChild(qbox);d.appendChild(el('div','vid-note-info','💡 Queste domande fanno parte anche del quiz di consolidamento del livello collegato.'));}
+  try{window.scrollTo(0,0);}catch(e){}
+}
+function closeVideoNote(){
+  _id('vid-detail').style.display='none';
+  const head=document.querySelector('#view-video .vid-head');if(head)head.style.display='';
+  const pw=document.querySelector('#view-video .vid-progress-wrap');if(pw)pw.style.display='';
+  const sc=document.querySelector('#view-video .sec-title');if(sc)sc.style.display='';
+  _id('vid-list').style.display='';
+}
+function renderNoteQuiz(box,quiz){
+  quiz.forEach((raw,qi)=>{
+    const q=prepQuestion(raw,'');
+    const card=el('div','brief-card');
+    card.appendChild(el('div','q-text','<b>'+(qi+1)+'.</b> '+q.question));
+    const grid=el('div','opts-grid','');grid.style.marginTop='10px';
+    const fb=el('div','feedback','');
+    q.options.forEach((opt,i)=>{
+      const b=el('button','opt','<span class="opt-lbl">'+['A','B','C','D'][i]+'</span><span>'+opt+'</span>');
+      b.onclick=()=>{
+        if(card.dataset.done)return;card.dataset.done='1';
+        grid.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add('ok');});
+        if(i!==q.correct)b.classList.add('ko');else addXP(5);
+        fb.className='feedback show '+(i===q.correct?'ok':'ko');
+        fb.innerHTML='<div class="feedback-title">'+(i===q.correct?'✓ Corretto':'✗ Errato')+'</div><div>'+q.explanation+'</div>';
+      };
+      grid.appendChild(b);
+    });
+    card.appendChild(grid);card.appendChild(fb);suppressHover(grid);
+    box.appendChild(card);
+  });
+}
+// integra le domande dei riassunti video nei banchi dei moduli (quiz dei livelli)
+function integrateVideoQuizzes(){
+  Object.keys(VIDEO_NOTES).forEach(function(vid){
+    var n=VIDEO_NOTES[vid];if(!n.mod||!n.quiz)return;
+    if(!QBANK[n.mod])QBANK[n.mod]=[];
+    n.quiz.forEach(function(q){if(!QBANK[n.mod].some(function(x){return x.q===q.q;}))QBANK[n.mod].push(q);});
+  });
+}
 
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
+integrateVideoQuizzes();
 updateUI();
 renderTree();
 initQuizMenu();
