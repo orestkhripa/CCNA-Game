@@ -164,8 +164,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .rbtn-home{background:transparent;border:1px solid var(--dim);color:var(--muted)}
 .rbtn-home:hover{border-color:var(--text);color:var(--text)}
 /* XP TOAST */
-.xp-toast{position:fixed;bottom:20px;right:20px;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:.85rem;font-weight:600;z-index:9999;transform:translateX(140%);transition:transform .3s cubic-bezier(.4,0,.2,1);max-width:280px}
-.xp-toast.show{transform:translateX(0)}
+.xp-toast{position:fixed;top:64px;left:50%;background:var(--panel);border:1px solid var(--border);border-left:3px solid var(--green);border-radius:8px;padding:12px 18px;font-size:.85rem;font-weight:600;z-index:9999;transform:translate(-50%,-220%);transition:transform .35s cubic-bezier(.4,0,.2,1);max-width:340px;cursor:pointer;box-shadow:0 8px 24px rgba(0,0,0,.4)}
+.xp-toast.show{transform:translate(-50%,0)}
 /* SCHEMAS */
 .schema-nav{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:24px}
 .schema-nav-btn{background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:8px 14px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;transition:all .15s;font-family:'DM Sans',sans-serif}
@@ -431,6 +431,12 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .recap-line.ko{color:#fca5a5}
 .recap-line.ok{color:var(--green)}
 .recap-why{font-size:.78rem;color:var(--muted);line-height:1.55;margin-top:6px;border-top:1px solid var(--border);padding-top:6px}
+.recap-err.good{border-left:3px solid var(--green)}
+.recap-err.bad{border-left:3px solid var(--red)}
+.recap-head{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;margin-bottom:6px}
+.recap-head .recap-q{margin-bottom:0;flex:1}
+.approf-btn{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border:1px solid var(--accent);color:var(--accent);background:rgba(59,130,246,.06);border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
+.approf-btn:hover{background:var(--accent);color:#fff}
 /* ─── CALENDAR / HEATMAP ─── */
 .cal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .cal-stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
@@ -512,7 +518,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 @media(max-width:640px){
   .topic-btn,.mode-btn,.cat-btn,.lab-tab,.opt{min-height:46px}
   .mod-card{min-width:calc(50% - 5px)}
-  .xp-toast{bottom:calc(84px + env(safe-area-inset-bottom));right:12px;left:12px;max-width:none}
+  .xp-toast{top:calc(56px + env(safe-area-inset-top));left:50%;right:auto;max-width:88vw}
 }
 /* ─── MOBILE · QUIZ / LAB / CAL / SCHEMI ─── */
 @media(max-width:640px){
@@ -1035,6 +1041,7 @@ let toastT;
 function showToast(msg,col){
   const t=_id('xp-toast');t.textContent=msg;
   t.style.borderLeftColor=col||'var(--green)';
+  t.onclick=()=>{t.classList.remove('show');clearTimeout(toastT);};
   t.classList.add('show');clearTimeout(toastT);
   toastT=setTimeout(()=>t.classList.remove('show'),2500);
 }
@@ -2663,25 +2670,51 @@ function startGamePhase(mod){
   ENGINES[cfg.engine](_id('play-game'),cfg.data,onGameDone);
 }
 function onGameDone(){showToast('✓ Gioco completato! Ora il consolidamento','var(--green)');startConsolidation();}
+// ── GENERATORI DI DOMANDE A TEMA (varietà infinita, fedeli all'argomento) ──
+function shuffleOpts(correct,others){const o=[correct].concat(others);qShuffle(o);return{o:o,c:o.indexOf(correct)};}
+function genFromMatch(modId){const d=LEVELS[modId]&&LEVELS[modId].data;if(!d||!d.items||!d.cats)return null;const it=d.items[rnd(0,d.items.length-1)];const b=shuffleOpts(it.c,d.cats.filter(c=>c!==it.c));return{q:'Classifica correttamente: '+it.n+(it.h?' — '+it.h:''),o:b.o,c:b.c,e:it.n+' → '+it.c};}
+function genFromTF(modId){const d=LEVELS[modId]&&LEVELS[modId].data;if(!d||!d.items)return null;const it=d.items[rnd(0,d.items.length-1)];return{q:'Vero o Falso: '+it.s,o:['Vero','Falso'],c:it.t?0:1,e:it.e};}
+function uniqNums(correct,cands,k){const out=[];for(const c of cands){if(c!==correct&&out.indexOf(c)<0){out.push(c);if(out.length>=k)break;}}return out;}
+function genBinaryMCQ(){const d=rnd(1,255);if(rnd(0,1)===0){const bin=d.toString(2).padStart(8,'0'),cor=String(d);const w=uniqNums(cor,[String((d+8)%256),String((d-8+256)%256),String(255-d),String(d^0x0f),String((d+1)%256)],3);const b=shuffleOpts(cor,w);return{q:'Quanto vale in decimale '+bin+'?',o:b.o,c:b.c,e:bin+' = '+d};}const hex='0x'+d.toString(16).toUpperCase(),cor=String(d);const w=uniqNums(cor,[String((d+16)%256),String((d-16+256)%256),String(255-d),String(d^0xff)],3);const b=shuffleOpts(cor,w);return{q:'Quanto vale in decimale '+hex+'?',o:b.o,c:b.c,e:hex+' = '+d};}
+function maskOf(c){return intToIp((0xffffffff<<(32-c))>>>0);}
+function genSubnetMCQ(){const c=rnd(24,30);if(rnd(0,1)===0){const hosts=Math.pow(2,32-c)-2,cor=String(hosts);const w=uniqNums(cor,[String(Math.pow(2,32-c)),String(Math.pow(2,32-(c-1))-2),String(Math.pow(2,33-c)-2),String(hosts+2)],3);const b=shuffleOpts(cor,w);return{q:'Quanti host utilizzabili offre una /'+c+'?',o:b.o,c:b.c,e:'/'+c+' → 2^'+(32-c)+' − 2 = '+hosts+' host'};}const cor=maskOf(c);const w=uniqNums(cor,[maskOf(c-1),maskOf(c+1),maskOf(c>=29?26:c+2)],3);const b=shuffleOpts(cor,w);return{q:'Qual è la subnet mask di una /'+c+'?',o:b.o,c:b.c,e:'/'+c+' = '+cor};}
+const QGEN={osi_mod:genFromMatch,ip_addr:genFromMatch,wifi_mod:genFromMatch,switching:genFromTF,eigrp_mod:genFromTF,wan_mod:genFromTF,auto_mod:genFromTF,binary:genBinaryMCQ,subnetting:genSubnetMCQ,boss1:genSubnetMCQ};
+function genQuizFor(modId,k){const f=QGEN[modId];if(!f)return[];const seen={},out=[];let t=0;while(out.length<k&&t<k*6){t++;const q=f(modId);if(q&&!seen[q.q]){seen[q.q]=1;out.push(q);}}return out;}
+function moduleOfQuestion(text){for(const k in QBANK){if(QBANK[k].some(q=>q.q===text))return k;}return LP.mod?LP.mod.id:'osi_mod';}
+const SCHEMA_MAP={net_basics:'osi',binary:'subnet',osi_mod:'osi',tcpip_mod:'osi',ip_addr:'subnet',subnetting:'subnet',boss1:'subnet',switching:'vlan',vlan_mod:'vlan',routing_s:'cli',ospf_mod:'cli',eigrp_mod:'cli',boss2:'cli',acl_mod:'acl',nat_mod:'nat',ssh_sec:'cli',boss3:'acl',ipv6_mod:'ipv6',wan_mod:'cli',auto_mod:'cli',wifi_mod:'vlan',redun_mod:'vlan',ipserv_mod:'subnet',ccna_cert:'osi'};
+const SCHEMA_ORDER=['osi','subnet','cli','vlan','nat','acl','ipv6'];
+function openTheory(modId){const s=SCHEMA_MAP[modId]||'osi';showView('schemas');const b=document.querySelectorAll('.schema-nav-btn')[SCHEMA_ORDER.indexOf(s)];selSchema(s,b);try{window.scrollTo(0,0);}catch(e){}}
 function startConsolidation(){
   setPlayStep('quiz');
   _id('play-game').style.display='none';_id('play-done').style.display='none';
   _id('play-quiz').style.display='block';
-  const mod=LP.mod;const pool=qShuffle(questionsForModule(mod));
-  const n=mod.type==='cert'?20:mod.type==='boss'?6:4;
-  LP.quiz={base:pool.slice(0,Math.min(n,pool.length)),pool:[],cur:0,ok:0,answered:false,wrong:[],round:1};
+  const mod=LP.mod;
+  LP.quiz={n:(mod.type==='cert'?20:mod.type==='boss'?6:4),cur:0,ok:0,answered:false,round:1};
+  LP.answers=[]; // storico completo di TUTTE le risposte, entrambi i giri
   startRound(1);
 }
+function buildQuizPool(mod,n){
+  const all=questionsForModule(mod);
+  const gen=genQuizFor(mod.id,Math.floor(n/2)); // metà generate al volo
+  const curatedN=n-gen.length;
+  if(!G.seenQ)G.seenQ={};if(!G.seenQ[mod.id])G.seenQ[mod.id]=[];
+  let unseen=all.filter(q=>!G.seenQ[mod.id].includes(q.q));
+  if(unseen.length<curatedN){G.seenQ[mod.id]=[];unseen=all.slice();}
+  const curated=qShuffle(unseen).slice(0,Math.min(curatedN,unseen.length));
+  curated.forEach(q=>G.seenQ[mod.id].push(q.q));saveG();
+  return qShuffle(curated.concat(gen));
+}
 function startRound(r){
-  const Q=LP.quiz;Q.round=r;Q.cur=0;Q.ok=0;Q.wrong=[];Q.pool=qShuffle(Q.base.slice());
+  const Q=LP.quiz;Q.round=r;Q.cur=0;Q.ok=0;
+  Q.pool=buildQuizPool(LP.mod,Q.n); // domande diverse a ogni giro (rotazione + generate)
   renderCons();
 }
 function renderRoundTransition(){
   const wrap=_id('play-quiz');wrap.innerHTML='';const Q=LP.quiz;
   const c=el('div','q-box');c.style.textAlign='center';
-  c.innerHTML='<div class="q-tag" style="color:var(--green)">✓ GIRO 1 · IMPARA — COMPLETATO</div>'+
+  c.innerHTML='<div class="q-tag" style="color:var(--green)">✓ GIRO 1 — COMPLETATO</div>'+
     '<div class="q-text">Hai totalizzato '+Q.ok+'/'+Q.pool.length+' al primo giro.</div>'+
-    '<p style="color:var(--muted);font-size:.85rem;margin-top:10px;line-height:1.6">Ora il <b style="color:var(--cyan)">Giro 2 · Verifica</b>: rispondi di nuovo alle stesse domande (in ordine diverso). Nel resoconto finale contano <b>solo gli errori di questo secondo giro</b>.</p>';
+    '<p style="color:var(--muted);font-size:.85rem;margin-top:10px;line-height:1.6">Ora il <b style="color:var(--cyan)">Giro 2</b>: <b>nuove domande</b> sullo stesso tema. Nel resoconto finale contano <b>tutte</b> le risposte di entrambi i giri.</p>';
   const btn=el('button','hero-cta','▶ Inizia il Giro 2');btn.onclick=()=>startRound(2);
   wrap.appendChild(c);wrap.appendChild(btn);
 }
@@ -2690,7 +2723,7 @@ function renderCons(){
   if(Q.cur>=Q.pool.length){ if(Q.round===1){renderRoundTransition();}else{finishLevel();} return; }
   Q.answered=false;
   const q=prepQuestion(Q.pool[Q.cur],mod.title);Q.currentQ=q;
-  const rlabel=Q.round===1?'Giro 1 · Impara':'Giro 2 · Verifica';
+  const rlabel=Q.round===1?'Giro 1':'Giro 2';
   wrap.appendChild(el('div','game-instr','🧠 '+rlabel+' · Domanda '+(Q.cur+1)+'/'+Q.pool.length));
   wrap.appendChild(el('div','q-box','<div class="q-text">'+q.question+'</div>'));
   const grid=el('div','opts-grid','');
@@ -2702,7 +2735,8 @@ function renderCons(){
       if(Q.answered)return;Q.answered=true;
       grid.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add('ok');});
       const ok=i===q.correct;
-      if(!ok){b.classList.add('ko');Q.wrong.push({q:q.question,tua:q.options[i],giusta:q.options[q.correct],perche:q.explanation});}else{Q.ok++;addXP(8);}
+      if(ok){Q.ok++;addXP(8);}else{b.classList.add('ko');}
+      LP.answers.push({q:q.question,tua:q.options[i],giusta:q.options[q.correct],ok:ok,perche:q.explanation,mod:moduleOfQuestion(q.question)});
       fb.className='feedback show '+(ok?'ok':'ko');
       fb.innerHTML='<div class="feedback-title">'+(ok?'✓ Corretto':'✗ Errato')+'</div>'+
         (ok?'':'<div style="margin-bottom:6px"><b style="color:var(--green)">✓ Risposta corretta:</b> '+q.options[q.correct]+'</div>')+
@@ -2717,13 +2751,15 @@ function renderCons(){
 function finishLevel(){
   const mod=LP.mod;setPlayStep('done');
   hidePlayPanels();_id('play-done').style.display='block';
-  const passed=LP.quiz.ok>=Math.ceil(LP.quiz.pool.length*0.5);
+  const ans=LP.answers||[],tot=ans.length,ok=ans.filter(a=>a.ok).length,ko=tot-ok;
+  const passed=tot>0 && ok>=Math.ceil(tot*0.5);
   if(passed&&!G.modules[mod.id].completed) completeModule(mod.id);
   _id('play-done-pct').textContent=passed?'✓':'✗';
   _id('play-done-pct').style.color=passed?'var(--green)':'var(--orange)';
-  _id('play-done-msg').innerHTML=(passed?'Livello completato! ':'Ci sei quasi. ')+'Verifica (Giro 2): '+LP.quiz.ok+'/'+LP.quiz.pool.length+(passed?' &nbsp;·&nbsp; +'+mod.xp+' XP':' — ripeti per sbloccare il modulo');
-  // ── RESOCONTO + REVISIONE ERRORI ──
+  _id('play-done-msg').innerHTML=(passed?'Livello completato! ':'Ci sei quasi. ')+'Totale (2 giri): '+ok+'/'+tot+' giuste'+(passed?' &nbsp;·&nbsp; +'+mod.xp+' XP':' — ripeti per sbloccare')+
+    '<br><span style="font-size:.8rem"><span style="color:var(--green)">'+ok+' corrette</span> &nbsp;·&nbsp; <span style="color:#fca5a5">'+ko+' sbagliate</span></span>';
   const rc=_id('play-recap');rc.innerHTML='';
+  // cosa hai imparato
   const b=BRIEF[mod.id];
   if(b&&b.key){
     const card=el('div','brief-card');card.style.borderLeftColor='var(--green)';
@@ -2731,22 +2767,21 @@ function finishLevel(){
     const ul=el('ul','brief-list');b.key.forEach(k=>{const li=document.createElement('li');li.innerHTML=k;ul.appendChild(li);});card.appendChild(ul);
     rc.appendChild(card);
   }
-  const w=LP.quiz.wrong||[];
-  if(w.length){
-    const card=el('div','brief-card');card.style.borderLeftColor='var(--red)';
-    const l=el('div','brief-label','🔁 Errori del Giro 2 — da rivedere ('+w.length+')');l.style.color='var(--red)';card.appendChild(l);
-    w.forEach(e=>{
-      const it=el('div','recap-err');
-      it.innerHTML='<div class="recap-q">'+e.q+'</div>'+
-        '<div class="recap-line ko">✗ Tua risposta: '+e.tua+'</div>'+
-        '<div class="recap-line ok">✓ Corretta: '+e.giusta+'</div>'+
-        '<div class="recap-why">'+e.perche+'</div>';
+  // resoconto completo di TUTTE le risposte (verdi + rosse), con Approfondisci
+  if(tot){
+    const card=el('div','brief-card');card.style.borderLeftColor='var(--accent)';
+    const l=el('div','brief-label','📋 Resoconto risposte ('+ok+' giuste · '+ko+' sbagliate)');l.style.color='var(--accent)';card.appendChild(l);
+    ans.forEach(a=>{
+      const it=el('div','recap-err '+(a.ok?'good':'bad'));
+      const head=el('div','recap-head','');
+      head.appendChild(el('div','recap-q',(a.ok?'🟢 ':'🔴 ')+a.q));
+      const btn=el('button','approf-btn','Approfondisci ↗');btn.onclick=()=>openTheory(a.mod);head.appendChild(btn);
+      it.appendChild(head);
+      it.appendChild(el('div','recap-line '+(a.ok?'ok':'ko'),(a.ok?'✓':'✗')+' Tua risposta: '+a.tua));
+      if(!a.ok) it.appendChild(el('div','recap-line ok','✓ Corretta: '+a.giusta));
+      it.appendChild(el('div','recap-why',a.perche));
       card.appendChild(it);
     });
-    rc.appendChild(card);
-  }else if(LP.quiz.pool.length){
-    const card=el('div','brief-card');card.style.borderLeftColor='var(--green)';
-    card.innerHTML='<div class="brief-text">🎉 Nessun errore nel Giro 2 — perfetto!</div>';
     rc.appendChild(card);
   }
 }
