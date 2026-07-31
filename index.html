@@ -438,6 +438,29 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .recap-head .recap-q{margin-bottom:0;flex:1}
 .approf-btn{flex-shrink:0;font-family:'JetBrains Mono',monospace;font-size:.58rem;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border:1px solid var(--accent);color:var(--accent);background:rgba(59,130,246,.06);border-radius:6px;cursor:pointer;transition:all .15s;white-space:nowrap}
 .approf-btn:hover{background:var(--accent);color:#fff}
+/* ─── VIDEO ─── */
+.vid-head{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+.vid-title-main{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800}
+.vid-sub{font-size:.76rem;color:var(--muted);margin-top:3px}
+.vid-open-pl{font-family:'JetBrains Mono',monospace;font-size:.66rem;letter-spacing:1px;text-transform:uppercase;padding:8px 14px;border:1px solid var(--red);color:var(--red);border-radius:8px;text-decoration:none;white-space:nowrap;transition:all .15s}
+.vid-open-pl:hover{background:var(--red);color:#fff}
+.vid-progress-wrap{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:12px 16px;margin-bottom:16px}
+.vid-progress-top{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-family:'JetBrains Mono',monospace;font-size:.72rem;color:var(--muted)}
+.vid-reset{background:none;border:1px solid var(--border);color:var(--muted);border-radius:6px;padding:3px 10px;font-size:.64rem;cursor:pointer;font-family:'JetBrains Mono',monospace;transition:all .15s}
+.vid-reset:hover{border-color:var(--red);color:var(--red)}
+.vid-progress-track{height:8px;background:var(--dim);border-radius:4px;overflow:hidden}
+.vid-progress-fill{height:100%;background:linear-gradient(90deg,var(--red),var(--orange));border-radius:4px;transition:width .5s ease}
+.vid-item{display:flex;align-items:center;gap:12px;background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:11px 14px;margin-bottom:8px;transition:all .15s}
+.vid-item:hover{border-color:var(--accent)}
+.vid-item.seen{opacity:.62}
+.vid-item.seen .vid-name{text-decoration:line-through;color:var(--muted)}
+.vid-check{width:24px;height:24px;min-width:24px;border-radius:6px;border:2px solid var(--dim);background:var(--surface);cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.9rem;transition:all .15s}
+.vid-check:hover{border-color:var(--green)}
+.vid-item.seen .vid-check{background:var(--green);border-color:var(--green);color:var(--bg)}
+.vid-num{font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted);min-width:26px}
+.vid-link{flex:1;color:var(--text);text-decoration:none;font-size:.86rem;font-weight:500;line-height:1.4}
+.vid-link:hover .vid-name{color:var(--accent)}
+.vid-play{color:var(--red);font-size:1rem;text-decoration:none;flex-shrink:0}
 /* ─── CALENDAR / HEATMAP ─── */
 .cal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .cal-stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
@@ -652,6 +675,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="nav-btn" id="nb-cal"     onclick="showView('cal')"><span class="nb-ico">📅</span><span class="nb-txt">Calendario</span></button>
     <button class="nav-btn" id="nb-schemas" onclick="showView('schemas')"><span class="nb-ico">📚</span><span class="nb-txt">Schemi</span></button>
     <button class="nav-btn" id="nb-gloss" onclick="showView('gloss')"><span class="nb-ico">📖</span><span class="nb-txt">Glossario</span></button>
+    <button class="nav-btn" id="nb-video" onclick="showView('video')"><span class="nb-ico">📺</span><span class="nb-txt">Video</span></button>
   </div>
   <div class="nav-xp">
     <span class="nav-lv" id="nav-lv">LV1</span>
@@ -977,6 +1001,23 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </div>
 </div>
 
+<!-- ══════════════ VIDEO ══════════════ -->
+<div class="view" id="view-video">
+  <div class="sec-title">Videocorso · NetworkChuck</div>
+  <div class="vid-head">
+    <div>
+      <div class="vid-title-main">FREE CCNA 200-301 // Complete Course</div>
+      <div class="vid-sub">24 video · spunta quelli già visti per tenere traccia dei progressi</div>
+    </div>
+    <a class="vid-open-pl" href="https://www.youtube.com/playlist?list=PLIhvC56v63IJVXv0GJcl9vO5Z6znCVb1P" target="_blank" rel="noopener">Apri playlist ↗</a>
+  </div>
+  <div class="vid-progress-wrap">
+    <div class="vid-progress-top"><span id="vid-count">0 / 24 visti</span><button class="vid-reset" onclick="resetVideos()">Azzera</button></div>
+    <div class="vid-progress-track"><div class="vid-progress-fill" id="vid-progress-fill" style="width:0%"></div></div>
+  </div>
+  <div id="vid-list"></div>
+</div>
+
 <div class="xp-toast" id="xp-toast"></div>
 
 <script>
@@ -1066,6 +1107,7 @@ function showView(v){
   if(v==='cal') renderCalendar();
   if(v==='schemas') renderSchema('osi');
   if(v==='gloss') renderGlossary((_id('gloss-search')||{}).value||'');
+  if(v==='video') renderVideos();
 }
 
 // ══════════════════════════════════════
@@ -3299,6 +3341,63 @@ function closeGloss(){
   const cnt=_id('gloss-count');if(cnt)cnt.style.display='';
   _id('gloss-list').style.display='';
 }
+// ══════════════════════════════════════
+// VIDEO · playlist NetworkChuck (spunta i visti)
+// ══════════════════════════════════════
+const VIDEO_PL='PLIhvC56v63IJVXv0GJcl9vO5Z6znCVb1P';
+const VIDEOS=[
+ {id:"S7MNX_UD7vY",t:"FREE CCNA // What is a Network? // Day 0"},
+ {id:"9eH16Fxeb9o",t:"What is a SWITCH? // FREE CCNA // Day 1"},
+ {id:"p9ScLm9S3B4",t:"What is a ROUTER? // FREE CCNA // EP 2"},
+ {id:"CRdL1PcherM",t:"what is TCP/IP and OSI? // FREE CCNA // EP 3"},
+ {id:"3kfO61Mensg",t:"REAL LIFE example!! (TCP/IP and OSI layers) // FREE CCNA // EP 4"},
+ {id:"oIRkXulqJA4",t:"how the OSI model works on YouTube (Application and Transport Layers) // FREE CCNA // EP 5"},
+ {id:"wwwAXlE4OtU",t:"DO NOT design your network like this!! // FREE CCNA // EP 6"},
+ {id:"6-66D9J5PkY",t:"Data Center NETWORKS (what do they look like??) // FREE CCNA // EP 7"},
+ {id:"xPi4uZu4uF0",t:"WAN....it's not the internet!! (sometimes) // FREE CCNA // EP 8"},
+ {id:"80vIin4xGp8",t:"let's hack your home network // FREE CCNA // EP 9"},
+ {id:"37tyxaQbtN4",t:"you need to learn Hybrid-Cloud RIGHT NOW!! // FREE CCNA // EP 10"},
+ {id:"y8h5qY3zwic",t:"forcing my kids to make Ethernet cables // FREE CCNA // EP 11"},
+ {id:"MLxgmkRzgIQ",t:"why Power over Ethernet (PoE) is amazing!! // FREE CCNA // EP 12"},
+ {id:"E3DEJ7odWq0",t:"fiber optic cables (what you NEED to know) // FREE CCNA // EP 13"},
+ {id:"0W4JZIWtjLQ",t:"you NEED to learn Port Security RIGHT NOW!! // FREE CCNA // EP 14"},
+ {id:"5WfiTHiU4x8",t:"what is an IP Address? // You SUCK at Subnetting // EP 1"},
+ {id:"tcae4TSSMo8",t:"we ran OUT of IP Addresses!!"},
+ {id:"8bhvn9tQk8o",t:"we're out of IP Addresses but this saved us (Private IP Addresses)"},
+ {id:"2-i5x8KCfII",t:"i bet you can't do this (because you still suck at subnetting)"},
+ {id:"oZGZRtaGyG8",t:"What is a Subnet Mask??? (you NEED to know it!!)"},
+ {id:"mJ_5qeqGOaI",t:"let's subnet your home network // You SUCK at subnetting // EP 6"},
+ {id:"B1vqKQIPxr0",t:"subnetting my coffee shop"},
+ {id:"6zopTcQFhqM",t:"Subnetting but in reverse"},
+ {id:"OD2vG5st4zI",t:"Do you STILL suck at subnetting?? (THE FINAL TEST) // EP 9"}
+];
+function vidUrl(id){return 'https://www.youtube.com/watch?v='+id+'&list='+VIDEO_PL;}
+function toggleVideo(id){
+  if(!G.watched)G.watched={};
+  G.watched[id]=!G.watched[id];if(!G.watched[id])delete G.watched[id];
+  saveG();renderVideos();
+}
+function resetVideos(){G.watched={};saveG();renderVideos();}
+function renderVideos(){
+  const list=_id('vid-list');if(!list)return;
+  if(!G.watched)G.watched={};
+  list.innerHTML='';
+  let done=0;
+  VIDEOS.forEach((v,i)=>{
+    const seen=!!G.watched[v.id];if(seen)done++;
+    const row=el('div','vid-item'+(seen?' seen':''));
+    const ck=el('button','vid-check',seen?'✓':'');ck.title=seen?'Segna come non visto':'Segna come visto';ck.onclick=()=>toggleVideo(v.id);
+    const num=el('span','vid-num',(i+1<10?'0':'')+(i+1));
+    const a=el('a','vid-link','<span class="vid-name">'+v.t+'</span>');a.href=vidUrl(v.id);a.target='_blank';a.rel='noopener';
+    const play=el('a','vid-play','▶');play.href=vidUrl(v.id);play.target='_blank';play.rel='noopener';play.title='Guarda su YouTube';
+    row.appendChild(ck);row.appendChild(num);row.appendChild(a);row.appendChild(play);
+    list.appendChild(row);
+  });
+  const pct=Math.round(done/VIDEOS.length*100);
+  _id('vid-count').textContent=done+' / '+VIDEOS.length+' visti ('+pct+'%)';
+  _id('vid-progress-fill').style.width=pct+'%';
+}
+
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
