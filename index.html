@@ -3530,6 +3530,96 @@ const VIDEO_NOTES={
    {q:"Cos'è, in sostanza, Internet?",o:["Un'enorme quantità di router che instradano i pacchetti tra reti","Un unico grande computer","Una singola rete locale","Un tipo di switch"],c:0,e:"Internet è l'insieme di innumerevoli router (e switch, firewall…) che fanno 'saltare' i pacchetti da rete a rete fino a destinazione."},
    {q:"Qual è la funzione di un firewall?",o:["Bloccare il traffico non autorizzato e lasciar passare solo quello legittimo","Collegare due reti diverse","Diffondere il Wi-Fi","Assegnare gli IP"],c:0,e:"Il firewall filtra il traffico in ingresso e in uscita, proteggendo la rete."},
    {q:"Cosa fa un Wireless Access Point (WAP)?",o:["Diffonde la rete via onde radio per i dispositivi wireless","Instrada tra reti diverse","Blocca gli attacchi","Converte i segnali in fibra"],c:0,e:"L'access point trasmette la rete via Wi-Fi, permettendo ai dispositivi senza cavo di connettersi."}
+ ]},
+ "9eH16Fxeb9o":{ep:"Day 1",mod:"switching",sections:[
+   {h:"🔌 Cos'è uno switch",b:"Lo switch collega i dispositivi tramite cavi Ethernet nelle sue porte (8, 24, 48…): i computer comunicano con segnali elettrici che viaggiano nei cavi. Serve a far parlare tra loro i dispositivi della stessa rete locale."},
+   {h:"🙈 Hub: il predecessore 'stupido'",b:"Prima degli switch c'erano gli hub. L'hub non ha intelligenza: ripete ogni segnale ricevuto su TUTTE le porte, come se un messaggio a un amico arrivasse a tutti gli amici. È uno spreco di banda e un problema di sicurezza: chiunque (anche un attaccante) può vedere il traffico altrui."},
+   {h:"🧠 Switch: intelligente",b:"Lo switch invia il frame solo alla porta del destinatario giusto. Per farlo impara gli indirizzi MAC dei dispositivi (dalla MAC sorgente dei frame) e li memorizza nella tabella CAM. Più efficiente e più sicuro dell'hub."},
+   {h:"🏷️ Indirizzi Layer 2 e Layer 3",b:"Un indirizzo identifica in modo univoco un dispositivo. L'indirizzo di Livello 2 è il MAC (fisico); quello di Livello 3 è l'IP. Lo switch lavora con i MAC (L2); l'IP (L3) è competenza del router. Il comando ping serve a verificare se un dispositivo è raggiungibile."}
+ ],key:[
+   "Hub = ripete il segnale a TUTTE le porte (insicuro, un solo dominio di collisione)",
+   "Switch = invia il frame solo alla porta del destinatario",
+   "Lo switch impara i MAC (dalla sorgente) e li salva nella tabella CAM",
+   "Layer 2 = indirizzo MAC · Layer 3 = indirizzo IP",
+   "ping = verifica se un dispositivo è raggiungibile"
+ ],quiz:[
+   {q:"Qual è la differenza principale tra hub e switch?",o:["L'hub ripete a tutte le porte; lo switch invia solo alla porta del destinatario","L'hub è più veloce","Lo switch opera a Livello 3","L'hub crea le VLAN"],c:0,e:"L'hub è 'stupido' e inoltra a tutte le porte; lo switch usa la MAC per inviare solo al destinatario giusto."},
+   {q:"Perché un hub è meno sicuro di uno switch?",o:["Ripete il traffico a tutti, così chiunque può vederlo","Cifra male i dati","Non ha porte","Blocca il ping"],c:0,e:"Poiché l'hub inoltra a tutte le porte, un attaccante collegato può intercettare il traffico degli altri."},
+   {q:"Come fa lo switch a sapere su quale porta si trova un dispositivo?",o:["Impara la MAC sorgente dei frame e la salva nella tabella CAM","Interroga il DNS","Usa l'indirizzo IP","Chiede al router"],c:0,e:"Lo switch costruisce la tabella CAM associando ogni MAC sorgente alla porta da cui è arrivata."},
+   {q:"A quale livello appartiene l'indirizzo MAC?",o:["Livello 2 (Data Link)","Livello 3 (Network)","Livello 4 (Transport)","Livello 1 (Physical)"],c:0,e:"Il MAC è l'indirizzo di Livello 2; l'IP è di Livello 3 ed è competenza del router."},
+   {q:"A cosa serve il comando ping?",o:["Verificare se un dispositivo è raggiungibile","Assegnare un indirizzo IP","Creare una VLAN","Cifrare il traffico"],c:0,e:"Il ping invia un messaggio e attende la risposta per capire se l'host di destinazione è attivo e raggiungibile."}
+ ]},
+ "p9ScLm9S3B4":{ep:"EP 2",mod:"routing_s",sections:[
+   {h:"📡 Cos'è un router",b:"Il router collega reti diverse e ci connette a Internet. Lo switch fa parlare i dispositivi della stessa rete; quando la destinazione è su un'altra rete (es. un server web) serve il router, il cui compito è instradare il traffico tra reti."},
+   {h:"🔢 Cos'è una 'rete'",b:"Una rete è un gruppo di indirizzi IP. Dispositivi con IP nello stesso intervallo (es. 10.1.1.0–10.1.1.255) sono sulla stessa rete; un intervallo diverso è un'altra rete. Non basta collegare due switch: a separare le reti sono gli indirizzi IP, quindi serve un router per farle comunicare."},
+   {h:"🔎 ARP (Address Resolution Protocol)",b:"Per inviare un frame, l'host deve conoscere il MAC del destinatario (lo switch parla solo 'MAC'). ARP scopre il MAC associato a un IP: l'host manda una richiesta in broadcast (MAC destinazione FFFF.FFFF.FFFF) 'chi ha questo IP?'; solo il proprietario risponde con il suo MAC."},
+   {h:"🚪 Default gateway",b:"Se la destinazione è su un'altra rete, l'host non fa ARP per il server remoto: manda il frame al proprio default gateway (il router), che poi instrada verso la rete di destinazione. Senza router, host su reti IP diverse non possono comunicare."}
+ ],key:[
+   "Il router collega reti IP diverse e ci porta su Internet",
+   "Una 'rete' = un gruppo di indirizzi IP (stesso intervallo = stessa rete)",
+   "ARP scopre il MAC associato a un IP (richiesta in broadcast FFFF.FFFF.FFFF)",
+   "Per un'altra rete l'host invia al default gateway (il router)",
+   "Lo switch non instrada tra reti IP diverse: serve il router"
+ ],quiz:[
+   {q:"Qual è il compito principale di un router?",o:["Collegare e instradare il traffico tra reti IP diverse","Collegare i dispositivi della stessa rete","Assegnare i MAC","Cifrare il traffico"],c:0,e:"Il router connette reti diverse (e Internet); lo switch invece collega i dispositivi della stessa rete."},
+   {q:"Cosa identifica una 'rete' a livello IP?",o:["Un gruppo di indirizzi IP nello stesso intervallo","Il numero di switch collegati","Il tipo di cavo","Il modello del router"],c:0,e:"Dispositivi con IP nello stesso intervallo sono sulla stessa rete; intervalli diversi = reti diverse."},
+   {q:"A cosa serve il protocollo ARP?",o:["A scoprire il MAC associato a un indirizzo IP","A cifrare i pacchetti","A instradare tra VLAN","Ad assegnare gli IP"],c:0,e:"ARP risolve un IP nel corrispondente MAC, inviando una richiesta in broadcast a cui risponde solo il proprietario dell'IP."},
+   {q:"Quale indirizzo MAC di destinazione usa una richiesta ARP?",o:["Broadcast FFFF.FFFF.FFFF","L'indirizzo del router","000000000000","Quello del DNS"],c:0,e:"La richiesta ARP va in broadcast (FFFF.FFFF.FFFF) così tutti la ricevono, ma solo il proprietario dell'IP risponde."},
+   {q:"Se la destinazione è su un'altra rete, a chi invia il frame l'host?",o:["Al proprio default gateway (il router)","Direttamente al server remoto","In broadcast su Internet","Al server DNS"],c:0,e:"Per uscire dalla propria rete l'host consegna il frame al default gateway, che instrada verso la rete di destinazione."}
+ ]},
+ "CRdL1PcherM":{ep:"EP 3",mod:"osi_mod",sections:[
+   {h:"📜 Perché serve un modello",b:"Agli albori (ARPANET, 1969) le reti erano proprietarie: computer di aziende diverse 'parlavano lingue diverse' e non comunicavano. Servivano regole comuni: nascono i modelli di rete, standard condivisi che permettono a dispositivi di produttori diversi di comunicare."},
+   {h:"🧱 Il modello TCP/IP",b:"È il modello realmente usato ('stack TCP/IP'), implementato in ogni computer. Divide la comunicazione in livelli, ciascuno con i suoi protocolli: Physical (cavi, segnali), Data Link (MAC, switch), Network (IP, router), Transport (TCP/UDP, porte), Application (HTTP, DNS…). Nel CCNA lo si vede spesso a 4-5 livelli."},
+   {h:"📚 Il modello OSI",b:"L'OSI è il modello di riferimento a 7 livelli. Condivide i primi con TCP/IP (Physical, Data Link, Network, Transport) ma aggiunge in alto due livelli: Session e Presentation. La differenza principale tra OSI e TCP/IP sono proprio questi due livelli extra."},
+   {h:"🔁 A cosa servono i livelli",b:"Suddividere le funzioni in livelli rende tutto più semplice e modulare: ogni livello ha un compito e un protocollo standard. Grazie a questi standard un PC può inviare una foto a un Mac: usano tutti le stesse tecnologie di rete."}
+ ],key:[
+   "I modelli di rete = standard comuni che fanno comunicare dispositivi di produttori diversi",
+   "TCP/IP = il modello realmente usato (Physical, Data Link, Network, Transport, Application)",
+   "OSI = modello di riferimento a 7 livelli",
+   "OSI aggiunge a TCP/IP i livelli Session (5) e Presentation (6)",
+   "L1 = cavi/segnali · L2 = MAC/switch · L3 = IP/router · L4 = TCP/UDP/porte"
+ ],quiz:[
+   {q:"Perché sono nati i modelli di rete (TCP/IP, OSI)?",o:["Per far comunicare dispositivi di produttori diversi con standard comuni","Per rendere le reti più lente","Per usare solo hardware di una marca","Per eliminare gli indirizzi IP"],c:0,e:"Prima le reti erano proprietarie e incompatibili; i modelli definiscono standard condivisi che permettono l'interoperabilità."},
+   {q:"Quale modello è quello realmente implementato nei computer?",o:["TCP/IP","OSI","ARPANET","IPX/SPX"],c:0,e:"Il modello TCP/IP (lo 'stack') è quello effettivamente usato; l'OSI resta un modello di riferimento."},
+   {q:"Quali livelli aggiunge l'OSI rispetto al TCP/IP?",o:["Session e Presentation","Physical e Data Link","Network e Transport","Nessuno"],c:0,e:"L'OSI ha 7 livelli: rispetto al TCP/IP aggiunge in alto Session (5) e Presentation (6)."},
+   {q:"A quale livello appartengono gli indirizzi IP e i router?",o:["Network (Livello 3)","Data Link (Livello 2)","Transport (Livello 4)","Physical (Livello 1)"],c:0,e:"Gli IP e l'instradamento dei router sono di Livello 3 (Network)."},
+   {q:"Cosa si trova al livello Transport?",o:["TCP, UDP e i numeri di porta","Gli indirizzi MAC","I cavi Ethernet","Gli indirizzi IP"],c:0,e:"Il Transport (L4) gestisce TCP/UDP e le porte, cioè l'affidabilità e l'identificazione dei servizi."}
+ ]},
+ "3kfO61Mensg":{ep:"EP 4",mod:"tcpip_mod",sections:[
+   {h:"📦 Incapsulamento",b:"Quando invii dati, il computer li fa scendere lungo i livelli: a ogni livello aggiunge un header, come mettere una lettera dentro buste sempre più grandi. Application (dati) → Transport (header L4) → Network (header L3) → Data Link (frame) → Physical (bit)."},
+   {h:"🏷️ Le PDU a ogni livello",b:"Scendendo, il messaggio cambia nome (PDU): al Transport è un Segmento (header TCP/UDP + porta), al Network un Pacchetto (con IP sorgente/destinazione), al Data Link un Frame (con i MAC), al Physical dei Bit."},
+   {h:"🔓 Decapsulamento",b:"Sul dispositivo che riceve avviene il processo inverso: da Frame a Pacchetto a Segmento fino ai dati (decapsulamento). Ogni livello 'apre la sua busta' e passa il contenuto al livello superiore."},
+   {h:"🌐 Esempio pratico (web)",b:"Aprendo un sito: L7 usa HTTP/HTTPS (richiesta al server), L4 usa TCP con la porta 443 (HTTPS) o 80 (HTTP), L3 aggiunge gli IP sorgente/destinazione per il router, L2 i MAC, L1 i segnali. È l'incapsulamento in azione."}
+ ],key:[
+   "Incapsulamento = ogni livello aggiunge un header scendendo lo stack",
+   "PDU: Dati (L7) → Segmento (L4) → Pacchetto (L3) → Frame (L2) → Bit (L1)",
+   "Decapsulamento = processo inverso in ricezione (frame→pacchetto→segmento→dati)",
+   "Web: HTTP/HTTPS (L7) · TCP porta 443/80 (L4) · IP (L3) · MAC (L2)",
+   "L'header L4 porta il protocollo (TCP/UDP) e il numero di porta"
+ ],quiz:[
+   {q:"Come si chiama il processo di aggiunta di un header a ogni livello scendendo lo stack?",o:["Incapsulamento","Decapsulamento","Frammentazione","Instradamento"],c:0,e:"Scendendo i livelli ogni strato aggiunge il proprio header (incapsulamento); in ricezione avviene il decapsulamento."},
+   {q:"Qual è l'ordine corretto delle PDU dall'alto verso il basso?",o:["Dati → Segmento → Pacchetto → Frame → Bit","Bit → Frame → Pacchetto → Segmento → Dati","Segmento → Frame → Pacchetto → Bit","Pacchetto → Segmento → Dati → Frame"],c:0,e:"Application=Dati, Transport=Segmento, Network=Pacchetto, Data Link=Frame, Physical=Bit."},
+   {q:"Come si chiama il messaggio con l'header di Livello 4 (Transport)?",o:["Segmento","Pacchetto","Frame","Bit"],c:0,e:"Con l'header L4 (TCP/UDP + porta) il messaggio è un Segmento; al L3 diventa Pacchetto, al L2 Frame."},
+   {q:"Nel decapsulamento (lato ricevente), l'ordine è:",o:["Frame → Pacchetto → Segmento → Dati","Dati → Segmento → Pacchetto → Frame","Bit → Segmento → Dati","Pacchetto → Frame → Bit"],c:0,e:"In ricezione si risale lo stack: ogni livello rimuove il suo header, da Frame fino ai Dati."},
+   {q:"Aprendo un sito HTTPS, quale porta e livello sono coinvolti nel Transport?",o:["TCP porta 443 al Livello 4","UDP porta 80 al Livello 3","TCP porta 22 al Livello 2","IP porta 443 al Livello 1"],c:0,e:"HTTPS usa TCP sulla porta 443 al livello Transport (L4)."}
+ ]},
+ "oIRkXulqJA4":{ep:"EP 5",mod:"osi_mod",sections:[
+   {h:"🖥️ Application (7)",b:"È l'interfaccia tra un programma che ha bisogno della rete (browser, gioco online) e la rete stessa. Definisce i protocolli applicativi come HTTP/HTTPS e DNS. È la 'porta d'ingresso' verso i livelli sottostanti."},
+   {h:"🎨 Presentation (6)",b:"Rende i dati 'presentabili': gestisce il formato (es. HTML, XML, JPG — tipi che tutti sanno interpretare) e la cifratura (es. SSL/TLS) per proteggere i dati in transito."},
+   {h:"🔗 Session (5)",b:"Apre, mantiene e chiude la 'conversazione' (sessione) tra l'applicazione e il server, e gestisce l'autenticazione. Coordina più sessioni contemporanee (es. browser + Spotify). Protocolli tipici: L2TP (VPN), RTCP, H.245 (chiamate/video), proxy SOCKS."},
+   {h:"🚚 Transport (4)",b:"Trasporta i dati con TCP (affidabile, con ritrasmissioni) o UDP (veloce, senza garanzie) e usa i numeri di porta per identificare il servizio. Nel modello TCP/IP i livelli 5-6-7 sono raggruppati nell'Application, ma i loro concetti restano validi."}
+ ],key:[
+   "Application (7) = interfaccia app↔rete (HTTP, DNS…)",
+   "Presentation (6) = formato dati (HTML, JPG) e cifratura (SSL/TLS)",
+   "Session (5) = apre/gestisce/chiude la conversazione (es. L2TP)",
+   "Transport (4) = TCP (affidabile) / UDP (veloce) + numeri di porta",
+   "Nel TCP/IP i livelli 5-6-7 sono uniti nell'Application"
+ ],quiz:[
+   {q:"Cosa fa il livello Application (7)?",o:["Fa da interfaccia tra i programmi (es. browser) e la rete","Instrada i pacchetti","Assegna i MAC","Trasmette i bit sul cavo"],c:0,e:"L'Application layer è il punto d'accesso alla rete per le applicazioni, con protocolli come HTTP/HTTPS e DNS."},
+   {q:"Di cosa si occupa il livello Presentation (6)?",o:["Formato dei dati (HTML, JPG) e cifratura (SSL/TLS)","Instradamento IP","Numeri di porta","Indirizzi MAC"],c:0,e:"Il Presentation rende i dati leggibili da tutti (formati standard) e li può cifrare."},
+   {q:"Qual è il compito del livello Session (5)?",o:["Aprire, mantenere e chiudere la conversazione tra le applicazioni","Cifrare i dati","Instradare tra reti","Assegnare gli IP"],c:0,e:"Il Session gestisce l'inizio, il mantenimento e la fine dei dialoghi (sessioni) tra host."},
+   {q:"Nel modello TCP/IP, dove finiscono i livelli Session e Presentation?",o:["Sono raggruppati nel livello Application","Nel livello Transport","Nel livello Network","Vengono eliminati del tutto"],c:0,e:"Il TCP/IP unisce Application, Presentation e Session in un unico livello Application, ma i concetti restano."},
+   {q:"Quale protocollo di trasporto scegli per affidabilità garantita?",o:["TCP","UDP","IP","ICMP"],c:0,e:"TCP garantisce consegna affidabile con ritrasmissioni; UDP è più veloce ma senza garanzie."}
  ]}
 };
 function openVideoNote(id){
