@@ -8,6 +8,8 @@
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 <meta name="mobile-web-app-capable" content="yes">
 <title>CCNA Quest</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2307090f'/%3E%3Ccircle cx='50' cy='50' r='24' fill='none' stroke='%233b82f6' stroke-width='6'/%3E%3Ccircle cx='50' cy='26' r='6' fill='%2306b6d4'/%3E%3Ccircle cx='50' cy='74' r='6' fill='%2306b6d4'/%3E%3Ccircle cx='26' cy='50' r='6' fill='%2306b6d4'/%3E%3Ccircle cx='74' cy='50' r='6' fill='%2306b6d4'/%3E%3C/svg%3E">
+<link rel="apple-touch-icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Crect width='100' height='100' rx='22' fill='%2307090f'/%3E%3Ccircle cx='50' cy='50' r='24' fill='none' stroke='%233b82f6' stroke-width='6'/%3E%3Ccircle cx='50' cy='26' r='6' fill='%2306b6d4'/%3E%3Ccircle cx='50' cy='74' r='6' fill='%2306b6d4'/%3E%3Ccircle cx='26' cy='50' r='6' fill='%2306b6d4'/%3E%3Ccircle cx='74' cy='50' r='6' fill='%2306b6d4'/%3E%3C/svg%3E">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&family=Syne:wght@700;800&family=DM+Sans:wght@400;500;600&display=swap');
 :root{
@@ -671,6 +673,27 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 /* hint sui moduli bloccati */
 .mod-lock-hint{font-family:'JetBrains Mono',monospace;font-size:.54rem;color:var(--muted);line-height:1.35;margin-top:7px;border-top:1px dashed var(--border);padding-top:5px}
 .mod-card:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+/* ─── IMPOSTAZIONI ─── */
+.nav-gear{background:none;border:1px solid var(--border);color:var(--muted);width:34px;height:34px;border-radius:9px;cursor:pointer;font-size:1rem;margin-left:8px;transition:all .15s;flex-shrink:0}
+.nav-gear:hover{color:var(--text);border-color:var(--accent)}
+@media(max-width:640px){.nav-gear{width:30px;height:30px;margin-left:6px}}
+.modal-ov{position:fixed;inset:0;background:rgba(2,4,8,.72);-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);z-index:1000;display:none;align-items:flex-start;justify-content:center;padding:5vh 16px;overflow-y:auto}
+.modal-ov.show{display:flex;animation:fadeUp .25s ease}
+.modal-card{background:var(--surface);border:1px solid var(--border);border-radius:14px;max-width:460px;width:100%;padding:20px;box-shadow:0 20px 60px rgba(0,0,0,.5)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.modal-head h3{font-family:'Syne',sans-serif;font-size:1.1rem;font-weight:800}
+.modal-x{background:none;border:none;color:var(--muted);font-size:1rem;cursor:pointer;padding:6px;border-radius:6px}
+.modal-x:hover{color:var(--text)}
+.set-sec{border-top:1px solid var(--border);padding:14px 0}
+.set-sec:first-of-type{border-top:none}
+.set-lbl{font-family:'JetBrains Mono',monospace;font-size:.68rem;letter-spacing:1px;text-transform:uppercase;color:var(--cyan);margin-bottom:8px}
+.set-hint{font-size:.78rem;color:var(--muted);line-height:1.5;margin-bottom:10px}
+.set-row{display:flex;align-items:center;gap:12px;margin-bottom:10px}
+.set-goal-v{font-family:'JetBrains Mono',monospace;font-size:1rem;font-weight:700;color:var(--cyan);min-width:44px;text-align:right}
+.set-ta{width:100%;min-height:70px;background:var(--panel);border:1px solid var(--border);border-radius:8px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:.72rem;padding:10px;resize:vertical;margin-bottom:10px;outline:none}
+.set-ta:focus{border-color:var(--accent)}
+.set-danger{width:100%;padding:11px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:all .15s}
+.set-danger:hover{background:rgba(239,68,68,.1)}
 /* ─── ACCESSIBILITÀ MOVIMENTO ─── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
@@ -696,6 +719,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <div class="nav-track"><div class="nav-fill" id="nav-fill" style="width:0%"></div></div>
     <span class="nav-score" id="nav-score">0 XP</span>
   </div>
+  <button class="nav-gear" onclick="openSettings()" aria-label="Impostazioni" title="Impostazioni">⚙</button>
 </nav>
 
 <!-- ══════════════ HOME ══════════════ -->
@@ -1040,6 +1064,35 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
     <button class="gloss-modal-close" onclick="closeGlossModal()" aria-label="Chiudi">✕</button>
     <div id="gloss-modal-body"></div>
     <button class="gloss-modal-back" onclick="closeGlossModal()">‹ Torna al resoconto</button>
+  </div>
+</div>
+
+<!-- ══════════════ IMPOSTAZIONI ══════════════ -->
+<div class="modal-ov" id="settings-ov" onclick="if(event.target===this)closeSettings()">
+  <div class="modal-card" role="dialog" aria-label="Impostazioni">
+    <div class="modal-head"><h3>⚙ Impostazioni</h3><button class="modal-x" onclick="closeSettings()" aria-label="Chiudi">✕</button></div>
+    <div class="set-sec">
+      <div class="set-lbl">🎯 Obiettivo giornaliero (XP)</div>
+      <div class="set-row"><input type="range" id="set-goal" min="20" max="300" step="10" class="svz-slider" oninput="_id('set-goal-v').textContent=this.value"><span id="set-goal-v" class="set-goal-v">60</span></div>
+      <button class="check-btn" onclick="saveGoal()">Salva obiettivo</button>
+    </div>
+    <div class="set-sec">
+      <div class="set-lbl">💾 Backup del salvataggio</div>
+      <p class="set-hint">I progressi sono salvati solo su questo dispositivo. Copia questo codice per trasferirli o conservarli.</p>
+      <textarea id="set-export" class="set-ta" readonly onclick="this.select()"></textarea>
+      <button class="check-btn" onclick="copySave()">📋 Copia backup</button>
+    </div>
+    <div class="set-sec">
+      <div class="set-lbl">📥 Ripristina da backup</div>
+      <textarea id="set-import" class="set-ta" placeholder="Incolla qui un codice di backup..."></textarea>
+      <button class="check-btn" onclick="importSave()">Ripristina</button>
+      <div class="fb-strip" id="set-fb"></div>
+    </div>
+    <div class="set-sec">
+      <div class="set-lbl" style="color:var(--red)">⚠️ Azzera progressi</div>
+      <p class="set-hint">Cancella XP, livelli completati e cronologia di studio. Irreversibile.</p>
+      <button class="set-danger" onclick="resetProgress()">Azzera tutto</button>
+    </div>
   </div>
 </div>
 
@@ -3782,6 +3835,32 @@ function integrateVideoQuizzes(){
   });
 }
 
+// ══════════════════════════════════════
+// IMPOSTAZIONI
+// ══════════════════════════════════════
+function openSettings(){
+  _id('set-goal').value=G.dailyGoal||60;_id('set-goal-v').textContent=G.dailyGoal||60;
+  _id('set-export').value=JSON.stringify(G);
+  _id('set-import').value='';_id('set-fb').className='fb-strip';
+  _id('settings-ov').classList.add('show');
+}
+function closeSettings(){_id('settings-ov').classList.remove('show');}
+function saveGoal(){G.dailyGoal=+_id('set-goal').value||60;saveG();showToast('🎯 Obiettivo: '+G.dailyGoal+' XP/giorno','var(--accent)');if(_id('view-cal').classList.contains('active'))renderCalendar();}
+function copySave(){const ta=_id('set-export');ta.select();try{navigator.clipboard.writeText(ta.value);}catch(e){try{document.execCommand('copy');}catch(_){}}showToast('📋 Backup copiato','var(--green)');}
+function importSave(){
+  const fb=_id('set-fb');
+  try{const s=JSON.parse(_id('set-import').value);if(!s||!s.modules)throw 0;
+    localStorage.setItem(SAVE,JSON.stringify(s));
+    fb.className='fb-strip show ok';fb.textContent='✓ Backup ripristinato. Ricarico...';
+    setTimeout(()=>location.reload(),750);
+  }catch(e){fb.className='fb-strip show ko';fb.textContent='✗ Codice non valido: controlla di aver incollato tutto il backup.';}
+}
+function resetProgress(){
+  if(!confirm('Azzerare tutti i progressi? XP, moduli e cronologia saranno cancellati. Operazione irreversibile.'))return;
+  try{localStorage.removeItem(SAVE);}catch(e){}
+  location.reload();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
