@@ -3469,6 +3469,67 @@ const VIDEO_NOTES={
    {q:"Come si chiama il router del cliente al confine con la rete MPLS del provider?",o:["CE (Customer Edge)","PE (Provider Edge)","Core router","Router-on-a-stick"],c:0,e:"Il CE (Customer Edge) è dal lato cliente; il PE (Provider Edge) è il router del carrier a cui il CE si collega."},
    {q:"Quale variante di Metro Ethernet è un collegamento punto-punto?",o:["E-Line","E-LAN","E-Tree","E-Mesh"],c:0,e:"E-Line = punto-punto (EVC). E-LAN = full mesh multipunto ('switch nel cielo'); E-Tree = hub-and-spoke."},
    {q:"Per collegare una piccola filiale in modo economico su Internet pubblico, cosa serve?",o:["Una VPN site-to-site che cifra il traffico","Una leased line dedicata","Una connessione Metro Ethernet","Un circuito MPLS"],c:0,e:"Su Internet pubblico il traffico va cifrato con una VPN site-to-site tra filiale e data center: economico ma senza QoS garantita."}
+ ]},
+ "80vIin4xGp8":{ep:"EP 9",mod:"ssh_sec",sections:[
+   {h:"🏠 Rete SOHO",b:"SOHO = Small Office / Home Office: la classica rete di casa dove un unico dispositivo all-in-one fa router + switch + access point + modem e collega tutti i dispositivi (PC, telefoni, TV, Alexa, lampadine smart) a Internet. Più piccola e semplice di una rete enterprise, ma proprio per questo spesso poco sicura."},
+   {h:"🎯 4 punti deboli",b:"1) L'esterno (Internet): qualcuno può entrare? 2) I dispositivi interni, soprattutto IoT. 3) Il wireless: chiunque passi può vedere e tentare la tua Wi-Fi. 4) La connessione verso l'azienda (smart working). Il tuo IP pubblico (assegnato dall'ISP) non va condiviso: rivela la posizione approssimativa ed è un bersaglio per le scansioni. Strumenti come nmap scansionano le porte ('buchi') aperte in cerca di vulnerabilità."},
+   {h:"🔧 Hardening del router (6+ mosse)",b:"1) Firewall attivo. 2) Disattiva il port forwarding (chiudi tutte le porte). 3) Disabilita il remote management. 4) Cambia username/password di default. 5) Aggiorna il firmware (le patch chiudono le vulnerabilità). 6) Wireless: usa WPA2/WPA3, password forte, non lasciare l'SSID di default (rivela marca/modello → war driving) e usa una rete guest separata. Bonus: non rispondere ai ping dalla WAN per 'volare sotto i radar'."},
+   {h:"💡 Il pericolo IoT",b:"I dispositivi interni possono uscire liberamente su Internet: una lampadina o TV smart compromessa diventa un piede dell'hacker dentro la tua rete, e sul firewall sembra traffico legittimo. Soluzione: segmentare gli IoT su VLAN separate, con client/device isolation (impedisce a un dispositivo di parlare con gli altri) e livelli di fiducia diversi."},
+   {h:"🛡️ Apparati e VPN",b:"Per queste funzioni servono apparati adeguati: firmware custom (DD-WRT), apparati Cisco (ottimi per fare lab CCNA) o soluzioni prosumer come Ubiquiti/UniFi (controller-based, con IDS/IPS: l'IDS rileva, l'IPS blocca). Per lo smart working si usa una VPN: remote access (software sul PC, es. Cisco AnyConnect) oppure site-to-site (l'azienda fornisce un'appliance/firewall come un Cisco ASA che mantiene un tunnel sicuro). Per accedere da fuori alla tua rete di casa: abilita un server VPN sul router."}
+ ],key:[
+   "SOHO = rete casa/piccolo ufficio con un dispositivo all-in-one (router+switch+AP)",
+   "Non condividere l'IP pubblico; nmap scansiona le porte aperte in cerca di vulnerabilità",
+   "Hardening router: firewall on, no port forwarding, no remote management, cambia credenziali di default, aggiorna firmware",
+   "Wireless: WPA2/WPA3, password forte, SSID non di default (war driving), rete guest separata",
+   "IoT su VLAN separate + client isolation; una lampadina smart compromessa = hacker in rete",
+   "VPN: remote access (software sul PC) vs site-to-site (appliance/firewall, es. Cisco ASA) · IDS rileva, IPS blocca"
+ ],quiz:[
+   {q:"Cos'è una rete SOHO?",o:["La rete di casa/piccolo ufficio con un dispositivo all-in-one (router+switch+AP)","Una rete di data center","Una WAN aziendale","Un protocollo di routing"],c:0,e:"SOHO = Small Office/Home Office: rete piccola dove un unico apparato fa router, switch, access point e modem."},
+   {q:"Quale di queste NON è una buona pratica di hardening del router?",o:["Lasciare attivo il remote management con credenziali di default","Aggiornare il firmware","Disattivare il port forwarding","Usare WPA2/WPA3"],c:0,e:"Il remote management con credenziali di default è pericolosissimo: va disabilitato e le credenziali di default vanno sempre cambiate."},
+   {q:"Cosa comporta il port forwarding dal punto di vista della sicurezza?",o:["Apre 'buchi' (porte) nel firewall verso l'interno della rete","Cifra il traffico","Aggiorna il firmware","Crea una VLAN"],c:0,e:"Ogni regola di port forwarding espone una porta verso l'esterno: la best practice è chiudere tutte le porte non necessarie."},
+   {q:"Come si mettono in sicurezza i dispositivi IoT non fidati?",o:["Su una VLAN separata con client/device isolation","Dando loro l'IP pubblico","Aprendo le porte sul firewall","Disattivando il firewall"],c:0,e:"Gli IoT vanno isolati su VLAN dedicate con client isolation, così una lampadina smart compromessa non raggiunge il resto della rete."},
+   {q:"Perché non lasciare l'SSID di default sulla Wi-Fi?",o:["Rivela marca/modello del router e facilita attacchi mirati (war driving)","Rallenta la connessione","Consuma più energia","Impedisce la cifratura"],c:0,e:"Un SSID come 'TP-Link' dice all'attaccante che router usi; meglio un nome personalizzato + WPA2/WPA3 e password forte."},
+   {q:"Quale tipo di VPN usa un software installato sul PC per lo smart working?",o:["Remote access VPN","Site-to-site VPN","MPLS VPN","VLAN"],c:0,e:"La remote access VPN (es. Cisco AnyConnect) gira sul PC dell'utente; nel site-to-site è un'appliance/firewall (es. Cisco ASA) a mantenere il tunnel."}
+ ]},
+ "37tyxaQbtN4":{ep:"EP 10",mod:"auto_mod",sections:[
+   {h:"🏢 On-prem vs Cloud",b:"Ogni app ha bisogno di infrastruttura (server, router, switch, database, firewall). Tradizionalmente questa vive nel tuo data center: è l'on-premises (on-prem). Vantaggio: pieno controllo. Svantaggio: costi iniziali altissimi (acquisto hardware). Il cloud (AWS, Azure, Google Cloud) è invece 'affittare i server di qualcun altro', pagando a consumo (es. pochi centesimi l'ora)."},
+   {h:"💸 Capex vs Opex",b:"Comprare hardware on-prem è una spesa in conto capitale (capex). Il cloud sposta tutto su spesa operativa (opex): paghi solo ciò che usi, quando lo usi. Oltre al costo, il cloud brilla per l'elasticità: crei o elimini server in pochi click, scalando su/giù in base al traffico."},
+   {h:"📦 Cloud-native: microservizi, container, Kubernetes",b:"Invece di un'unica app monolitica su VM, si spezza l'app in piccoli servizi (microservizi) distribuiti in container, gestiti e orchestrati con Kubernetes (k8s). Sono feature 'cloud-native': tradizionalmente si facevano meglio nel cloud, dove gli strumenti sono già pronti."},
+   {h:"🔒 Perché restare on-prem",b:"Non tutto deve andare nel cloud: vincoli di compliance e normative (es. GDPR, dati governativi), enormi requisiti di storage costosi nel cloud, oppure app che richiedono bassa latenza vicino agli utenti. Queste convengono in-house."},
+   {h:"🔀 Hybrid cloud e Multi-cloud",b:"Hybrid cloud = mix: app nel cloud quando conviene, on-prem quando no (lo fanno la maggior parte delle aziende). Multi-cloud = usare più provider insieme (in media ~5) per sfruttare feature e costi diversi. Il rovescio della medaglia è la gestione: portali diversi, competenze diverse, interoperabilità. Soluzioni come VMware Cloud Foundation puntano a gestire on-prem e cloud con gli stessi strumenti."}
+ ],key:[
+   "On-prem = infrastruttura propria nel tuo data center (controllo, ma capex alto)",
+   "Cloud = affitti server altrui a consumo (opex, elasticità, scala on-demand)",
+   "Cloud-native: microservizi in container orchestrati da Kubernetes (invece delle VM)",
+   "Hybrid cloud = mix on-prem + cloud secondo convenienza",
+   "Multi-cloud = più provider (AWS, Azure, GCP) insieme",
+   "Si resta on-prem per compliance (GDPR), bassa latenza o costi di storage"
+ ],quiz:[
+   {q:"Cosa significa 'on-premises' (on-prem)?",o:["Infrastruttura di tua proprietà nel tuo data center","Server affittati nel cloud","Una VPN aziendale","Un protocollo di routing"],c:0,e:"On-prem = hardware e servizi che possiedi e gestisci nel tuo data center: massimo controllo ma costi iniziali elevati."},
+   {q:"Nel cloud, il modello di spesa passa da capex a…?",o:["Opex (paghi a consumo)","Un costo fisso una tantum","Nessun costo","Solo capex"],c:0,e:"Il cloud trasforma l'acquisto di hardware (capex) in spesa operativa (opex): paghi solo ciò che usi."},
+   {q:"Qual è un vantaggio chiave del cloud oltre al costo?",o:["Elasticità: scalare su/giù in pochi click on-demand","Non richiede rete","Elimina la sicurezza","Funziona senza Internet"],c:0,e:"L'elasticità permette di creare/rimuovere risorse rapidamente per seguire i picchi di traffico."},
+   {q:"Con quali tecnologie si distribuiscono i microservizi cloud-native?",o:["Container orchestrati da Kubernetes","Solo macchine virtuali","Leased line","Frame Relay"],c:0,e:"I microservizi girano in container gestiti/orchestrati da Kubernetes (k8s), il modo moderno di deploy delle app."},
+   {q:"Cos'è l'hybrid cloud?",o:["Un mix di risorse on-prem e cloud pubblico secondo convenienza","Solo cloud pubblico","Solo on-prem","Due data center on-prem"],c:0,e:"L'hybrid cloud combina on-prem e cloud: si mette nel cloud ciò che conviene e si tiene on-prem il resto."},
+   {q:"Perché alcune applicazioni restano on-prem invece che nel cloud?",o:["Per compliance/normative, bassa latenza o costi di storage","Perché il cloud è sempre più lento","Perché il cloud non ha server","Per usare indirizzi privati"],c:0,e:"Vincoli normativi (es. GDPR/dati sensibili), esigenze di bassa latenza o costi elevati di storage spingono a tenere certe app in-house."}
+ ]},
+ "S7MNX_UD7vY":{ep:"Day 0",mod:"net_basics",sections:[
+   {h:"🎯 A cosa serve una rete",b:"Una rete nasce per far comunicare e condividere dati tra computer (e stampanti, telefoni…). L'obiettivo è sempre lo stesso da decenni: collegare dispositivi per scambiare informazioni."},
+   {h:"🔀 Switch",b:"Lo switch collega più dispositivi tra loro formando una rete locale (LAN). Quando i dispositivi sono troppi si aggiungono altri switch. Dietro c'è molto altro (MAC, domini di broadcast, VLAN) che vedrai più avanti."},
+   {h:"📡 Router e Internet",b:"Il router collega reti diverse e permette loro di parlarsi. Internet non è altro che tantissimi router che si passano i pacchetti, 'saltando' da router a router attraverso grandi distanze fino alla destinazione."},
+   {h:"🛡️ Firewall e 📶 Access Point",b:"Il firewall protegge la rete: blocca il traffico non autorizzato (in ingresso e in uscita) e lascia passare solo quello buono. L'access point (WAP) diffonde la rete via onde radio (Wi-Fi) per i dispositivi wireless."},
+   {h:"🏠 Casa vs Azienda",b:"A casa un unico dispositivo fa router + switch + modem + firewall + access point. In azienda ci sono apparati separati e più grandi (switch, router, firewall, più access point) con più funzionalità, perché ci sono più utenti e dispositivi."}
+ ],key:[
+   "Switch = collega dispositivi nella stessa rete locale (LAN)",
+   "Router = collega reti diverse; Internet = tanti router che instradano i pacchetti",
+   "Firewall = blocca il traffico non autorizzato, in ingresso e in uscita",
+   "Access Point (WAP) = diffonde la rete via Wi-Fi",
+   "A casa un apparato all-in-one; in azienda dispositivi separati e più grandi"
+ ],quiz:[
+   {q:"A cosa serve principalmente uno switch?",o:["Collegare più dispositivi nella stessa rete locale","Collegare reti diverse tra loro","Proteggere la rete dagli attacchi","Diffondere il Wi-Fi"],c:0,e:"Lo switch collega i dispositivi di una LAN; è il router a collegare reti diverse."},
+   {q:"Qual è il compito del router?",o:["Collegare reti diverse e instradare i pacchetti tra di esse","Collegare i PC nella stessa rete","Cifrare il traffico","Assegnare i MAC"],c:0,e:"Il router mette in comunicazione reti diverse; Internet è fatto di tanti router che instradano i pacchetti."},
+   {q:"Cos'è, in sostanza, Internet?",o:["Un'enorme quantità di router che instradano i pacchetti tra reti","Un unico grande computer","Una singola rete locale","Un tipo di switch"],c:0,e:"Internet è l'insieme di innumerevoli router (e switch, firewall…) che fanno 'saltare' i pacchetti da rete a rete fino a destinazione."},
+   {q:"Qual è la funzione di un firewall?",o:["Bloccare il traffico non autorizzato e lasciar passare solo quello legittimo","Collegare due reti diverse","Diffondere il Wi-Fi","Assegnare gli IP"],c:0,e:"Il firewall filtra il traffico in ingresso e in uscita, proteggendo la rete."},
+   {q:"Cosa fa un Wireless Access Point (WAP)?",o:["Diffonde la rete via onde radio per i dispositivi wireless","Instrada tra reti diverse","Blocca gli attacchi","Converte i segnali in fibra"],c:0,e:"L'access point trasmette la rete via Wi-Fi, permettendo ai dispositivi senza cavo di connettersi."}
  ]}
 };
 function openVideoNote(id){
