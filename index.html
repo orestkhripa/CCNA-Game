@@ -466,6 +466,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .vid-riass:hover{background:var(--purple);color:#fff}
 .vid-note-title{font-family:'Syne',sans-serif;font-size:1.05rem;font-weight:800;margin:12px 0 8px}
 .vid-note-info{font-size:.74rem;color:var(--muted);margin-top:12px;font-style:italic;line-height:1.5}
+/* ─── OVERLAY GLOSSARIO (Approfondisci) ─── */
+.gloss-modal{position:fixed;inset:0;z-index:10000;display:none;align-items:flex-start;justify-content:center;padding:40px 16px;overflow-y:auto}
+.gloss-modal.show{display:flex}
+.gloss-modal-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.62);-webkit-backdrop-filter:blur(3px);backdrop-filter:blur(3px)}
+.gloss-modal-card{position:relative;z-index:1;background:var(--panel);border:1px solid var(--border);border-radius:14px;padding:24px 22px 18px;max-width:560px;width:100%;box-shadow:0 20px 60px rgba(0,0,0,.55);margin:auto}
+.gloss-modal-close{position:absolute;top:12px;right:12px;width:32px;height:32px;border-radius:8px;border:1px solid var(--border);background:var(--surface);color:var(--muted);cursor:pointer;font-size:.9rem;line-height:1}
+.gloss-modal-close:hover{border-color:var(--red);color:var(--red)}
+.gloss-modal-back{margin-top:16px;width:100%;padding:10px;background:transparent;border:1px solid var(--accent);color:var(--accent);border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s}
+.gloss-modal-back:hover{background:rgba(59,130,246,.1)}
 /* ─── CALENDAR / HEATMAP ─── */
 .cal-stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:10px;margin-bottom:20px}
 .cal-stat{background:var(--panel);border:1px solid var(--border);border-radius:10px;padding:14px;text-align:center}
@@ -1022,6 +1031,16 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </div>
   <div id="vid-list"></div>
   <div id="vid-detail" style="display:none"></div>
+</div>
+
+<!-- overlay glossario (Approfondisci senza perdere il resoconto) -->
+<div class="gloss-modal" id="gloss-modal">
+  <div class="gloss-modal-backdrop" onclick="closeGlossModal()"></div>
+  <div class="gloss-modal-card">
+    <button class="gloss-modal-close" onclick="closeGlossModal()" aria-label="Chiudi">✕</button>
+    <div id="gloss-modal-body"></div>
+    <button class="gloss-modal-back" onclick="closeGlossModal()">‹ Torna al resoconto</button>
+  </div>
 </div>
 
 <div class="xp-toast" id="xp-toast"></div>
@@ -2744,7 +2763,22 @@ function glossForQuestion(text,modId){
   if(text){const lo=text.toLowerCase();const cand=GLOSSARY.filter(g=>lo.indexOf(g.t.toLowerCase())>=0&&g.t.length>=4).sort((a,b)=>b.t.length-a.t.length);if(cand.length)return cand[0];}
   const term=GLOSS_MAP[modId];return term&&GLOSSARY.find(x=>x.t===term);
 }
-function openTheory(modId,qtext){const g=glossForQuestion(qtext,modId)||(GLOSS_MAP[modId]&&GLOSSARY.find(x=>x.t===GLOSS_MAP[modId]));showView('gloss');if(g){openGloss(g);}try{window.scrollTo(0,0);}catch(e){}}
+function openTheory(modId,qtext){const g=glossForQuestion(qtext,modId)||(GLOSS_MAP[modId]&&GLOSSARY.find(x=>x.t===GLOSS_MAP[modId]));if(g)openGlossModal(g);}
+// mostra la scheda del glossario in un overlay: NON cambia schermata, così il resoconto resta sotto e si può tornare a rivedere gli errori
+function openGlossModal(g){
+  const x=GLOSS_MORE[g.t]||{};const dg=x.diag&&DIAGRAM[x.diag];
+  const body=_id('gloss-modal-body');body.innerHTML=
+    '<div class="gloss-detail-term">'+g.t+'</div>'+
+    '<div class="gloss-sec-h">Definizione</div><div class="gloss-detail-def">'+g.d+'</div>'+
+    (x.more?'<div class="gloss-sec-h">🔎 Approfondimento</div><div class="gloss-detail-more">'+x.more+'</div>':'')+
+    (dg?'<div class="gloss-sec-h">🖼️ Esempio grafico</div><div class="brief-diagram">'+dg.svg+(dg.cap?'<div class="diag-cap">'+dg.cap+'</div>':'')+'</div>':'');
+  if(x.diag){
+    const rel=GLOSSARY.filter(o=>o.t!==g.t&&(GLOSS_MORE[o.t]||{}).diag===x.diag).slice(0,6);
+    if(rel.length){const box=document.createElement('div');box.innerHTML='<div class="gloss-sec-h">↔ Termini collegati</div>';const chips=el('div','gloss-rel');rel.forEach(o=>{const b=el('button','gloss-rel-chip',o.t);b.onclick=()=>openGlossModal(o);chips.appendChild(b);});box.appendChild(chips);body.appendChild(box);}
+  }
+  _id('gloss-modal').classList.add('show');
+}
+function closeGlossModal(){_id('gloss-modal').classList.remove('show');}
 function startConsolidation(){
   setPlayStep('quiz');
   _id('play-game').style.display='none';_id('play-done').style.display='none';
@@ -3620,6 +3654,78 @@ const VIDEO_NOTES={
    {q:"Qual è il compito del livello Session (5)?",o:["Aprire, mantenere e chiudere la conversazione tra le applicazioni","Cifrare i dati","Instradare tra reti","Assegnare gli IP"],c:0,e:"Il Session gestisce l'inizio, il mantenimento e la fine dei dialoghi (sessioni) tra host."},
    {q:"Nel modello TCP/IP, dove finiscono i livelli Session e Presentation?",o:["Sono raggruppati nel livello Application","Nel livello Transport","Nel livello Network","Vengono eliminati del tutto"],c:0,e:"Il TCP/IP unisce Application, Presentation e Session in un unico livello Application, ma i concetti restano."},
    {q:"Quale protocollo di trasporto scegli per affidabilità garantita?",o:["TCP","UDP","IP","ICMP"],c:0,e:"TCP garantisce consegna affidabile con ritrasmissioni; UDP è più veloce ma senza garanzie."}
+ ]},
+ "y8h5qY3zwic":{ep:"EP 11",mod:"net_basics",sections:[
+   {h:"🧵 Doppino intrecciato (twisted pair)",b:"Un cavo Ethernet UTP (cat5e) ha 4 coppie di fili di rame intrecciati. L'intreccio protegge dai due nemici del segnale: l'EMI (interferenza elettromagnetica) e il crosstalk (interferenza tra i fili vicini). UTP = Unshielded Twisted Pair; l'STP (Shielded) aggiunge una schermatura, usata dove c'è molta EMI (es. fabbriche)."},
+   {h:"🧥 Guaina e cavi plenum",b:"La guaina esterna protegge i fili. In certi ambienti (controsoffitti, aree a rischio incendio) si usano cavi plenum, con guaina che non emette fumi tossici bruciando. La categoria (cat3, cat5, cat5e, cat6) si riferisce ai fili di rame, non a tutto il cavo."},
+   {h:"⚡ Velocità e standard",b:"I dati viaggiano come variazioni di tensione (binario). Standard: 10BASE-T (10 Mbps, cat3, 2 coppie), 100BASE-TX 'Fast Ethernet' (100 Mbps, cat5, 2 coppie), 1000BASE-T 'Gigabit' (cat5e, tutte e 4 le coppie). La 'T' sta per twisted pair (rame)."},
+   {h:"🔌 Straight-through vs Crossover",b:"Il NIC di un PC trasmette sui pin 1-2 e riceve sui 3-6; lo switch fa l'opposto. Perciò tra dispositivi diversi (PC↔switch) si usa un cavo straight-through (pin uguali ai due capi). Tra dispositivi uguali (PC↔PC, switch↔switch) serve un crossover, che incrocia TX e RX (1→3, 2→6). Il connettore è l'RJ45; l'ordine dei colori (standard T568) è fondamentale."}
+ ],key:[
+   "UTP = doppino intrecciato non schermato; l'intreccio riduce EMI e crosstalk",
+   "STP = schermato (ambienti con molta interferenza) · plenum = guaina anti-incendio",
+   "10BASE-T (10 Mbps), 100BASE-TX Fast Ethernet (100 Mbps), 1000BASE-T Gigabit (cat5e)",
+   "La categoria (cat5e, cat6) si riferisce ai fili di rame",
+   "Straight-through: PC↔switch · Crossover: PC↔PC / switch↔switch · connettore RJ45"
+ ],quiz:[
+   {q:"Perché i fili di un cavo Ethernet sono intrecciati a coppie?",o:["Per ridurre EMI e crosstalk","Per aumentare la lunghezza","Per risparmiare rame","Per cifrare i dati"],c:0,e:"L'intreccio (twisted pair) riduce l'interferenza elettromagnetica (EMI) e il crosstalk tra i fili."},
+   {q:"Cosa significa UTP?",o:["Unshielded Twisted Pair (doppino non schermato)","Universal Transport Protocol","Ultra Thin Pair","Unified TCP"],c:0,e:"UTP = doppino intrecciato non schermato; l'STP è la versione schermata per ambienti con molta EMI."},
+   {q:"Quale standard raggiunge 1 Gbps usando tutte e 4 le coppie (cat5e)?",o:["1000BASE-T","10BASE-T","100BASE-TX","10GBASE-SR"],c:0,e:"1000BASE-T (Gigabit Ethernet) usa tutte e 4 le coppie del cat5e; 10BASE-T=10 Mbps, 100BASE-TX=100 Mbps."},
+   {q:"Quale cavo collega due dispositivi dello stesso tipo (es. switch↔switch) senza auto-MDIX?",o:["Crossover","Straight-through","Coassiale","Seriale"],c:0,e:"Il crossover incrocia TX e RX; lo straight-through (pin uguali ai due capi) si usa tra dispositivi diversi (PC↔switch)."},
+   {q:"A cosa si riferisce la 'categoria' (cat5e, cat6) di un cavo?",o:["Ai fili di rame interni","Al connettore RJ45","Alla guaina esterna","Alla velocità della porta"],c:0,e:"La categoria indica la qualità dei fili di rame, non l'intero cavo né il connettore."}
+ ]},
+ "MLxgmkRzgIQ":{ep:"EP 12",mod:"switching",sections:[
+   {h:"💡 Cos'è il PoE",b:"Power over Ethernet (PoE) porta alimentazione e dati sullo stesso cavo Ethernet. Utile per alimentare telefoni IP, access point e telecamere di sicurezza con un solo cavo, senza bisogno di un elettricista: il network engineer fa tutto, e spostare un AP significa solo spostare il cavo."},
+   {h:"🔌 PSE e PD",b:"Chi fornisce la corrente (tipicamente lo switch) è il PSE (Power Sourcing Equipment); il dispositivo alimentato (telefono, AP, telecamera) è il PD (Powered Device). All'inizio Cisco usava le coppie di fili non utilizzate (pin 4-5 e 7-8) dei cavi cat5."},
+   {h:"📈 Standard e potenza",b:"Cisco lo inventò nel 2000 (Cisco Inline Power). Poi gli standard IEEE: 802.3af (2003, PoE, Type 1, 15,4 W), 802.3at (2009, PoE+, Type 2, 30 W — il più diffuso), 802.3bt (PoE++/4PPoE, ancora più potenza, usa tutte e 4 le coppie)."},
+   {h:"🎯 Perché usarlo",b:"Ogni dispositivo di rete ha bisogno di due cose: alimentazione e dati. Con il PoE le unisci in un solo cavo: meno cablaggio, meno costi (niente elettricista), massima flessibilità nel posizionare AP e telecamere per una buona copertura."}
+ ],key:[
+   "PoE = alimentazione + dati sullo stesso cavo Ethernet",
+   "PSE = fornisce la corrente (lo switch) · PD = dispositivo alimentato (telefono/AP/telecamera)",
+   "802.3af (PoE, 15,4 W) · 802.3at (PoE+, 30 W, il più comune) · 802.3bt (PoE++)",
+   "Ideale per telefoni IP, access point e telecamere",
+   "Vantaggio: un solo cavo, niente elettricista, posizionamento flessibile"
+ ],quiz:[
+   {q:"Cosa permette il Power over Ethernet (PoE)?",o:["Portare alimentazione e dati sullo stesso cavo Ethernet","Cifrare il traffico","Creare VLAN","Aumentare la velocità a 10 Gbps"],c:0,e:"Il PoE alimenta il dispositivo e trasmette i dati con un unico cavo, utile per telefoni IP, AP e telecamere."},
+   {q:"Nel PoE, come si chiama il dispositivo che fornisce la corrente (di solito lo switch)?",o:["PSE (Power Sourcing Equipment)","PD (Powered Device)","PoE controller","NIC"],c:0,e:"Il PSE fornisce l'alimentazione (spesso lo switch); il PD è il dispositivo alimentato (telefono, AP, telecamera)."},
+   {q:"Quale standard è il PoE+ da 30 W, oggi il più diffuso?",o:["802.3at","802.3af","802.3bt","802.11ac"],c:0,e:"802.3at (PoE+, Type 2) fornisce 30 W per porta; l'802.3af (PoE) ne dava 15,4 W, l'802.3bt (PoE++) di più."},
+   {q:"Perché usare il PoE per un access point?",o:["Un solo cavo per dati e alimentazione, senza elettricista","Perché cifra il Wi-Fi","Perché aumenta la banda","Perché crea le VLAN"],c:0,e:"Con il PoE l'AP riceve dati e corrente da un unico cavo: meno cablaggio, niente elettricista e posizionamento flessibile."},
+   {q:"Come si chiama il dispositivo alimentato via PoE (telefono, telecamera, AP)?",o:["PD (Powered Device)","PSE","Gateway","Repeater"],c:0,e:"Il PD (Powered Device) è il dispositivo che riceve alimentazione via PoE dal PSE."}
+ ]},
+ "E3DEJ7odWq0":{ep:"EP 13",mod:"net_basics",sections:[
+   {h:"💡 Luce invece di elettricità",b:"La fibra ottica trasmette i dati con impulsi di luce, non con segnali elettrici come il rame. La luce viaggia velocissima (nel vetro circa il 31% più lenta rispetto al vuoto, ma comunque enorme) e permette banda altissima."},
+   {h:"🚀 Perché è fantastica",b:"Tre vantaggi: velocità (banda enorme, quasi illimitata in teoria), distanza (bassa attenuazione: la single-mode arriva fino a ~100 km senza degradare, contro i ~100 m del rame), e nessuna EMI (la luce non genera campo elettromagnetico → niente interferenze/crosstalk)."},
+   {h:"🔬 Come funziona: core, cladding, riflessione",b:"La luce viaggia nel core; il cladding attorno la mantiene dentro grazie alla riflessione interna totale (la luce 'rimbalza' restando nel core). All'esterno ci sono guaine di protezione. La fibra è delicata: non va mai piegata bruscamente, altrimenti si rompe."},
+   {h:"🔀 Single-mode vs Multimode",b:"Multimode: core più grande (50-62,5 µm), la luce rimbalza in più 'modi', distanze più brevi (es. ~300 m), tipica in campus/data center. Single-mode: core minuscolo (5-9 µm), un solo percorso di luce (laser), distanze lunghissime (fino a ~100 km), usata sulle lunghe tratte."}
+ ],key:[
+   "La fibra usa impulsi di luce (niente EMI, distanze lunghe, banda enorme)",
+   "Bassa attenuazione: single-mode fino a ~100 km · rame ~100 m",
+   "Struttura: core (luce) + cladding (riflessione interna totale) + guaina",
+   "Multimode = core grande, distanze brevi (~300 m) · Single-mode = core piccolo, lunghe distanze",
+   "La fibra è fragile: non piegarla mai bruscamente"
+ ],quiz:[
+   {q:"Come trasmette i dati la fibra ottica?",o:["Con impulsi di luce","Con segnali elettrici","Con onde radio","Con il campo magnetico"],c:0,e:"La fibra usa impulsi di luce nel core, non elettricità come il rame."},
+   {q:"Qual è un vantaggio della fibra rispetto al rame?",o:["Nessuna EMI e distanze molto maggiori","È più economica","È più facile da terminare","Trasporta corrente"],c:0,e:"La luce non genera EMI e ha bassissima attenuazione: la fibra va molto più lontano del rame (fino a ~100 km single-mode)."},
+   {q:"Quale tipo di fibra copre le distanze più lunghe (fino a ~100 km)?",o:["Single-mode (core piccolo, laser)","Multimode (core grande)","UTP","STP"],c:0,e:"La single-mode ha un core minuscolo (5-9 µm) con un solo percorso di luce: raggiunge distanze lunghissime; la multimode ha core più grande e distanze più brevi."},
+   {q:"Cosa trattiene la luce all'interno del core della fibra?",o:["La riflessione interna totale grazie al cladding","Il campo magnetico","La guaina esterna","Il connettore"],c:0,e:"Il cladding attorno al core provoca la riflessione interna totale, facendo 'rimbalzare' la luce e mantenendola nel core."},
+   {q:"Rispetto al rame (limitato a ~100 m), la fibra:",o:["Ha bassa attenuazione e copre distanze molto maggiori","Si degrada prima","Ha più EMI","È più lenta"],c:0,e:"La bassissima attenuazione permette alla fibra di andare molto oltre i ~100 m del rame senza perdere segnale."}
+ ]},
+ "0W4JZIWtjLQ":{ep:"EP 14",mod:"ssh_sec",sections:[
+   {h:"🎯 La porta come superficie d'attacco",b:"Una presa Ethernet esposta (ufficio, aeroporto, ristorante) è un punto d'attacco: un dispositivo malevolo collegato può ottenere un IP via DHCP, scoprire subnet mask, gateway e DNS, e poi scansionare la rete (es. con nmap) alla ricerca di host e porte da sfruttare."},
+   {h:"🧩 Cosa serve all'attacco (e come spezzarlo)",b:"Perché l'attacco funzioni servono tre condizioni: la porta deve essere attiva (up), deve esserci un DHCP che assegna l'IP, e il dispositivo deve poter raggiungere gli altri host. Togliendo anche solo una di queste condizioni si blocca l'attacco."},
+   {h:"🔒 Passo 1: spegnere le porte inutilizzate",b:"La prima difesa: disabilitare (shutdown) tutte le porte non usate. Con 'show ip interface brief | include down' individui le porte spente; poi 'interface <id>' + 'shutdown' le tieni giù, così che se qualcuno le collega non si attivino."},
+   {h:"🛡️ Port security",b:"Sulle porte access si abilita la port security per limitare quali/quanti MAC possono usare la porta: 'switchport mode access', 'switchport port-security', 'maximum N' e 'mac-address sticky' (impara e salva il MAC). Alla violazione la porta reagisce: shutdown (err-disabled, default), restrict o protect (scartano il traffico)."}
+ ],key:[
+   "Una porta Ethernet esposta è una superficie d'attacco (IP via DHCP + scan nmap)",
+   "L'attacco richiede: porta up + DHCP + raggiungibilità → toglierne una lo blocca",
+   "Spegni (shutdown) tutte le porte inutilizzate",
+   "Port security: limita i MAC per porta (maximum, mac-address sticky)",
+   "Violazione: shutdown (err-disabled, default), restrict, protect"
+ ],quiz:[
+   {q:"Perché una porta switch inutilizzata ma attiva è un rischio?",o:["Un dispositivo collegato può ottenere un IP e scansionare la rete","Rallenta lo switch","Consuma troppa corrente","Crea loop STP"],c:0,e:"Una porta up permette a un dispositivo malevolo di prendere un IP via DHCP e scansionare la rete: meglio spegnerla."},
+   {q:"Qual è la prima difesa per le porte non usate?",o:["Disabilitarle con shutdown","Aprirle tutte","Attivare il DHCP su di esse","Metterle in trunk"],c:0,e:"Spegnere (shutdown) le porte inutilizzate impedisce che si attivino se qualcuno le collega."},
+   {q:"Cosa fa la port security su una porta access?",o:["Limita quali/quanti indirizzi MAC possono usarla","Cifra il traffico","Assegna gli IP","Crea le VLAN"],c:0,e:"La port security restringe i MAC ammessi su una porta (maximum, sticky), bloccando dispositivi non autorizzati."},
+   {q:"Quale comando salva automaticamente il MAC appreso nella configurazione?",o:["switchport port-security mac-address sticky","switchport mode trunk","shutdown","ip dhcp snooping"],c:0,e:"Con 'mac-address sticky' lo switch impara il MAC del dispositivo e lo memorizza nel running-config."},
+   {q:"Alla violazione, quale modalità (default) mette la porta in err-disabled?",o:["shutdown","protect","restrict","permit"],c:0,e:"La modalità di default 'shutdown' disabilita la porta (err-disabled); 'restrict' e 'protect' scartano solo il traffico."}
  ]}
 };
 function openVideoNote(id){
