@@ -1079,7 +1079,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 <!-- ══════════════ IMPOSTAZIONI ══════════════ -->
 <div class="modal-ov" id="settings-ov" onclick="if(event.target===this)closeSettings()">
-  <div class="modal-card" role="dialog" aria-label="Impostazioni">
+  <div class="modal-card" role="dialog" aria-modal="true" tabindex="-1" aria-label="Impostazioni">
     <div class="modal-head"><h3>⚙ Impostazioni</h3><button class="modal-x" onclick="closeSettings()" aria-label="Chiudi">✕</button></div>
     <div class="set-sec">
       <div class="set-lbl">🎯 Obiettivo giornaliero (XP)</div>
@@ -1108,13 +1108,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 
 <!-- ══════════════ RIPASSO ERRORI ══════════════ -->
 <div class="modal-ov" id="review-ov" onclick="if(event.target===this)closeReview()">
-  <div class="modal-card" role="dialog" aria-label="Ripasso errori">
+  <div class="modal-card" role="dialog" aria-modal="true" tabindex="-1" aria-label="Ripasso errori">
     <div class="modal-head"><h3>🔁 Ripasso errori</h3><button class="modal-x" onclick="closeReview()" aria-label="Chiudi">✕</button></div>
     <div id="review-body"></div>
   </div>
 </div>
 
-<div class="xp-toast" id="xp-toast"></div>
+<div class="xp-toast" id="xp-toast" role="status" aria-live="polite"></div>
 
 <script>
 // ══════════════════════════════════════
@@ -2895,7 +2895,7 @@ function renderCons(){
   wrap.appendChild(el('div','game-instr','🧠 '+rlabel+' · Domanda '+(Q.cur+1)+'/'+Q.pool.length));
   wrap.appendChild(el('div','q-box','<div class="q-text">'+q.question+'</div>'));
   const grid=el('div','opts-grid','');
-  const fb=el('div','feedback','');
+  const fb=el('div','feedback','');fb.setAttribute('role','status');fb.setAttribute('aria-live','polite');
   const nb=el('button','next-btn','PROSSIMA →');
   q.options.forEach((opt,i)=>{
     const b=el('button','opt','<span class="opt-lbl">'+['A','B','C','D'][i]+'</span><span>'+opt+'</span>');
@@ -3894,6 +3894,7 @@ function openSettings(){
   _id('set-export').value=JSON.stringify(G);
   _id('set-import').value='';_id('set-fb').className='fb-strip';
   _id('settings-ov').classList.add('show');
+  const c=_id('settings-ov').querySelector('.modal-card');if(c)c.focus();
 }
 function closeSettings(){_id('settings-ov').classList.remove('show');}
 function saveGoal(){G.dailyGoal=+_id('set-goal').value||60;saveG();showToast('🎯 Obiettivo: '+G.dailyGoal+' XP/giorno','var(--accent)');if(_id('view-cal').classList.contains('active'))renderCalendar();}
@@ -3934,6 +3935,7 @@ function openReview(){
   if(!pool.length){showToast('Nessun errore da ripassare 🎉','var(--green)');return;}
   RV={pool:qShuffle(pool),cur:0,ok:0};
   _id('review-ov').classList.add('show');renderReview();
+  const c=_id('review-ov').querySelector('.modal-card');if(c)c.focus();
 }
 function closeReview(){_id('review-ov').classList.remove('show');renderReviewCard();}
 function renderReview(){
@@ -3943,6 +3945,7 @@ function renderReview(){
   wrap.appendChild(el('div','game-instr','Domanda '+(RV.cur+1)+'/'+RV.pool.length));
   wrap.appendChild(el('div','q-box','<div class="q-text">'+q.question+'</div>'));
   const grid=el('div','opts-grid'),fb=el('div','feedback'),nb=el('button','next-btn','PROSSIMA →');
+  fb.setAttribute('role','status');fb.setAttribute('aria-live','polite');
   let answered=false;
   q.options.forEach((opt,i)=>{
     const b=el('button','opt','<span class="opt-lbl">'+['A','B','C','D'][i]+'</span><span>'+opt+'</span>');
