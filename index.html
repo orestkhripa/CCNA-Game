@@ -694,6 +694,15 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .set-ta:focus{border-color:var(--accent)}
 .set-danger{width:100%;padding:11px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:all .15s}
 .set-danger:hover{background:rgba(239,68,68,.1)}
+/* ─── RIPASSO ERRORI ─── */
+#review-card{margin-bottom:16px}
+.review-card-inner{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(139,92,246,.09),transparent 60%),var(--panel);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:12px;padding:14px 16px}
+.rv-left{display:flex;align-items:center;gap:12px;flex:1;min-width:0}
+.rv-ico{font-size:1.6rem;flex-shrink:0}
+.rv-title{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem}
+.rv-sub{font-size:.75rem;color:var(--muted)}
+.rv-go{background:transparent;border:1px solid var(--purple);color:var(--purple);border-radius:9px;padding:9px 16px;font-family:'Syne',sans-serif;font-weight:700;font-size:.82rem;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.rv-go:hover{background:rgba(139,92,246,.1)}
 /* ─── ACCESSIBILITÀ MOVIMENTO ─── */
 @media(prefers-reduced-motion:reduce){
   *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
@@ -779,6 +788,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </div>
 
   <!-- TREE -->
+  <div id="review-card"></div>
   <div class="sec-title" style="margin-top:8px">Percorso di apprendimento</div>
   <div id="tree-container"></div>
 </div>
@@ -1096,6 +1106,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
   </div>
 </div>
 
+<!-- ══════════════ RIPASSO ERRORI ══════════════ -->
+<div class="modal-ov" id="review-ov" onclick="if(event.target===this)closeReview()">
+  <div class="modal-card" role="dialog" aria-label="Ripasso errori">
+    <div class="modal-head"><h3>🔁 Ripasso errori</h3><button class="modal-x" onclick="closeReview()" aria-label="Chiudi">✕</button></div>
+    <div id="review-body"></div>
+  </div>
+</div>
+
 <div class="xp-toast" id="xp-toast"></div>
 
 <script>
@@ -1115,6 +1133,7 @@ function loadG(){try{const s=JSON.parse(localStorage.getItem(SAVE));if(s&&s.modu
 let G=loadG();
 // migrazione stato calendario per salvataggi vecchi
 if(!G.days)G.days={};
+if(!G.review)G.review=[];
 if(G.bestStreak==null)G.bestStreak=0;
 if(G.dailyGoal==null)G.dailyGoal=60;
 if(!G.labs)G.labs={};
@@ -1155,6 +1174,7 @@ function updateUI(){
   _id('lv-cert').textContent=G.certs;
   updateHeroProgress();
   renderHomeStreak();
+  renderReviewCard();
 }
 function _id(id){return document.getElementById(id);}
 let toastT;
@@ -2885,6 +2905,7 @@ function renderCons(){
       const ok=i===q.correct;
       if(ok){Q.ok++;addXP(8);}else{b.classList.add('ko');}
       LP.answers.push({q:q.question,tua:q.options[i],giusta:q.options[q.correct],ok:ok,perche:q.explanation,mod:moduleOfQuestion(q.question)});
+      reviewTrack(ok,q);
       fb.className='feedback show '+(ok?'ok':'ko');
       fb.innerHTML='<div class="feedback-title">'+(ok?'✓ Corretto':'✗ Errato')+'</div>'+
         (ok?'':'<div style="margin-bottom:6px"><b style="color:var(--green)">✓ Risposta corretta:</b> '+q.options[q.correct]+'</div>')+
@@ -3861,6 +3882,64 @@ function resetProgress(){
   location.reload();
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeSettings();});
+// ══════════════════════════════════════
+// RIPASSO ERRORI (ripetizione dilazionata)
+// ══════════════════════════════════════
+let RV={};
+function reviewTrack(ok,q){
+  if(!G.review)G.review=[];const key=q.question;
+  if(ok){G.review=G.review.filter(r=>r.q!==key);}
+  else if(!G.review.some(r=>r.q===key)){G.review.push({q:q.question,o:q.options.slice(),c:q.correct,e:q.explanation});if(G.review.length>80)G.review.shift();}
+  saveG();
+}
+function renderReviewCard(){
+  const c=_id('review-card');if(!c)return;
+  const n=(G.review||[]).length;
+  if(!n){c.innerHTML='';c.style.display='none';return;}
+  c.style.display='block';
+  c.innerHTML='<div class="review-card-inner"><div class="rv-left"><div class="rv-ico">🔁</div><div><div class="rv-title">Ripasso errori</div><div class="rv-sub">'+n+' domand'+(n===1?'a':'e')+' da consolidare</div></div></div><button class="rv-go" onclick="openReview()">Ripassa →</button></div>';
+}
+function openReview(){
+  const pool=(G.review||[]).slice();
+  if(!pool.length){showToast('Nessun errore da ripassare 🎉','var(--green)');return;}
+  RV={pool:qShuffle(pool),cur:0,ok:0};
+  _id('review-ov').classList.add('show');renderReview();
+}
+function closeReview(){_id('review-ov').classList.remove('show');renderReviewCard();}
+function renderReview(){
+  const wrap=_id('review-body');wrap.innerHTML='';
+  if(RV.cur>=RV.pool.length){finishReview();return;}
+  const raw=RV.pool[RV.cur],q=prepQuestion(raw,'');
+  wrap.appendChild(el('div','game-instr','Domanda '+(RV.cur+1)+'/'+RV.pool.length));
+  wrap.appendChild(el('div','q-box','<div class="q-text">'+q.question+'</div>'));
+  const grid=el('div','opts-grid'),fb=el('div','feedback'),nb=el('button','next-btn','PROSSIMA →');
+  let answered=false;
+  q.options.forEach((opt,i)=>{
+    const b=el('button','opt','<span class="opt-lbl">'+['A','B','C','D'][i]+'</span><span>'+opt+'</span>');
+    b.onclick=()=>{
+      if(answered)return;answered=true;
+      grid.querySelectorAll('.opt').forEach((x,j)=>{x.disabled=true;if(j===q.correct)x.classList.add('ok');});
+      const ok=i===q.correct;
+      if(ok){RV.ok++;addXP(5);G.review=(G.review||[]).filter(r=>r.q!==raw.q);saveG();}else b.classList.add('ko');
+      fb.className='feedback show '+(ok?'ok':'ko');
+      fb.innerHTML='<div class="feedback-title">'+(ok?'✓ Corretto — tolto dal ripasso':'✗ Errato — resta nel ripasso')+'</div>'+(ok?'':'<div style="margin-bottom:6px"><b style="color:var(--green)">✓ Risposta corretta:</b> '+q.options[q.correct]+'</div>')+'<div>'+q.explanation+'</div>';
+      nb.classList.add('show');
+    };
+    grid.appendChild(b);
+  });
+  nb.onclick=()=>{RV.cur++;renderReview();};
+  wrap.appendChild(grid);wrap.appendChild(fb);wrap.appendChild(nb);
+  if(typeof suppressHover==='function')suppressHover(grid);
+}
+function finishReview(){
+  const wrap=_id('review-body'),rem=(G.review||[]).length;
+  wrap.innerHTML='<div class="q-box" style="text-align:center"><div class="q-tag" style="color:var(--green)">RIPASSO COMPLETATO</div><div class="q-text">'+RV.ok+'/'+RV.pool.length+' corrette</div><p style="color:var(--muted);font-size:.85rem;margin-top:10px;line-height:1.6">'+(rem?('Restano <b>'+rem+'</b> domande da ripassare.'):'🎉 Hai svuotato la lista degli errori!')+'</p></div>';
+  const row=el('div','result-btns');row.style.marginTop='14px';
+  if(rem){const b1=el('button','rbtn rbtn-retry','↻ Continua');b1.onclick=()=>openReview();row.appendChild(b1);}
+  const b2=el('button','rbtn rbtn-home','Chiudi');b2.onclick=()=>closeReview();row.appendChild(b2);
+  wrap.appendChild(row);updateUI();
+}
+document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview();});
 // ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
