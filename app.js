@@ -1974,6 +1974,37 @@ function renderHomeStreak(){
   num.textContent=currentStreak();
   buildCells(_id('hs-mini'),21);
 }
+const MONTHS_IT=['gennaio','febbraio','marzo','aprile','maggio','giugno','luglio','agosto','settembre','ottobre','novembre','dicembre'];
+const MON_ABBR=['gen','feb','mar','apr','mag','giu','lug','ago','set','ott','nov','dic'];
+const DOW_IT=['domenica','lunedì','martedì','mercoledì','giovedì','venerdì','sabato'];
+function showHeatDay(date,xp){
+  const e=_id('heat-selected');if(!e)return;
+  e.innerHTML='📅 <b>'+DOW_IT[date.getDay()]+' '+date.getDate()+' '+MONTHS_IT[date.getMonth()]+' '+date.getFullYear()+'</b> — '+xp+' XP';
+}
+function renderCalHeatmap(days){
+  const grid=_id('heatmap');if(!grid)return;grid.innerHTML='';
+  const monthsEl=_id('heat-months');if(monthsEl)monthsEl.innerHTML='';
+  const today=todayStr();
+  const start=new Date();const dow=(start.getDay()+6)%7;// lun=0
+  start.setDate(start.getDate()-dow-(days/7-1)*7);
+  let lastMonth=-1;
+  for(let w=0;w<days/7;w++){
+    const first=new Date(start);first.setDate(start.getDate()+w*7);
+    if(monthsEl){const lbl=el('span','heat-mlabel');if(first.getMonth()!==lastMonth){lbl.textContent=MON_ABBR[first.getMonth()];lastMonth=first.getMonth();}monthsEl.appendChild(lbl);}
+    const col=el('div','heat-col');
+    for(let d=0;d<7;d++){
+      const cur=new Date(start);cur.setDate(start.getDate()+w*7+d);
+      const k=todayStr(cur);const xp=G.days[k]||0;
+      const cell=el('div','heat-cell heat-'+heatLevel(xp));
+      cell.title=k+' · '+xp+' XP';
+      if(k===today)cell.classList.add('heat-today');
+      if(cur>new Date())cell.style.visibility='hidden';
+      else{cell.style.cursor='pointer';const cd=new Date(cur);cell.onclick=()=>showHeatDay(cd,xp);}
+      col.appendChild(cell);
+    }
+    grid.appendChild(col);
+  }
+}
 function renderCalendar(){
   const s=_id('cal-stats');if(!s)return;
   const todayXP=G.days[todayStr()]||0;
@@ -1985,7 +2016,7 @@ function renderCalendar(){
     '<div class="cal-stat"><b>'+G.score+'</b><span>XP totali</span></div>';
   const goal=G.dailyGoal||60;const pct=Math.min(100,Math.round(todayXP/goal*100));
   _id('cal-goal').innerHTML='<div class="cal-goal-top"><span>Obiettivo di oggi</span><b>'+todayXP+' / '+goal+' XP</b></div><div class="cal-goal-track"><div class="cal-goal-fill" style="width:'+pct+'%"></div></div>';
-  buildCells(_id('heatmap'),18*7);
+  renderCalHeatmap(18*7);
 }
 
 // ══════════════════════════════════════

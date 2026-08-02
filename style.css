@@ -476,6 +476,14 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .cal-goal-track{height:10px;background:var(--dim);border-radius:5px;overflow:hidden}
 .cal-goal-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--green));border-radius:5px;transition:width .6s ease}
 .heatmap-wrap{overflow-x:auto;padding-bottom:8px}
+.heat-scroll{min-width:min-content}
+.heat-selected{font-size:.8rem;color:var(--muted);margin-bottom:10px;min-height:1.25em}
+.heat-selected b{color:var(--cyan)}
+.heat-months{display:flex;gap:4px;margin-left:34px;margin-bottom:5px}
+.heat-mlabel{flex:0 0 14px;width:14px;font-family:'JetBrains Mono',monospace;font-size:.55rem;letter-spacing:1px;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:visible}
+.heat-body{display:flex;gap:6px}
+.heat-days{display:flex;flex-direction:column;gap:4px}
+.heat-days span{height:14px;line-height:14px;width:28px;font-family:'JetBrains Mono',monospace;font-size:.55rem;color:var(--muted)}
 .heatmap{display:flex;gap:4px;min-width:min-content}
 .heat-col{display:flex;flex-direction:column;gap:4px}
 .heat-cell{width:14px;height:14px;border-radius:3px;background:#0d1117;border:1px solid rgba(255,255,255,.03)}
