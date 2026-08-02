@@ -1,6 +1,6 @@
 /* CCNA Quest service worker — offline support (network-first per l'HTML) */
-const CACHE = 'ccna-quest-v1';
-const ASSETS = ['./', './index.html', './manifest.webmanifest', './icon.svg'];
+const CACHE = 'ccna-quest-v2';
+const ASSETS = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)).then(() => self.skipWaiting()));
