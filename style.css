@@ -97,6 +97,9 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .mode-btn{flex:1;min-width:100px;background:var(--panel);border:1px solid var(--border);color:var(--muted);padding:10px;border-radius:8px;cursor:pointer;font-size:.78rem;font-weight:600;transition:all .15s;font-family:'DM Sans',sans-serif}
 .mode-btn.sel{border-color:var(--orange);color:var(--orange);background:rgba(245,158,11,.07)}
 .start-btn{width:100%;padding:16px;background:transparent;border:2px solid var(--accent);color:var(--accent);font-family:'Syne',sans-serif;font-size:.9rem;font-weight:700;letter-spacing:3px;cursor:pointer;border-radius:8px;transition:all .3s;margin-bottom:20px}
+.exam-sim-btn{border-color:var(--green);color:var(--green);letter-spacing:1.5px;margin-bottom:8px}
+.exam-sim-btn:hover{background:var(--green);color:var(--bg)}
+.exam-sim-note{font-size:.75rem;color:var(--muted);line-height:1.5;margin-bottom:20px;text-align:center}
 .start-btn:hover{background:var(--accent);color:var(--bg)}
 /* quiz active */
 .quiz-wrap{max-width:680px;margin:0 auto}

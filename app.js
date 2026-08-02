@@ -566,6 +566,7 @@ function startModuleQuiz(mod){
 }
 function replayQuiz(){
   if(quizState&&quizState.source==='module'){const m=MODS.find(x=>x.id===quizState.moduleId);if(m)return startModuleQuiz(m);}
+  if(quizState&&quizState.source==='exam')return startExam();
   startQuiz();
 }
 function buildDots(){
@@ -670,7 +671,7 @@ const DOMAINS={
  'Automazione':['auto_mod']
 };
 function domainOfModule(mid){for(const d in DOMAINS){if(DOMAINS[d].includes(mid))return d;}return 'Altro';}
-function domainOfQuestion(text){return domainOfModule(moduleOfQuestion(text));}
+function domainOfQuestion(text){const e=EXAM_BANK.find(x=>x.q===text);if(e&&e.dom)return e.dom;return domainOfModule(moduleOfQuestion(text));}
 function renderDomainScores(){
   const dc=_id('res-domains');if(!dc)return;dc.innerHTML='';
   if(quizState.mode!=='exam')return;
@@ -679,6 +680,63 @@ function renderDomainScores(){
   Object.keys(agg).forEach(d=>{const a=agg[d],p=Math.round(a.ok/a.t*100),c=p>=75?'var(--green)':p>=60?'var(--accent)':'var(--red)';
     h+='<div class="dom-row"><div class="dom-top"><span>'+d+'</span><b style="color:'+c+'">'+a.ok+'/'+a.t+' · '+p+'%</b></div><div class="dom-track"><div class="dom-fill" style="width:'+p+'%;background:'+c+'"></div></div></div>';});
   dc.innerHTML=h;
+}
+// ══════════════════════════════════════
+// SIMULAZIONE D'ESAME · domande originali stile CCNA 200-301
+//   (allineate al blueprint, non copie di dump)
+// ══════════════════════════════════════
+const EXAM_BANK=[
+ {dom:'Fondamenti',q:"Quali due livelli OSI corrispondono al livello Network Access del modello TCP/IP?",o:["Data Link e Physical","Transport e Network","Session e Presentation","Application e Transport"],c:0,e:"Il livello Network Access (Link) del TCP/IP raggruppa Data Link e Physical dell'OSI."},
+ {dom:'Fondamenti',q:"Un host ha indirizzo 172.16.5.10/20. Qual è l'indirizzo di rete?",o:["172.16.0.0","172.16.4.0","172.16.5.0","172.16.16.0"],c:0,e:"/20 = 255.255.240.0, block size 16 nel 3° ottetto: 5 cade nel blocco 0-15 → rete 172.16.0.0."},
+ {dom:'Fondamenti',q:"Quale dispositivo delimita i domini di broadcast?",o:["Il router (L3)","Lo switch (L2)","L'hub (L1)","Il ripetitore"],c:0,e:"I router delimitano i domini di broadcast; di default tutte le porte di uno switch sono nello stesso dominio (VLAN 1)."},
+ {dom:'Fondamenti',q:"Quale indirizzo IPv6 è link-local?",o:["FE80::1","2001:db8::1","FC00::1","2002::1"],c:0,e:"Gli indirizzi link-local appartengono a FE80::/10."},
+ {dom:'Fondamenti',q:"Un frame con MAC destinazione FFFF.FFFF.FFFF viene:",o:["Inoltrato a tutte le porte della VLAN (broadcast L2)","Inviato solo al gateway","Scartato dallo switch","Instradato dal router verso Internet"],c:0,e:"FFFF.FFFF.FFFF è il broadcast L2: inoltrato a tutte le porte della stessa VLAN."},
+ {dom:'Accesso alla rete',q:"Quale comando imposta staticamente una porta come trunk?",o:["switchport mode trunk","switchport access vlan 1","switchport nonegotiate","no switchport"],c:0,e:"'switchport mode trunk' forza il trunk; 'nonegotiate' disattiva solo DTP."},
+ {dom:'Accesso alla rete',q:"In STP, quale porta di uno switch non-root inoltra verso il root bridge?",o:["Root port","Designated port","Blocking port","Disabled port"],c:0,e:"La root port ha il costo minore verso il root bridge e inoltra il traffico."},
+ {dom:'Accesso alla rete',q:"Cosa serve perché si formi un EtherChannel?",o:["Stessa velocità, duplex e configurazione VLAN sulle porte membre","Un IP diverso su ogni porta membro","Una porta access e una trunk","STP disabilitato"],c:0,e:"Le porte membre devono avere parametri coerenti, altrimenti il canale non si forma."},
+ {dom:'Accesso alla rete',q:"Un access point 'lightweight' dipende da:",o:["Un Wireless LAN Controller (WLC) via CAPWAP","Un server DHCP dedicato","Un processo OSPF","Un hub"],c:0,e:"Gli AP lightweight sono gestiti centralmente dal WLC tramite CAPWAP."},
+ {dom:'Accesso alla rete',q:"Su un trunk 802.1Q, il traffico non taggato appartiene a:",o:["La native VLAN (default 1)","La VLAN 4094","La voice VLAN","Nessuna: tutto è taggato"],c:0,e:"Il traffico non taggato viaggia nella native VLAN; deve combaciare ai due capi del trunk."},
+ {dom:'Accesso alla rete',q:"Come si separa il traffico voce di un telefono IP su una porta access?",o:["Con una voice VLAN","Con un trunk verso il PC","Con un secondo IP sul PC","Con STP PortFast"],c:0,e:"La voice VLAN separa la voce dai dati sulla stessa porta access."},
+ {dom:'Connettività IP',q:"Un router ha la stessa rete via statica (AD 1) e via OSPF (AD 110). Quale installa?",o:["La statica, perché ha AD più bassa","La OSPF, perché ha metrica migliore","Entrambe in load-balancing","Nessuna: conflitto"],c:0,e:"A parità di prefisso vince l'AD più bassa: statica (1) batte OSPF (110)."},
+ {dom:'Connettività IP',q:"Con rotte /16, /24 e default verso 172.16.10.5, quale viene usata?",o:["La /24 (longest prefix match)","La /16","La default","Quella con AD più alta"],c:0,e:"Vince sempre la corrispondenza col prefisso più lungo (più specifica)."},
+ {dom:'Connettività IP',q:"Quale comando crea una default route statica via 203.0.113.1?",o:["ip route 0.0.0.0 0.0.0.0 203.0.113.1","ip default-gateway 203.0.113.1","ip route default 203.0.113.1","default-information originate"],c:0,e:"'ip route 0.0.0.0 0.0.0.0 <next-hop>' imposta il gateway of last resort."},
+ {dom:'Connettività IP',q:"Come sceglie il router ID un processo OSPF, se non configurato?",o:["IP più alto di una loopback, altrimenti dell'interfaccia attiva più alta","IP più basso di qualsiasi interfaccia","L'indirizzo MAC","Sempre 0.0.0.0"],c:0,e:"OSPF preferisce l'IP più alto di una loopback; in assenza usa l'IP attivo più alto."},
+ {dom:'Connettività IP',q:"Lo stato OSPF 'Full' indica che:",o:["Le adiacenze sono complete e i database sincronizzati","L'interfaccia è spenta","Sono stati ricevuti solo pacchetti Hello","C'è un errore di autenticazione"],c:0,e:"'Full' significa che i vicini hanno sincronizzato il link-state database."},
+ {dom:'Connettività IP',q:"La wildcard mask corretta per 192.168.4.0/24 in OSPF è:",o:["0.0.0.255","255.255.255.0","0.0.255.255","0.0.0.0"],c:0,e:"La wildcard è la mask invertita: /24 → 0.0.0.255."},
+ {dom:'Servizi IP',q:"Un client ottiene 169.254.10.5. Cosa è successo?",o:["Non ha ricevuto risposta dal DHCP (APIPA)","Ha ricevuto un IP pubblico","Il DNS è irraggiungibile","Ha un IP statico valido"],c:0,e:"169.254.0.0/16 è APIPA: auto-assegnato quando il DHCP non risponde."},
+ {dom:'Servizi IP',q:"Su quali porte lavora il DHCP?",o:["UDP 67 (server) e 68 (client)","TCP 53","UDP 123","TCP 443"],c:0,e:"Server su UDP 67, client su UDP 68; lo scambio iniziale è in broadcast."},
+ {dom:'Servizi IP',q:"Il PAT distingue le sessioni di più host interni tramite:",o:["I numeri di porta sorgente","Gli indirizzi MAC","Il valore TTL","Il VLAN ID"],c:0,e:"Il PAT (NAT overload) usa le porte per mappare molti IP privati su un solo IP pubblico."},
+ {dom:'Servizi IP',q:"A cosa serve NTP?",o:["Sincronizzare l'orario dei dispositivi","Risolvere i nomi in IP","Assegnare gli indirizzi IP","Filtrare il traffico"],c:0,e:"NTP (UDP 123) mantiene l'orario coerente: vitale per log e certificati."},
+ {dom:'Sicurezza',q:"Dove va posizionata idealmente una ACL estesa?",o:["Il più vicino possibile alla sorgente","Il più vicino possibile alla destinazione","Solo sull'interfaccia loopback","La posizione è indifferente"],c:0,e:"Extended vicino alla sorgente (scarta subito); Standard vicino alla destinazione."},
+ {dom:'Sicurezza',q:"Cosa fa 'switchport port-security mac-address sticky'?",o:["Impara dinamicamente il MAC consentito e lo salva in config","Blocca tutte le porte","Cifra il traffico della porta","Crea una nuova VLAN"],c:0,e:"'sticky' apprende il MAC e lo memorizza nella running-config."},
+ {dom:'Sicurezza',q:"Perché preferire SSH a Telnet per la gestione?",o:["SSH cifra la sessione, Telnet la invia in chiaro","SSH è più veloce","Telnet non supporta IPv4","SSH non richiede autenticazione"],c:0,e:"SSH (22) cifra tutto; Telnet (23) espone anche le credenziali in chiaro."},
+ {dom:'Sicurezza',q:"Quale comando memorizza la password di enable come hash?",o:["enable secret","enable password","service tcp-keepalives","username admin nopassword"],c:0,e:"'enable secret' salva un hash; 'enable password' è debole e reversibile."},
+ {dom:'Sicurezza',q:"DHCP snooping protegge la rete da:",o:["Server DHCP non autorizzati (rogue)","Loop di livello 2","Errori di routing OSPF","Sovraccarico della CPU"],c:0,e:"DHCP snooping blocca le risposte DHCP provenienti da porte non fidate."},
+ {dom:'Automazione',q:"In una REST API, quale metodo HTTP recupera dati senza modificarli?",o:["GET","POST","PUT","DELETE"],c:0,e:"GET legge; POST crea, PUT/PATCH aggiornano, DELETE elimina."},
+ {dom:'Automazione',q:"Quale formato usa coppie chiave-valore tra parentesi graffe ed è comune nelle API?",o:["JSON","CSV","Testo semplice","Binario"],c:0,e:"JSON usa {\"chiave\":\"valore\"} ed è il formato tipico delle REST API."},
+ {dom:'Automazione',q:"In SDN, il controller comunica con gli switch (data plane) tramite:",o:["Le southbound API","Le northbound API","La console RJ-45","I trap SNMP"],c:0,e:"Le southbound API (es. OpenFlow/NETCONF) vanno verso i dispositivi; le northbound verso le app."},
+ {dom:'Connettività IP',q:"Qual è la distanza amministrativa di una rotta EIGRP interna?",o:["90","110","120","1"],c:0,e:"EIGRP interno = 90; OSPF 110, RIP 120, statica 1, connessa 0."}
+];
+function examQuestionsByDomain(){
+  const map={'Fondamenti':[],'Accesso alla rete':[],'Connettività IP':[],'Servizi IP':[],'Sicurezza':[],'Automazione':[]};
+  EXAM_BANK.forEach(q=>{if(map[q.dom])map[q.dom].push(q);});
+  for(const mid in QBANK){const d=domainOfModule(mid);if(map[d])QBANK[mid].forEach(q=>map[d].push(q));}
+  return map;
+}
+function buildExamPool(){
+  const w={'Fondamenti':6,'Accesso alla rete':6,'Connettività IP':7,'Servizi IP':3,'Sicurezza':5,'Automazione':3};
+  const by=examQuestionsByDomain();let pool=[];
+  for(const d in w){pool=pool.concat(qShuffle((by[d]||[]).slice()).slice(0,w[d]));}
+  return qShuffle(pool);
+}
+function startExam(){
+  const pool=buildExamPool();
+  quizState={source:'exam',topic:'Simulazione CCNA 200-301',mode:'exam',cfg:MODE_CFG.exam,pool,total:Math.min(30,pool.length)||1,cur:0,results:[],xpEarned:0,timer:null,timeLeft:MODE_CFG.exam.t,answered:false,labKey:null};
+  document.querySelectorAll('.view').forEach(x=>x.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.remove('active'));
+  _id('view-quiz').classList.add('active');_id('nb-quiz').classList.add('active');
+  _id('quiz-menu').style.display='none';_id('quiz-active').style.display='block';_id('quiz-result').style.display='none';
+  buildDots();loadQuestion();
 }
 function showQuizResult(){
   clearInterval(quizState.timer);
