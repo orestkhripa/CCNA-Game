@@ -8,7 +8,7 @@
 html{scroll-behavior:smooth}
 body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min-height:100vh;-webkit-tap-highlight-color:transparent;-webkit-text-size-adjust:100%;text-size-adjust:100%;overflow-x:hidden}
 /* NAV */
-.topnav{background:rgba(13,17,23,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:10px 16px;position:sticky;top:0;z-index:200}
+.topnav{background:rgba(13,17,23,.82);-webkit-backdrop-filter:blur(12px);backdrop-filter:blur(12px);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:6px;padding:calc(10px + env(safe-area-inset-top)) 16px 10px;position:sticky;top:0;z-index:200}
 .nav-brand{position:relative;font-family:'Syne',sans-serif;font-size:.95rem;font-weight:800;letter-spacing:1px;padding:6px 14px 6px 26px;margin-right:6px;cursor:pointer;background:linear-gradient(90deg,var(--accent),var(--cyan));-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;white-space:nowrap}
 .nav-brand::before{content:'';position:absolute;left:8px;top:50%;transform:translateY(-50%);width:9px;height:9px;border-radius:50%;background:var(--cyan);box-shadow:0 0 10px var(--cyan)}
 .nav-links{display:flex;align-items:center;gap:6px;flex-wrap:wrap}
@@ -24,7 +24,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 @media(max-width:640px){
   /* niente backdrop-filter qui: creerebbe un containing block per la
      tab bar fixed, spingendola in alto invece che in basso */
-  .topnav{padding:9px 14px;gap:8px;background:rgba(11,15,22,.96);-webkit-backdrop-filter:none;backdrop-filter:none}
+  .topnav{padding:calc(9px + env(safe-area-inset-top)) 14px 9px;gap:8px;background:rgba(11,15,22,.96);-webkit-backdrop-filter:none;backdrop-filter:none}
   .nav-brand{font-size:.82rem;padding:4px 6px 4px 22px;margin-right:0}
   .nav-brand::before{left:5px;width:8px;height:8px}
   .nav-xp{margin-left:auto;padding:5px 10px;gap:8px}
