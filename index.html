@@ -695,6 +695,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .set-ta:focus{border-color:var(--accent)}
 .set-danger{width:100%;padding:11px;background:transparent;border:1px solid var(--red);color:var(--red);border-radius:8px;font-family:'Syne',sans-serif;font-weight:700;cursor:pointer;transition:all .15s}
 .set-danger:hover{background:rgba(239,68,68,.1)}
+/* ─── PUNTEGGIO PER DOMINIO (esame) ─── */
+#res-domains{text-align:left}
+.dom-row{margin-bottom:10px}
+.dom-top{display:flex;justify-content:space-between;align-items:baseline;font-size:.82rem;margin-bottom:4px}
+.dom-top b{font-family:'JetBrains Mono',monospace;font-size:.78rem}
+.dom-track{height:8px;background:var(--dim);border-radius:4px;overflow:hidden}
+.dom-fill{height:100%;border-radius:4px;transition:width .6s ease}
 /* ─── RIPASSO ERRORI ─── */
 #review-card{margin-bottom:16px}
 .review-card-inner{display:flex;align-items:center;gap:14px;background:linear-gradient(135deg,rgba(139,92,246,.09),transparent 60%),var(--panel);border:1px solid var(--border);border-left:3px solid var(--purple);border-radius:12px;padding:14px 16px}
@@ -845,6 +852,7 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
       <div class="rs"><b id="res-ko">0</b><span>Errate</span></div>
       <div class="rs"><b id="res-xp">0</b><span>XP guadagnati</span></div>
     </div>
+    <div id="res-domains"></div>
     <div class="result-btns">
       <button class="rbtn rbtn-retry" onclick="replayQuiz()">↺ Rigioca</button>
       <button class="rbtn" id="res-lab-btn" style="display:none;border:1px solid var(--purple);color:var(--purple)">⚗️ Pratica interattiva</button>
@@ -1739,7 +1747,7 @@ function startTimer(){
 function timeoutQ(){
   quizState.answered=true;
   document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===quizState.currentQ.correct)b.classList.add('ok');});
-  quizState.results.push({q:quizState.currentQ.question,ok:false});
+  quizState.results.push({q:quizState.currentQ.question,ok:false,dom:domainOfQuestion(quizState.currentQ.question)});
   G.streak=0;saveG();updateUI();
   showFeedback(false,'⏱ Tempo scaduto',quizState.currentQ.explanation);
   dotMark(false);_id('next-btn').classList.add('show');
@@ -1751,7 +1759,7 @@ function answerQ(idx,btn){
   const ok=idx===quizState.currentQ.correct;
   document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===quizState.currentQ.correct)b.classList.add('ok');});
   if(!ok) btn.classList.add('ko');
-  quizState.results.push({q:quizState.currentQ.question,ok});
+  quizState.results.push({q:quizState.currentQ.question,ok,dom:domainOfQuestion(quizState.currentQ.question)});
   if(ok){
     const baseXP=20;const speedBonus=Math.floor(quizState.timeLeft*.4);
     const streakBonus=G.streak>2?(G.streak-2)*5:0;
@@ -1782,6 +1790,25 @@ async function nextQuestion(){
   if(quizState.cur>=quizState.total){showQuizResult();return;}
   await loadQuestion();
 }
+const DOMAINS={
+ 'Fondamenti':['net_basics','binary','osi_mod','tcpip_mod','ipv6_mod'],
+ 'Accesso alla rete':['switching','vlan_mod','wifi_mod','redun_mod'],
+ 'Connettività IP':['ip_addr','subnetting','boss1','routing_s','ospf_mod','eigrp_mod','boss2','wan_mod'],
+ 'Servizi IP':['nat_mod','ipserv_mod'],
+ 'Sicurezza':['acl_mod','ssh_sec','boss3'],
+ 'Automazione':['auto_mod']
+};
+function domainOfModule(mid){for(const d in DOMAINS){if(DOMAINS[d].includes(mid))return d;}return 'Altro';}
+function domainOfQuestion(text){return domainOfModule(moduleOfQuestion(text));}
+function renderDomainScores(){
+  const dc=_id('res-domains');if(!dc)return;dc.innerHTML='';
+  if(quizState.mode!=='exam')return;
+  const agg={};quizState.results.forEach(r=>{const d=r.dom||'Altro';(agg[d]=agg[d]||{ok:0,t:0}).t++;if(r.ok)agg[d].ok++;});
+  let h='<div class="sec-title" style="margin:20px 0 10px">Punteggio per dominio</div>';
+  Object.keys(agg).forEach(d=>{const a=agg[d],p=Math.round(a.ok/a.t*100),c=p>=75?'var(--green)':p>=60?'var(--accent)':'var(--red)';
+    h+='<div class="dom-row"><div class="dom-top"><span>'+d+'</span><b style="color:'+c+'">'+a.ok+'/'+a.t+' · '+p+'%</b></div><div class="dom-track"><div class="dom-fill" style="width:'+p+'%;background:'+c+'"></div></div></div>';});
+  dc.innerHTML=h;
+}
 function showQuizResult(){
   clearInterval(quizState.timer);
   _id('quiz-active').style.display='none';_id('quiz-result').style.display='block';
@@ -1797,6 +1824,7 @@ function showQuizResult(){
   else{grade='❌ RIPASSA';col='var(--red)';}
   const ge=_id('res-grade');ge.textContent=grade;ge.style.color=col;ge.style.background=col+'22';
   _id('res-pct').style.color=col;
+  renderDomainScores();
   // completa il modulo se superato
   if(quizState.source==='module'&&pct>=70&&quizState.moduleId){completeModule(quizState.moduleId);}
   // mostra il lab interattivo abbinato (se presente)
