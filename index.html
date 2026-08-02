@@ -3168,6 +3168,36 @@ const TSHOOT_SCENARIOS=[
   state:{ifaces:[
     {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
     {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:false}
+  ],routes:[]}},
+ {id:'ts_noip',icon:'🚫',diff:'med',xp:35,title:'Interfaccia senza IP',
+  desc:"L'interfaccia WAN è accesa ma non risponde: forse non ha un indirizzo.",
+  goal:"R1 deve raggiungere Internet (ping 8.8.8.8).",topo:"R1 [Gi0/1] ?/30 — ISP 203.0.113.1/30",
+  symptom:"Gi0/1 è up ma senza indirizzo IP (unassigned).",target:'8.8.8.8',hostname:'R1',
+  hints:['enable','show ip interface brief','configure terminal','interface Gi0/1','ip address 203.0.113.2 255.255.255.252','end','ping 8.8.8.8'],
+  explain:"L'interfaccia WAN era attiva ma senza indirizzo: senza IP non esiste una rete connessa verso il next-hop, quindi la default route era inutilizzabile. Assegnando 203.0.113.2/30 il collegamento funziona.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:null,mask:null,up:true}
+  ],routes:[{net:'0.0.0.0',mask:'0.0.0.0',via:'203.0.113.1',type:'S'}]}},
+ {id:'ts_lanshut',icon:'🖧',diff:'easy',xp:25,title:'LAN irraggiungibile',
+  desc:"Il server del magazzino non risponde: controlla l'interfaccia della LAN.",
+  goal:"R1 deve raggiungere il server LAN 192.168.1.10.",topo:"Server 192.168.1.10 —[Gi0/0] R1",
+  symptom:"Il ping verso 192.168.1.10 fallisce.",target:'192.168.1.10',hostname:'R1',
+  hints:['enable','show ip interface brief','configure terminal','interface Gi0/0','no shutdown','end','ping 192.168.1.10'],
+  explain:"L'interfaccia LAN Gi0/0 era 'administratively down': la rete locale non era raggiungibile. 'no shutdown' l'ha riattivata.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:false},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:true}
+  ],routes:[]}},
+ {id:'ts_missroute',icon:'🗺️',diff:'med',xp:40,title:'Rotta interna mancante',
+  desc:"Una rete interna dietro un altro router non è raggiungibile.",
+  goal:"R1 deve raggiungere l'host 10.0.0.10 (rete dietro R2).",topo:"R1 [Gi0/0] 192.168.1.1/24 — R2 .2 — LAN 10.0.0.0/24",
+  symptom:"Il ping verso 10.0.0.10 fallisce: manca la rotta.",target:'10.0.0.10',hostname:'R1',
+  hints:['enable','show ip route','configure terminal','ip route 10.0.0.0 255.255.255.0 192.168.1.2','end','ping 10.0.0.10'],
+  explain:"R1 non aveva alcuna rotta verso 10.0.0.0/24, la rete dietro R2. Aggiungendo la rotta statica via 192.168.1.2 (next-hop direttamente connesso) l'host diventa raggiungibile.",
+  state:{ifaces:[
+    {name:'Gi0/0',full:'GigabitEthernet0/0',ip:'192.168.1.1',mask:'255.255.255.0',up:true},
+    {name:'Gi0/1',full:'GigabitEthernet0/1',ip:'203.0.113.2',mask:'255.255.255.252',up:true}
   ],routes:[]}}
 ];
 function initTshoot(){
