@@ -522,7 +522,7 @@ function questionsForModule(mod){
 function prepQuestion(raw,tag){
   const opts=raw.o.map((t,i)=>({t,ok:i===raw.c}));
   qShuffle(opts);
-  return{question:raw.q,options:opts.map(o=>o.t),correct:opts.findIndex(o=>o.ok),explanation:raw.e,subtopic:raw.tag||tag||''};
+  return{question:raw.q,options:opts.map(o=>o.t),correct:opts.findIndex(o=>o.ok),explanation:raw.e,subtopic:raw.tag||tag||'',gloss:raw.g||null,schema:raw.s||null};
 }
 
 function initQuizMenu(){
@@ -619,7 +619,7 @@ function startTimer(){
 function timeoutQ(){
   quizState.answered=true;
   document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===quizState.currentQ.correct)b.classList.add('ok');});
-  quizState.results.push({q:quizState.currentQ.question,ok:false,dom:domainOfQuestion(quizState.currentQ.question)});
+  quizState.results.push(buildResult(quizState.currentQ,-1,false));
   G.streak=0;saveG();updateUI();
   showFeedback(false,'⏱ Tempo scaduto',quizState.currentQ.explanation);
   dotMark(false);_id('next-btn').classList.add('show');
@@ -631,7 +631,7 @@ function answerQ(idx,btn){
   const ok=idx===quizState.currentQ.correct;
   document.querySelectorAll('.opt').forEach((b,i)=>{b.disabled=true;if(i===quizState.currentQ.correct)b.classList.add('ok');});
   if(!ok) btn.classList.add('ko');
-  quizState.results.push({q:quizState.currentQ.question,ok,dom:domainOfQuestion(quizState.currentQ.question)});
+  quizState.results.push(buildResult(quizState.currentQ,idx,ok));
   if(ok){
     const baseXP=20;const speedBonus=Math.floor(quizState.timeLeft*.4);
     const streakBonus=G.streak>2?(G.streak-2)*5:0;
@@ -672,6 +672,13 @@ const DOMAINS={
 };
 function domainOfModule(mid){for(const d in DOMAINS){if(DOMAINS[d].includes(mid))return d;}return 'Altro';}
 function domainOfQuestion(text){const e=EXAM_BANK.find(x=>x.q===text);if(e&&e.dom)return e.dom;return domainOfModule(moduleOfQuestion(text));}
+// Snapshot completo di una domanda risposta: serve alla revisione post-esame
+// (testo, opzioni mescolate, indice corretto, scelta dell'utente, glossario e schema).
+function buildResult(cq,chosen,ok){
+  return {q:cq.question,ok,dom:domainOfQuestion(cq.question),
+    opts:(cq.options||[]).slice(),correct:cq.correct,chosen,exp:cq.explanation,
+    gloss:cq.gloss||null,schema:cq.schema||null};
+}
 function renderDomainScores(){
   const dc=_id('res-domains');if(!dc)return;dc.innerHTML='';
   if(quizState.mode!=='exam')return;
@@ -682,51 +689,82 @@ function renderDomainScores(){
   dc.innerHTML=h;
 }
 // ══════════════════════════════════════
-// SIMULAZIONE D'ESAME · domande originali stile CCNA 200-301
-//   (allineate al blueprint, non copie di dump)
+// EXAM SIMULATION · original CCNA 200-301 style questions (English)
+//   Aligned to the official blueprint — not dump copies.
+//   dom = exam domain · g = related glossary term · s = related schema id
 // ══════════════════════════════════════
 const EXAM_BANK=[
- {dom:'Fondamenti',q:"Quali due livelli OSI corrispondono al livello Network Access del modello TCP/IP?",o:["Data Link e Physical","Transport e Network","Session e Presentation","Application e Transport"],c:0,e:"Il livello Network Access (Link) del TCP/IP raggruppa Data Link e Physical dell'OSI."},
- {dom:'Fondamenti',q:"Un host ha indirizzo 172.16.5.10/20. Qual è l'indirizzo di rete?",o:["172.16.0.0","172.16.4.0","172.16.5.0","172.16.16.0"],c:0,e:"/20 = 255.255.240.0, block size 16 nel 3° ottetto: 5 cade nel blocco 0-15 → rete 172.16.0.0."},
- {dom:'Fondamenti',q:"Quale dispositivo delimita i domini di broadcast?",o:["Il router (L3)","Lo switch (L2)","L'hub (L1)","Il ripetitore"],c:0,e:"I router delimitano i domini di broadcast; di default tutte le porte di uno switch sono nello stesso dominio (VLAN 1)."},
- {dom:'Fondamenti',q:"Quale indirizzo IPv6 è link-local?",o:["FE80::1","2001:db8::1","FC00::1","2002::1"],c:0,e:"Gli indirizzi link-local appartengono a FE80::/10."},
- {dom:'Fondamenti',q:"Un frame con MAC destinazione FFFF.FFFF.FFFF viene:",o:["Inoltrato a tutte le porte della VLAN (broadcast L2)","Inviato solo al gateway","Scartato dallo switch","Instradato dal router verso Internet"],c:0,e:"FFFF.FFFF.FFFF è il broadcast L2: inoltrato a tutte le porte della stessa VLAN."},
- {dom:'Accesso alla rete',q:"Quale comando imposta staticamente una porta come trunk?",o:["switchport mode trunk","switchport access vlan 1","switchport nonegotiate","no switchport"],c:0,e:"'switchport mode trunk' forza il trunk; 'nonegotiate' disattiva solo DTP."},
- {dom:'Accesso alla rete',q:"In STP, quale porta di uno switch non-root inoltra verso il root bridge?",o:["Root port","Designated port","Blocking port","Disabled port"],c:0,e:"La root port ha il costo minore verso il root bridge e inoltra il traffico."},
- {dom:'Accesso alla rete',q:"Cosa serve perché si formi un EtherChannel?",o:["Stessa velocità, duplex e configurazione VLAN sulle porte membre","Un IP diverso su ogni porta membro","Una porta access e una trunk","STP disabilitato"],c:0,e:"Le porte membre devono avere parametri coerenti, altrimenti il canale non si forma."},
- {dom:'Accesso alla rete',q:"Un access point 'lightweight' dipende da:",o:["Un Wireless LAN Controller (WLC) via CAPWAP","Un server DHCP dedicato","Un processo OSPF","Un hub"],c:0,e:"Gli AP lightweight sono gestiti centralmente dal WLC tramite CAPWAP."},
- {dom:'Accesso alla rete',q:"Su un trunk 802.1Q, il traffico non taggato appartiene a:",o:["La native VLAN (default 1)","La VLAN 4094","La voice VLAN","Nessuna: tutto è taggato"],c:0,e:"Il traffico non taggato viaggia nella native VLAN; deve combaciare ai due capi del trunk."},
- {dom:'Accesso alla rete',q:"Come si separa il traffico voce di un telefono IP su una porta access?",o:["Con una voice VLAN","Con un trunk verso il PC","Con un secondo IP sul PC","Con STP PortFast"],c:0,e:"La voice VLAN separa la voce dai dati sulla stessa porta access."},
- {dom:'Connettività IP',q:"Un router ha la stessa rete via statica (AD 1) e via OSPF (AD 110). Quale installa?",o:["La statica, perché ha AD più bassa","La OSPF, perché ha metrica migliore","Entrambe in load-balancing","Nessuna: conflitto"],c:0,e:"A parità di prefisso vince l'AD più bassa: statica (1) batte OSPF (110)."},
- {dom:'Connettività IP',q:"Con rotte /16, /24 e default verso 172.16.10.5, quale viene usata?",o:["La /24 (longest prefix match)","La /16","La default","Quella con AD più alta"],c:0,e:"Vince sempre la corrispondenza col prefisso più lungo (più specifica)."},
- {dom:'Connettività IP',q:"Quale comando crea una default route statica via 203.0.113.1?",o:["ip route 0.0.0.0 0.0.0.0 203.0.113.1","ip default-gateway 203.0.113.1","ip route default 203.0.113.1","default-information originate"],c:0,e:"'ip route 0.0.0.0 0.0.0.0 <next-hop>' imposta il gateway of last resort."},
- {dom:'Connettività IP',q:"Come sceglie il router ID un processo OSPF, se non configurato?",o:["IP più alto di una loopback, altrimenti dell'interfaccia attiva più alta","IP più basso di qualsiasi interfaccia","L'indirizzo MAC","Sempre 0.0.0.0"],c:0,e:"OSPF preferisce l'IP più alto di una loopback; in assenza usa l'IP attivo più alto."},
- {dom:'Connettività IP',q:"Lo stato OSPF 'Full' indica che:",o:["Le adiacenze sono complete e i database sincronizzati","L'interfaccia è spenta","Sono stati ricevuti solo pacchetti Hello","C'è un errore di autenticazione"],c:0,e:"'Full' significa che i vicini hanno sincronizzato il link-state database."},
- {dom:'Connettività IP',q:"La wildcard mask corretta per 192.168.4.0/24 in OSPF è:",o:["0.0.0.255","255.255.255.0","0.0.255.255","0.0.0.0"],c:0,e:"La wildcard è la mask invertita: /24 → 0.0.0.255."},
- {dom:'Servizi IP',q:"Un client ottiene 169.254.10.5. Cosa è successo?",o:["Non ha ricevuto risposta dal DHCP (APIPA)","Ha ricevuto un IP pubblico","Il DNS è irraggiungibile","Ha un IP statico valido"],c:0,e:"169.254.0.0/16 è APIPA: auto-assegnato quando il DHCP non risponde."},
- {dom:'Servizi IP',q:"Su quali porte lavora il DHCP?",o:["UDP 67 (server) e 68 (client)","TCP 53","UDP 123","TCP 443"],c:0,e:"Server su UDP 67, client su UDP 68; lo scambio iniziale è in broadcast."},
- {dom:'Servizi IP',q:"Il PAT distingue le sessioni di più host interni tramite:",o:["I numeri di porta sorgente","Gli indirizzi MAC","Il valore TTL","Il VLAN ID"],c:0,e:"Il PAT (NAT overload) usa le porte per mappare molti IP privati su un solo IP pubblico."},
- {dom:'Servizi IP',q:"A cosa serve NTP?",o:["Sincronizzare l'orario dei dispositivi","Risolvere i nomi in IP","Assegnare gli indirizzi IP","Filtrare il traffico"],c:0,e:"NTP (UDP 123) mantiene l'orario coerente: vitale per log e certificati."},
- {dom:'Sicurezza',q:"Dove va posizionata idealmente una ACL estesa?",o:["Il più vicino possibile alla sorgente","Il più vicino possibile alla destinazione","Solo sull'interfaccia loopback","La posizione è indifferente"],c:0,e:"Extended vicino alla sorgente (scarta subito); Standard vicino alla destinazione."},
- {dom:'Sicurezza',q:"Cosa fa 'switchport port-security mac-address sticky'?",o:["Impara dinamicamente il MAC consentito e lo salva in config","Blocca tutte le porte","Cifra il traffico della porta","Crea una nuova VLAN"],c:0,e:"'sticky' apprende il MAC e lo memorizza nella running-config."},
- {dom:'Sicurezza',q:"Perché preferire SSH a Telnet per la gestione?",o:["SSH cifra la sessione, Telnet la invia in chiaro","SSH è più veloce","Telnet non supporta IPv4","SSH non richiede autenticazione"],c:0,e:"SSH (22) cifra tutto; Telnet (23) espone anche le credenziali in chiaro."},
- {dom:'Sicurezza',q:"Quale comando memorizza la password di enable come hash?",o:["enable secret","enable password","service tcp-keepalives","username admin nopassword"],c:0,e:"'enable secret' salva un hash; 'enable password' è debole e reversibile."},
- {dom:'Sicurezza',q:"DHCP snooping protegge la rete da:",o:["Server DHCP non autorizzati (rogue)","Loop di livello 2","Errori di routing OSPF","Sovraccarico della CPU"],c:0,e:"DHCP snooping blocca le risposte DHCP provenienti da porte non fidate."},
- {dom:'Automazione',q:"In una REST API, quale metodo HTTP recupera dati senza modificarli?",o:["GET","POST","PUT","DELETE"],c:0,e:"GET legge; POST crea, PUT/PATCH aggiornano, DELETE elimina."},
- {dom:'Automazione',q:"Quale formato usa coppie chiave-valore tra parentesi graffe ed è comune nelle API?",o:["JSON","CSV","Testo semplice","Binario"],c:0,e:"JSON usa {\"chiave\":\"valore\"} ed è il formato tipico delle REST API."},
- {dom:'Automazione',q:"In SDN, il controller comunica con gli switch (data plane) tramite:",o:["Le southbound API","Le northbound API","La console RJ-45","I trap SNMP"],c:0,e:"Le southbound API (es. OpenFlow/NETCONF) vanno verso i dispositivi; le northbound verso le app."},
- {dom:'Connettività IP',q:"Qual è la distanza amministrativa di una rotta EIGRP interna?",o:["90","110","120","1"],c:0,e:"EIGRP interno = 90; OSPF 110, RIP 120, statica 1, connessa 0."}
+ // ── 1 · Network Fundamentals ──────────────────────────────
+ {dom:'Network Fundamentals',q:"Which two OSI layers map to the Network Access (Link) layer of the TCP/IP model?",o:["Data Link and Physical","Transport and Network","Session and Presentation","Application and Transport"],c:0,e:"The TCP/IP Network Access layer combines the OSI Data Link and Physical layers.",g:"Modello OSI",s:"osi"},
+ {dom:'Network Fundamentals',q:"A host is configured with 172.16.5.10/20. What is its network address?",o:["172.16.0.0","172.16.4.0","172.16.5.0","172.16.16.0"],c:0,e:"/20 = 255.255.240.0, block size 16 in the 3rd octet: 5 falls in the 0–15 block → network 172.16.0.0.",g:"Subnet mask",s:"subnet"},
+ {dom:'Network Fundamentals',q:"Which device separates broadcast domains by default?",o:["A router (L3)","A switch (L2)","A hub (L1)","A repeater"],c:0,e:"Routers bound broadcast domains; by default all switch ports are in one broadcast domain (VLAN 1).",g:"Router",s:"osi"},
+ {dom:'Network Fundamentals',q:"Which IPv6 address is a link-local address?",o:["FE80::1","2001:db8::1","FC00::1","2002::1"],c:0,e:"Link-local addresses belong to FE80::/10 and are valid only on the local segment.",g:"Link-local",s:"ipv6"},
+ {dom:'Network Fundamentals',q:"A frame with destination MAC FFFF.FFFF.FFFF is:",o:["Flooded to all ports in the VLAN (L2 broadcast)","Sent only to the default gateway","Dropped by the switch","Routed to the Internet by the router"],c:0,e:"FFFF.FFFF.FFFF is the L2 broadcast: the switch floods it out every port in the same VLAN.",g:"MAC address",s:"osi"},
+ {dom:'Network Fundamentals',q:"How many usable hosts does a /26 subnet provide?",o:["62","64","30","126"],c:0,e:"/26 leaves 6 host bits: 2^6 − 2 = 62 usable hosts (network and broadcast removed).",g:"Block size",s:"subnet"},
+ {dom:'Network Fundamentals',q:"Which transport protocol provides reliable, connection-oriented delivery with acknowledgements?",o:["TCP","UDP","ICMP","IP"],c:0,e:"TCP uses a 3-way handshake, sequencing and ACKs; UDP is fast but best-effort.",g:"TCP",s:"osi"},
+ {dom:'Network Fundamentals',q:"Which cable connects a PC NIC directly to a switch access port (no auto-MDIX)?",o:["Straight-through","Crossover","Rollover (console)","Coaxial"],c:0,e:"Different device types (PC↔switch) use a straight-through cable; like devices use a crossover.",g:"Switch",s:"osi"},
+ {dom:'Network Fundamentals',q:"Which range is a private (RFC 1918) address block?",o:["10.0.0.0 – 10.255.255.255","172.32.0.0 – 172.63.255.255","192.169.0.0 – 192.169.255.255","224.0.0.0 – 239.255.255.255"],c:0,e:"RFC 1918 blocks are 10/8, 172.16–31/12 and 192.168/16; they need NAT to reach the Internet.",g:"Indirizzo IP privato",s:"subnet"},
+ {dom:'Network Fundamentals',q:"How many bits does a single hexadecimal digit represent?",o:["4 bits (a nibble)","8 bits","2 bits","16 bits"],c:0,e:"Each hex digit maps to 4 bits; two hex digits = 1 byte, handy for MAC and IPv6.",g:"MAC address",s:"ipv6"},
+ // ── 2 · Network Access ────────────────────────────────────
+ {dom:'Network Access',q:"Which command statically forces an interface to become a trunk?",o:["switchport mode trunk","switchport access vlan 1","switchport nonegotiate","no switchport"],c:0,e:"'switchport mode trunk' forces trunking; 'nonegotiate' only disables DTP.",g:"Trunk / 802.1Q",s:"vlan"},
+ {dom:'Network Access',q:"On a non-root switch, which port role forwards traffic toward the root bridge?",o:["Root port","Designated port","Alternate (blocking) port","Disabled port"],c:0,e:"The root port has the lowest cost to the root bridge and forwards toward it.",g:"STP",s:"vlan"},
+ {dom:'Network Access',q:"Which condition is required for an EtherChannel to form?",o:["Member ports share the same speed, duplex and VLAN configuration","Each member port has a different IP","One member is access and one is trunk","STP is disabled on the ports"],c:0,e:"All member ports must have consistent settings, otherwise the bundle stays down.",g:"EtherChannel",s:"vlan"},
+ {dom:'Network Access',q:"A lightweight access point depends on which device to operate?",o:["A Wireless LAN Controller (WLC) via CAPWAP","A dedicated DHCP server","An OSPF process","A hub"],c:0,e:"Lightweight APs are centrally managed by a WLC through the CAPWAP tunnel.",g:"WLC",s:"osi"},
+ {dom:'Network Access',q:"On an 802.1Q trunk, untagged traffic belongs to which VLAN?",o:["The native VLAN (default 1)","VLAN 4094","The voice VLAN","None — all traffic is tagged"],c:0,e:"Untagged frames travel in the native VLAN; it must match on both ends of the trunk.",g:"Native VLAN",s:"vlan"},
+ {dom:'Network Access',q:"Refer to the exhibit: 'show interfaces Gi0/1 switchport' shows Administrative Mode: dynamic auto on both switches. What will the link become?",o:["An access port (no trunk forms)","A trunk port","An EtherChannel","An error-disabled port"],c:0,e:"dynamic auto + dynamic auto never negotiates a trunk — both sides stay access.",g:"Trunk / 802.1Q",s:"vlan"},
+ {dom:'Network Access',q:"Which command assigns interface Fa0/5 to VLAN 20 as an access port?",o:["switchport access vlan 20","switchport trunk vlan 20","vlan 20 access","switchport mode vlan 20"],c:0,e:"In interface config: 'switchport mode access' then 'switchport access vlan 20'.",g:"Access port",s:"vlan"},
+ {dom:'Network Access',q:"A PC in VLAN 10 cannot reach a PC in VLAN 20 on the same switch. What is required?",o:["Inter-VLAN routing on a router or L3 switch","A second DHCP server","Disabling STP","A crossover cable"],c:0,e:"Different VLANs are different subnets; a L3 device (router-on-a-stick or L3 switch SVIs) must route between them.",g:"Inter-VLAN routing",s:"vlan"},
+ {dom:'Network Access',q:"Port security shuts a port after a violation. Which command returns it to service after clearing the cause?",o:["shutdown then no shutdown on the interface","clear mac address-table","reload the switch","switchport port-security maximum 1"],c:0,e:"A port in err-disabled from a violation is recovered with shutdown / no shutdown (or errdisable recovery).",g:"Port security",s:"cli"},
+ {dom:'Network Access',q:"Which wireless security standard is the most current and secure for a corporate WLAN?",o:["WPA3","WPA2","WEP","Open (no auth)"],c:0,e:"WPA3 is the newest and strongest; WEP is broken and must not be used.",g:"WPA2 / WPA3",s:"osi"},
+ // ── 3 · IP Connectivity ───────────────────────────────────
+ {dom:'IP Connectivity',q:"A router learns the same prefix via a static route (AD 1) and via OSPF (AD 110). Which is installed?",o:["The static route (lower AD)","The OSPF route (better metric)","Both, load-balanced","Neither — it is a conflict"],c:0,e:"With the same prefix length, the lower administrative distance wins: static (1) beats OSPF (110).",g:"Distanza amministrativa (AD)",s:"cli"},
+ {dom:'IP Connectivity',q:"A routing table has /16, /24 and a default route to reach 172.16.10.5. Which entry is used?",o:["The /24 (longest prefix match)","The /16","The default route","The one with the highest AD"],c:0,e:"Routers always pick the most specific match — the longest prefix — regardless of AD or metric.",g:"Default route",s:"cli"},
+ {dom:'IP Connectivity',q:"Which command creates a default static route via next hop 203.0.113.1?",o:["ip route 0.0.0.0 0.0.0.0 203.0.113.1","ip default-gateway 203.0.113.1","ip route default 203.0.113.1","default-information originate"],c:0,e:"'ip route 0.0.0.0 0.0.0.0 <next-hop>' sets the gateway of last resort on a router.",g:"Default route",s:"cli"},
+ {dom:'IP Connectivity',q:"With no router-id configured, how does an OSPF process choose its router ID?",o:["Highest loopback IP, otherwise highest active interface IP","Lowest IP of any interface","The MAC address","Always 0.0.0.0"],c:0,e:"OSPF prefers the highest loopback IP; without one it uses the highest active interface IP.",g:"OSPF",s:"cli"},
+ {dom:'IP Connectivity',q:"An OSPF neighbor is stuck in EXSTART/EXCHANGE and never reaches FULL. What is the most likely cause?",o:["An MTU mismatch between the interfaces","Different hostnames","A crossover cable","Port security"],c:0,e:"Mismatched MTU stops the DBD exchange, so adjacency hangs before FULL. FULL means databases are synced.",g:"OSPF",s:"cli"},
+ {dom:'IP Connectivity',q:"What is the correct wildcard mask for 192.168.4.0/24 in an OSPF network statement?",o:["0.0.0.255","255.255.255.0","0.0.255.255","0.0.0.0"],c:0,e:"The wildcard is the inverse of the mask: /24 → 0.0.0.255.",g:"Wildcard mask",s:"subnet"},
+ {dom:'IP Connectivity',q:"What is the administrative distance of an internal EIGRP route?",o:["90","110","120","1"],c:0,e:"Internal EIGRP = 90; OSPF 110, RIP 120, static 1, connected 0.",g:"EIGRP",s:"cli"},
+ {dom:'IP Connectivity',q:"Refer to the exhibit: 'show ip route' shows 'S* 0.0.0.0/0 [1/0] via 10.1.1.1'. What does S* mean?",o:["A static default route (gateway of last resort)","A connected network","An OSPF external route","A route learned via DHCP"],c:0,e:"'S' = static, '*' marks it as the default route / gateway of last resort.",g:"Default route",s:"cli"},
+ {dom:'IP Connectivity',q:"Which two OSPF parameters must match for two routers to become neighbors?",o:["Hello/Dead timers and area ID","Router ID and hostname","Process ID and bandwidth","MAC address and duplex"],c:0,e:"Timers, area ID, subnet/mask, authentication and stub flags must match; process ID is locally significant.",g:"OSPF",s:"cli"},
+ {dom:'IP Connectivity',q:"A point-to-point link between two routers is best addressed with which prefix?",o:["/30 (2 usable hosts)","/24","/28","/32"],c:0,e:"A /30 gives exactly 2 usable addresses — ideal for a router-to-router link (or /31 in modern designs).",g:"VLSM",s:"subnet"},
+ // ── 4 · IP Services ───────────────────────────────────────
+ {dom:'IP Services',q:"A client ends up with 169.254.10.5. What happened?",o:["It got no reply from a DHCP server (APIPA)","It received a public IP","DNS is unreachable","It has a valid static IP"],c:0,e:"169.254.0.0/16 is APIPA: the host self-assigns it when no DHCP server answers.",g:"APIPA",s:"subnet"},
+ {dom:'IP Services',q:"Which ports does DHCP use?",o:["UDP 67 (server) and UDP 68 (client)","TCP 53","UDP 123","TCP 443"],c:0,e:"Server listens on UDP 67, client on UDP 68; the DORA exchange starts as a broadcast.",g:"DHCP",s:"cli"},
+ {dom:'IP Services',q:"PAT distinguishes sessions from many inside hosts by using which field?",o:["Source port numbers","MAC addresses","The TTL value","The VLAN ID"],c:0,e:"PAT (NAT overload) rewrites source ports to map many private IPs onto one public IP.",g:"PAT",s:"nat"},
+ {dom:'IP Services',q:"What is the purpose of NTP?",o:["Synchronize the clocks of network devices","Resolve names to IP addresses","Assign IP addresses","Filter traffic"],c:0,e:"NTP (UDP 123) keeps time consistent — vital for logs, certificates and troubleshooting.",g:"NTP",s:"cli"},
+ {dom:'IP Services',q:"Hosts across the network get an IP but cannot resolve website names. Which service is failing?",o:["DNS","DHCP","NTP","NAT"],c:0,e:"If IPs work but names do not resolve, DNS (UDP/TCP 53) is the problem, not addressing.",g:"DNS",s:"cli"},
+ {dom:'IP Services',q:"On a router, which command lets clients on a LAN use it as a DHCP relay toward server 10.1.1.10?",o:["ip helper-address 10.1.1.10","ip dhcp pool 10.1.1.10","ip route 10.1.1.10","service dhcp 10.1.1.10"],c:0,e:"'ip helper-address' on the client-facing interface forwards DHCP broadcasts to the remote server.",g:"DHCP",s:"cli"},
+ // ── 5 · Security Fundamentals ─────────────────────────────
+ {dom:'Security Fundamentals',q:"Where should an extended ACL ideally be placed?",o:["As close as possible to the source","As close as possible to the destination","Only on a loopback interface","Placement does not matter"],c:0,e:"Extended ACLs go near the source (drop early); standard ACLs go near the destination.",g:"ACL",s:"acl"},
+ {dom:'Security Fundamentals',q:"What does 'switchport port-security mac-address sticky' do?",o:["Dynamically learns the allowed MAC and saves it to the running-config","Blocks every port","Encrypts the port's traffic","Creates a new VLAN"],c:0,e:"'sticky' learns the MAC and writes it into the running-config so it survives as a static entry.",g:"Port security",s:"cli"},
+ {dom:'Security Fundamentals',q:"Why choose SSH over Telnet for device management?",o:["SSH encrypts the session; Telnet sends it in clear text","SSH is faster","Telnet does not support IPv4","SSH needs no authentication"],c:0,e:"SSH (TCP 22) encrypts everything; Telnet (TCP 23) exposes commands and credentials in clear text.",g:"SSH",s:"cli"},
+ {dom:'Security Fundamentals',q:"Which command stores the privileged-EXEC password as a strong hash?",o:["enable secret","enable password","service tcp-keepalives","username admin nopassword"],c:0,e:"'enable secret' stores a hash; 'enable password' is weak and reversible.",g:"SSH",s:"cli"},
+ {dom:'Security Fundamentals',q:"DHCP snooping protects the network against what?",o:["Rogue (unauthorized) DHCP servers","Layer 2 loops","OSPF routing errors","CPU overload"],c:0,e:"DHCP snooping drops DHCP server replies arriving on untrusted ports, blocking rogue servers.",g:"DHCP",s:"cli"},
+ {dom:'Security Fundamentals',q:"Which two AAA server protocols are most common on Cisco networks?",o:["RADIUS and TACACS+","HTTP and HTTPS","OSPF and EIGRP","STP and VTP"],c:0,e:"RADIUS (open standard) and TACACS+ (Cisco, encrypts the whole packet) are the typical AAA protocols.",g:"AAA",s:"cli"},
+ {dom:'Security Fundamentals',q:"Refer to the config: 'access-list 101 permit tcp any any eq 22' then 'deny ip any any'. What traffic is allowed?",o:["Only SSH (TCP 22)","All TCP traffic","Only ICMP","Everything except SSH"],c:0,e:"The first line permits only TCP/22 (SSH); the explicit deny drops the rest.",g:"ACL",s:"acl"},
+ {dom:'Security Fundamentals',q:"What is the effect of the invisible statement at the end of every ACL?",o:["An implicit 'deny any' drops unmatched traffic","An implicit 'permit any' allows unmatched traffic","It logs all traffic","It has no effect"],c:0,e:"Every ACL ends with an implicit 'deny any', so you must permit the traffic you need.",g:"ACL",s:"acl"},
+ // ── 6 · Automation & Programmability ──────────────────────
+ {dom:'Automation & Programmability',q:"In a REST API, which HTTP method retrieves data without changing it?",o:["GET","POST","PUT","DELETE"],c:0,e:"GET reads; POST creates, PUT/PATCH update, DELETE removes.",g:"REST API",s:"osi"},
+ {dom:'Automation & Programmability',q:"Which data format uses key/value pairs inside braces and is common in REST APIs?",o:["JSON","CSV","Plain text","Binary"],c:0,e:"JSON uses {\"key\":\"value\"} and is the typical payload format for REST APIs.",g:"REST API",s:"osi"},
+ {dom:'Automation & Programmability',q:"In SDN, the controller programs the switches (data plane) through which interface?",o:["The southbound API","The northbound API","The RJ-45 console","SNMP traps"],c:0,e:"Southbound APIs (OpenFlow/NETCONF) talk to devices; northbound APIs face applications.",g:"SDN",s:"osi"},
+ {dom:'Automation & Programmability',q:"Which configuration-management tool is agentless and uses YAML playbooks over SSH?",o:["Ansible","Puppet","Chef","SNMP"],c:0,e:"Ansible is agentless, pushing YAML playbooks over SSH; Puppet and Chef use agents.",g:"SDN",s:"osi"},
+ {dom:'Automation & Programmability',q:"What benefit does SDN's separation of control and data plane provide?",o:["Centralized, programmable network control","Faster physical cabling","More broadcast domains","Automatic subnetting"],c:0,e:"Centralizing the control plane lets a controller program many devices consistently via APIs.",g:"SDN",s:"osi"}
 ];
+// Pesi per un esame da 30 domande, allineati al blueprint 200-301.
+const EXAM_WEIGHTS={'Network Fundamentals':6,'Network Access':6,'IP Connectivity':7,'IP Services':3,'Security Fundamentals':5,'Automation & Programmability':3};
 function examQuestionsByDomain(){
-  const map={'Fondamenti':[],'Accesso alla rete':[],'Connettività IP':[],'Servizi IP':[],'Sicurezza':[],'Automazione':[]};
-  EXAM_BANK.forEach(q=>{if(map[q.dom])map[q.dom].push(q);});
-  for(const mid in QBANK){const d=domainOfModule(mid);if(map[d])QBANK[mid].forEach(q=>map[d].push(q));}
+  // Solo il banco dedicato (in inglese), deduplicato per testo: niente più
+  // mescolanza con le domande di allenamento → nessuna domanda ripetuta.
+  const map={};const seen={};
+  for(const d in EXAM_WEIGHTS)map[d]=[];
+  EXAM_BANK.forEach(q=>{if(map[q.dom]&&!seen[q.q]){seen[q.q]=1;map[q.dom].push(q);}});
   return map;
 }
 function buildExamPool(){
-  const w={'Fondamenti':6,'Accesso alla rete':6,'Connettività IP':7,'Servizi IP':3,'Sicurezza':5,'Automazione':3};
   const by=examQuestionsByDomain();let pool=[];
-  for(const d in w){pool=pool.concat(qShuffle((by[d]||[]).slice()).slice(0,w[d]));}
+  for(const d in EXAM_WEIGHTS){pool=pool.concat(qShuffle((by[d]||[]).slice()).slice(0,EXAM_WEIGHTS[d]));}
+  // Dedup finale di sicurezza: mai la stessa domanda due volte nel pool.
+  const seen={};pool=pool.filter(q=>seen[q.q]?false:(seen[q.q]=1));
   return qShuffle(pool);
 }
 function startExam(){
@@ -754,6 +792,7 @@ function showQuizResult(){
   const ge=_id('res-grade');ge.textContent=grade;ge.style.color=col;ge.style.background=col+'22';
   _id('res-pct').style.color=col;
   renderDomainScores();
+  renderReviewList();
   // completa il modulo se superato
   if(quizState.source==='module'&&pct>=70&&quizState.moduleId){completeModule(quizState.moduleId);}
   // mostra il lab interattivo abbinato (se presente)
@@ -762,6 +801,85 @@ function showQuizResult(){
     if(quizState.labKey){lb.style.display='';lb.onclick=()=>openModuleLab(quizState.labKey);}
     else{lb.style.display='none';}
   }
+}
+
+// ══════════════════════════════════════
+// REVISIONE POST-ESAME · approfondisci ogni risposta (giusta o sbagliata)
+//   con spiegazione, glossario e schema collegati. Tutto in un overlay:
+//   il resoconto resta sotto, quindi si torna sempre alla schermata risultati.
+// ══════════════════════════════════════
+let _reviewCur=null,reviewGloss=null,reviewSchemaOpen=false;
+function escH(s){return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function glossTermForResult(r){
+  if(r.gloss){const g=GLOSSARY.find(x=>x.t===r.gloss);if(g)return g;}
+  return glossForQuestion(r.q,moduleOfQuestion(r.q))||null;
+}
+function schemaIdForResult(r){return r.schema&&SCHEMAS[r.schema]?r.schema:null;}
+// Costruisce la lista "Rivedi le risposte" sotto il resoconto.
+function renderReviewList(){
+  const box=_id('res-review');if(!box)return;
+  const rs=quizState.results||[];
+  if(!rs.length){box.innerHTML='';return;}
+  let h='<div class="sec-title" style="margin:26px 0 4px">Rivedi le risposte</div>'+
+    '<div class="review-hint">Tocca una domanda per approfondirla: risposta corretta, spiegazione, glossario e schema collegati. Puoi sempre tornare al resoconto.</div>'+
+    '<div class="review-list">';
+  rs.forEach((r,i)=>{
+    const icon=r.ok?'<span class="rv-ic ok">✓</span>':'<span class="rv-ic ko">✗</span>';
+    h+='<button class="review-item '+(r.ok?'ok':'ko')+'" onclick="openExamReview('+i+')">'+icon+
+       '<span class="rv-q">'+escH(r.q)+'</span><span class="rvw-arrow">›</span></button>';
+  });
+  h+='</div>';
+  box.innerHTML=h;
+}
+function openExamReview(i){
+  const r=(quizState.results||[])[i];if(!r)return;
+  _reviewCur=r;reviewGloss=glossTermForResult(r);reviewSchemaOpen=false;
+  renderReviewDetail();
+  _id('review-modal').classList.add('show');
+}
+function swapReviewGloss(term){const g=GLOSSARY.find(x=>x.t===term);if(g){reviewGloss=g;renderReviewDetail();}}
+function toggleReviewSchema(){reviewSchemaOpen=!reviewSchemaOpen;renderReviewDetail();}
+function closeReview(){_id('review-modal').classList.remove('show');}
+function renderReviewDetail(){
+  const r=_reviewCur;if(!r)return;
+  const body=_id('review-modal-body');const L=['A','B','C','D','E','F'];
+  let h='<div class="rv-dom">'+escH(r.dom||'')+(r.ok?'<span class="rv-tag ok">Corretta</span>':'<span class="rv-tag ko">Errata</span>')+'</div>';
+  h+='<div class="rv-detail-q">'+escH(r.q)+'</div><div class="rv-opts">';
+  (r.opts||[]).forEach((o,idx)=>{
+    const isC=idx===r.correct,isU=idx===r.chosen;
+    let cls='rv-opt'+(isC?' correct':'')+(isU&&!isC?' wrong':'');
+    let badge='';
+    if(isC)badge='<span class="rv-badge ok">'+(isU?'La tua risposta ✓':'Corretta')+'</span>';
+    else if(isU)badge='<span class="rv-badge ko">La tua risposta</span>';
+    h+='<div class="'+cls+'"><span class="rv-opt-l">'+L[idx]+'</span><span class="rv-opt-t">'+escH(o)+'</span>'+badge+'</div>';
+  });
+  if(r.chosen===-1)h+='<div class="rv-timeout">⏱ Tempo scaduto — nessuna risposta data</div>';
+  h+='</div>';
+  h+='<div class="gloss-sec-h">Spiegazione</div><div class="gloss-detail-def">'+escH(r.exp||'')+'</div>';
+  // ── Glossario collegato ──
+  const g=reviewGloss;
+  if(g){
+    const x=GLOSS_MORE[g.t]||{};const dg=x.diag&&DIAGRAM[x.diag];
+    h+='<div class="rv-sec"><div class="gloss-sec-h">🔎 Glossario · '+escH(g.t)+'</div>';
+    h+='<div class="gloss-detail-def">'+escH(g.d)+'</div>';
+    if(x.more)h+='<div class="gloss-detail-more" style="margin-top:8px">'+x.more+'</div>';
+    if(dg)h+='<div class="brief-diagram" style="margin-top:12px">'+dg.svg+(dg.cap?'<div class="diag-cap">'+dg.cap+'</div>':'')+'</div>';
+    const rel=GLOSSARY.filter(o=>o.t!==g.t&&(GLOSS_MORE[o.t]||{}).diag&&(GLOSS_MORE[o.t]||{}).diag===x.diag).slice(0,5);
+    if(rel.length){h+='<div class="gloss-sec-h" style="margin-top:12px">↔ Termini collegati</div><div class="gloss-rel">';
+      rel.forEach(o=>{h+='<button class="gloss-rel-chip" onclick="swapReviewGloss(\''+o.t.replace(/'/g,"\\'")+'\')">'+escH(o.t)+'</button>';});
+      h+='</div>';}
+    h+='</div>';
+  }
+  // ── Schema collegato ──
+  const sid=schemaIdForResult(r);
+  if(sid){
+    h+='<div class="rv-sec"><div class="gloss-sec-h">📐 Schema collegato</div>';
+    h+='<button class="review-schema-btn" onclick="toggleReviewSchema()">'+(reviewSchemaOpen?'▾ Nascondi ':'▸ Mostra ')+escH(SCHEMA_LABEL[sid]||sid)+'</button>';
+    if(reviewSchemaOpen)h+='<div class="rvw-schema-card">'+SCHEMAS[sid]+'</div>';
+    h+='</div>';
+  }
+  body.innerHTML=h;
+  makeTablesResponsive(body);
 }
 
 // ══════════════════════════════════════
@@ -1184,9 +1302,7 @@ function selSchema(id,btn){
   if(btn) btn.classList.add('sel');
   renderSchema(id);
 }
-function renderSchema(id){
-  const c=_id('schema-content');
-  const schemas={
+const SCHEMAS={
     osi:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">📶</span><h3>I 7 Layer OSI</h3><span style="background:rgba(139,92,246,.15);color:var(--purple);border:1px solid rgba(139,92,246,.3)">DIAGRAMMA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>N°</th><th>NOME</th><th>PDU</th><th>PROTOCOLLI</th><th>DISPOSITIVO</th></tr><tr><td class="ca">7</td><td style="color:#fca5a5;font-weight:600">Application</td><td class="cm">Data</td><td class="cm">HTTP,FTP,DNS,SMTP,SSH</td><td style="font-size:.75rem;color:var(--muted)">Firewall, Server, PC</td></tr><tr><td class="ca">6</td><td style="color:#fcd34d;font-weight:600">Presentation</td><td class="cm">Data</td><td class="cm">SSL/TLS,JPEG,ASCII</td><td style="font-size:.75rem;color:var(--muted)">Gateway</td></tr><tr><td class="ca">5</td><td style="color:#fde047;font-weight:600">Session</td><td class="cm">Data</td><td class="cm">NetBIOS,RPC,NFS</td><td style="font-size:.75rem;color:var(--muted)">Gateway</td></tr><tr><td class="ca">4</td><td style="color:#6ee7b7;font-weight:600">Transport</td><td class="cm">Segment</td><td class="cm">TCP,UDP</td><td style="font-size:.75rem;color:var(--muted)">Firewall, Load Balancer</td></tr><tr><td class="ca">3</td><td style="color:#67e8f9;font-weight:600">Network</td><td class="cm">Packet</td><td class="cm">IP,ICMP,OSPF,BGP</td><td style="font-size:.75rem;color:var(--muted)">Router, L3 Switch</td></tr><tr><td class="ca">2</td><td style="color:#93c5fd;font-weight:600">Data Link</td><td class="cm">Frame</td><td class="cm">Ethernet,802.11,PPP</td><td style="font-size:.75rem;color:var(--muted)">Switch, Bridge</td></tr><tr><td class="ca">1</td><td style="color:#c4b5fd;font-weight:600">Physical</td><td class="cm">Bits</td><td class="cm">UTP,Fibra,Wi-Fi</td><td style="font-size:.75rem;color:var(--muted)">Hub, Cavi, Repeater</td></tr></table><div class="note">💡 Mnemonico L7→L1: <strong>"All People Seem To Need Data Processing"</strong></div></div></div>`,
     subnet:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🔢</span><h3>CIDR Cheat Sheet</h3><span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)">TABELLA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>CIDR</th><th>SUBNET MASK</th><th>HOST USABILI</th><th>SUBNET DA /24</th><th>BLOCK SIZE</th></tr><tr><td class="cm">/24</td><td class="cm">255.255.255.0</td><td class="cg">254</td><td class="co">1</td><td class="cm">256</td></tr><tr><td class="cm">/25</td><td class="cm">255.255.255.128</td><td class="cg">126</td><td class="co">2</td><td class="cm">128</td></tr><tr><td class="cm">/26</td><td class="cm">255.255.255.192</td><td class="cg">62</td><td class="co">4</td><td class="cm">64</td></tr><tr><td class="cm">/27</td><td class="cm">255.255.255.224</td><td class="cg">30</td><td class="co">8</td><td class="cm">32</td></tr><tr><td class="cm">/28</td><td class="cm">255.255.255.240</td><td class="cg">14</td><td class="co">16</td><td class="cm">16</td></tr><tr><td class="cm">/29</td><td class="cm">255.255.255.248</td><td class="cg">6</td><td class="co">32</td><td class="cm">8</td></tr><tr><td class="cm">/30</td><td class="cm">255.255.255.252</td><td class="cg">2</td><td class="co">64</td><td class="cm">4</td></tr></table><div class="formula-grid" style="margin-top:16px"><div class="formula-box"><div class="formula-label">Host usabili</div><div class="formula-val">2ʰ − 2</div><div class="formula-sub">h = 32 − CIDR. Si tolgono network e broadcast.</div></div><div class="formula-box"><div class="formula-label">Block size</div><div class="formula-val">256 − valore mask</div><div class="formula-sub">Es: /26 → 256−192=64. Subnet ogni 64.</div></div></div></div></div>`,
     cli:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">💻</span><h3>CLI Cisco — Comandi essenziali</h3><span style="background:rgba(59,130,246,.15);color:var(--accent);border:1px solid rgba(59,130,246,.3)">REFERENCE</span></div><div class="schema-card-body"><div class="two-col"><div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">SHOW COMMANDS</div><table class="ref-table"><tr><td class="cm">show running-config</td><td style="font-size:.75rem;color:var(--muted)">Config in RAM</td></tr><tr><td class="cm">show ip interface brief</td><td style="font-size:.75rem;color:var(--muted)">Stato interfacce</td></tr><tr><td class="cm">show ip route</td><td style="font-size:.75rem;color:var(--muted)">Routing table</td></tr><tr><td class="cm">show vlan brief</td><td style="font-size:.75rem;color:var(--muted)">VLAN configurate</td></tr><tr><td class="cm">show version</td><td style="font-size:.75rem;color:var(--muted)">Info IOS/hardware</td></tr></table></div><div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin-bottom:8px">CONFIGURAZIONE</div><div class="code-block"><span class="cp">R1#</span> <span class="ck">enable</span><br><span class="cp">R1#</span> <span class="ck">configure terminal</span><br><span class="cp">R1(config)#</span> <span class="ck">hostname R1</span><br><span class="cp">R1(config)#</span> <span class="ck">interface Gi0/0</span><br><span class="cp">R1(config-if)#</span> <span class="ck">ip address</span> <span class="cv">192.168.1.1 255.255.255.0</span><br><span class="cp">R1(config-if)#</span> <span class="ck">no shutdown</span><br><span class="cp">R1(config)#</span> <span class="ck">ip route 0.0.0.0 0.0.0.0</span> <span class="cv">x.x.x.x</span><br><span class="cp">R1#</span> <span class="ck">copy run start</span></div></div></div></div></div>`,
@@ -1195,8 +1311,11 @@ function renderSchema(id){
     acl:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🛡️</span><h3>ACL — Access Control Lists</h3><span style="background:rgba(239,68,68,.15);color:var(--red);border:1px solid rgba(239,68,68,.3)">CLI</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>NUMERI</th><th>FILTRA</th><th>POSIZIONE</th></tr><tr><td class="ca">Standard</td><td class="cm">1–99</td><td>Solo IP sorgente</td><td style="font-size:.75rem;color:var(--muted)">Vicino alla destinazione</td></tr><tr><td class="ca">Extended</td><td class="cm">100–199</td><td>Src/Dst IP, proto, porta</td><td style="font-size:.75rem;color:var(--muted)">Vicino alla sorgente</td></tr></table><div class="two-col" style="margin-top:14px"><div><div class="code-block"><span class="cc">! Standard — blocca rete 10.x</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 10 deny</span> <span class="cv">10.0.0.0 0.255.255.255</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 10 permit any</span><br><span class="cp">R1(config-if)#</span> <span class="ck">ip access-group 10 in</span></div></div><div><div class="code-block"><span class="cc">! Extended — solo HTTP/HTTPS</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 101 permit tcp</span> <span class="cv">192.168.1.0 0.0.0.255 any eq 80</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 101 permit tcp</span> <span class="cv">192.168.1.0 0.0.0.255 any eq 443</span><br><span class="cp">R1(config)#</span> <span class="ck">access-list 101 deny ip any any</span></div></div></div><div class="note">⚠️ <strong>Implicit deny:</strong> alla fine di ogni ACL c\'è sempre un "deny any any" invisibile!</div></div></div>`,
     ipv6:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">6️⃣</span><h3>IPv6 — Riferimento rapido</h3><span style="background:rgba(6,182,212,.15);color:var(--cyan);border:1px solid rgba(6,182,212,.3)">TABELLA</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>TIPO</th><th>PREFISSO</th><th>IPv4 EQUIV.</th><th>NOTE</th></tr><tr><td class="ca">Global Unicast</td><td class="cm">2000::/3</td><td style="font-size:.78rem">IP pubblico</td><td style="font-size:.75rem;color:var(--muted)">Instradabile su Internet</td></tr><tr><td class="ca">Link-Local</td><td class="cm">FE80::/10</td><td style="font-size:.78rem">169.254.x.x</td><td style="font-size:.75rem;color:var(--muted)">Solo subnet locale, autogenerato</td></tr><tr><td class="ca">Unique Local</td><td class="cm">FC00::/7</td><td style="font-size:.78rem">192.168.x.x</td><td style="font-size:.75rem;color:var(--muted)">Privato, non routable Internet</td></tr><tr><td class="ca">Multicast</td><td class="cm">FF00::/8</td><td style="font-size:.78rem">224.x.x.x</td><td style="font-size:.75rem;color:var(--muted)">Gruppo di destinatari</td></tr><tr><td class="ca">Loopback</td><td class="cm">::1</td><td style="font-size:.78rem">127.0.0.1</td><td style="font-size:.75rem;color:var(--muted)">Localhost</td></tr></table><div class="note" style="margin-top:12px">💡 Abbreviazione: rimuovi zeri iniziali per gruppo (0db8→db8) e sostituisci gruppi consecutivi di zero con :: (solo una volta).<br>Es: 2001:0db8:0000:0000:0000:0000:0000:0001 → <strong>2001:db8::1</strong></div></div></div>`,
     exam:`<div class="schema-card"><div class="schema-card-head"><span style="font-size:1.2rem">🎓</span><h3>Guida all'esame CCNA 200-301</h3><span style="background:rgba(16,185,129,.15);color:var(--green);border:1px solid rgba(16,185,129,.3)">PIANO</span></div><div class="schema-card-body"><table class="ref-table"><tr><th>DOMINIO D'ESAME</th><th>PESO</th></tr><tr><td class="ca">1. Network Fundamentals</td><td class="cm">20%</td></tr><tr><td class="ca">2. Network Access (VLAN, trunk, Wi-Fi)</td><td class="cm">20%</td></tr><tr><td class="ca">3. IP Connectivity (routing, OSPF)</td><td class="cm">25%</td></tr><tr><td class="ca">4. IP Services (DHCP, DNS, NAT, NTP)</td><td class="cm">10%</td></tr><tr><td class="ca">5. Security Fundamentals</td><td class="cm">15%</td></tr><tr><td class="ca">6. Automation &amp; Programmability</td><td class="cm">10%</td></tr></table><div class="note">⏱️ Durata <strong>120 minuti</strong> · circa <strong>100-120 domande</strong> (scelta multipla, drag-and-drop e simulazioni) · per passare servono circa <strong>825/1000</strong>.</div><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin:16px 0 8px">PIANO IN 4 SETTIMANE</div><ul class="brief-list"><li><b>Sett. 1 — Fondamenti:</b> OSI/TCP-IP, cavi, binario, indirizzi IP. Gioca i Tier 0-1 e allena il subnetting ogni giorno.</li><li><b>Sett. 2 — Accesso &amp; Switching:</b> VLAN, trunk, STP, EtherChannel, Wi-Fi. Lab VLAN e config a tessere.</li><li><b>Sett. 3 — Routing &amp; Servizi IP:</b> statico, OSPF, NAT, DHCP/DNS/NTP. Lab CLI e Troubleshooting.</li><li><b>Sett. 4 — Sicurezza, Automazione &amp; ripasso:</b> ACL, SSH, port-security, REST/SDN. Mock d'esame + Ripasso errori.</li></ul><div style="font-family:JetBrains Mono,monospace;font-size:.6rem;color:var(--muted);letter-spacing:2px;margin:16px 0 8px">RISORSE CONSIGLIATE</div><ul class="brief-list"><li><b>Cisco Packet Tracer</b> (gratis) — pratica di configurazione e troubleshooting: imprescindibile.</li><li><b>Jeremy's IT Lab</b> (YouTube, gratis) — corso completo allineato al blueprint, con lab.</li><li><b>Boson ExSim-Max</b> — il banco domande più vicino all'esame reale.</li><li><b>Official Cert Guide</b> (Wendell Odom) — testo di riferimento.</li></ul><div class="note">💡 Regola d'oro: <strong>subnetting a colpo d'occhio</strong> (&lt;20s) e <strong>2-3 lab pratici a settimana</strong> in Packet Tracer. Questo gioco copre teoria e ripasso; la pratica su Packet Tracer completa la preparazione.</div></div></div>`,
-  };
-  c.innerHTML=schemas[id]||'<p style="color:var(--muted)">Schema non trovato.</p>';
+};
+const SCHEMA_LABEL={osi:'📶 OSI',subnet:'🔢 Subnetting',cli:'💻 CLI',vlan:'🔀 VLAN',nat:'🔄 NAT',acl:'🛡️ ACL',ipv6:'6️⃣ IPv6',exam:'🎓 Esame'};
+function renderSchema(id){
+  const c=_id('schema-content');
+  c.innerHTML=SCHEMAS[id]||'<p style="color:var(--muted)">Schema non trovato.</p>';
   makeTablesResponsive(c);
 }
 // Rende le tabelle di riferimento leggibili su mobile: legge le intestazioni

@@ -160,6 +160,7 @@
       <div class="rs"><b id="res-xp">0</b><span>XP guadagnati</span></div>
     </div>
     <div id="res-domains"></div>
+    <div id="res-review"></div>
     <div class="result-btns">
       <button class="rbtn rbtn-retry" onclick="replayQuiz()">↺ Rigioca</button>
       <button class="rbtn" id="res-lab-btn" style="display:none;border:1px solid var(--purple);color:var(--purple)">⚗️ Pratica interattiva</button>
@@ -391,6 +392,16 @@
     <button class="gloss-modal-close" onclick="closeGlossModal()" aria-label="Chiudi">✕</button>
     <div id="gloss-modal-body"></div>
     <button class="gloss-modal-back" onclick="closeGlossModal()">‹ Torna al resoconto</button>
+  </div>
+</div>
+
+<!-- overlay revisione risposta d'esame (approfondimento senza perdere il resoconto) -->
+<div class="gloss-modal" id="review-modal">
+  <div class="gloss-modal-backdrop" onclick="closeReview()"></div>
+  <div class="gloss-modal-card">
+    <button class="gloss-modal-close" onclick="closeReview()" aria-label="Chiudi">✕</button>
+    <div id="review-modal-body"></div>
+    <button class="gloss-modal-back" onclick="closeReview()">‹ Torna al resoconto</button>
   </div>
 </div>
 
