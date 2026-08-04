@@ -16,8 +16,8 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .nav-btn .nb-ico{font-size:1rem;line-height:1;transition:transform .18s}
 .nav-btn:hover{color:var(--text);background:rgba(255,255,255,.04)}
 .nav-btn.active{color:var(--accent);background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);box-shadow:0 0 14px rgba(59,130,246,.15)}
-.nav-ver{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.5px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:3px 9px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
-.nav-ver:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(59,130,246,.18)}
+.nav-ver{-webkit-appearance:none;appearance:none;font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.5px;color:var(--muted);-webkit-text-fill-color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:3px 9px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0;-webkit-user-select:none;user-select:none;-webkit-tap-highlight-color:transparent}
+.nav-ver:hover{border-color:var(--accent);color:var(--accent);-webkit-text-fill-color:var(--accent);box-shadow:0 0 12px rgba(59,130,246,.18)}
 .nav-ver:active{transform:scale(.95)}
 .nav-xp{margin-left:auto;display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--panel);border:1px solid var(--border);border-radius:10px}
 /* ─── CHANGELOG / NOVITÀ ─── */
@@ -39,11 +39,13 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 @media(max-width:640px){
   /* niente backdrop-filter qui: creerebbe un containing block per la
      tab bar fixed, spingendola in alto invece che in basso */
-  .topnav{padding:calc(9px + env(safe-area-inset-top)) 14px 9px;gap:8px;background:rgba(11,15,22,.96);-webkit-backdrop-filter:none;backdrop-filter:none}
-  .nav-brand{font-size:.82rem;padding:4px 6px 4px 22px;margin-right:0}
+  .topnav{padding:calc(9px + env(safe-area-inset-top)) 12px 9px;gap:6px;background:rgba(11,15,22,.96);-webkit-backdrop-filter:none;backdrop-filter:none}
+  /* il logo cede spazio per primo: gear e badge non escono mai dallo schermo */
+  .nav-brand{font-size:.82rem;padding:4px 6px 4px 22px;margin-right:0;flex-shrink:1;min-width:0;overflow:hidden;text-overflow:ellipsis}
   .nav-brand::before{left:5px;width:8px;height:8px}
-  .nav-xp{margin-left:auto;padding:5px 10px;gap:8px}
-  .nav-track{width:46px}
+  .nav-ver{font-size:.56rem;padding:2px 7px;letter-spacing:0}
+  .nav-xp{margin-left:auto;padding:5px 8px;gap:6px;flex-shrink:0}
+  .nav-track{width:38px}
   /* → tab bar in basso su mobile */
   .nav-links{position:fixed;left:0;right:0;bottom:0;z-index:300;display:flex;justify-content:space-around;gap:0;flex-wrap:nowrap;padding:7px 4px calc(7px + env(safe-area-inset-bottom));background:rgba(11,15,22,.94);-webkit-backdrop-filter:blur(18px);backdrop-filter:blur(18px);border-top:1px solid var(--border);box-shadow:0 -6px 24px rgba(0,0,0,.45)}
   .nav-btn{flex:1;flex-direction:column;gap:3px;padding:5px 2px;border-radius:12px;font-size:.58rem;font-weight:600;letter-spacing:.2px}
