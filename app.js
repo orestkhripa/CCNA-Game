@@ -3246,8 +3246,13 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview();});
 // ══════════════════════════════════════
 // VERSIONE & NOVITÀ · badge cliccabile con changelog in linguaggio semplice
 // ══════════════════════════════════════
-const APP_VERSION='1.3';
+const APP_VERSION='1.4';
 const CHANGELOG=[
+ {v:'1.4',d:'4 ago 2026',t:'Più domande e app sempre aggiornata',items:[
+   "Ogni riassunto video ha ora almeno 15 domande, per allenarti molto di più su ciascun episodio.",
+   "Sistemata l'etichetta della versione in alto: su alcuni telefoni appariva come un riquadro chiaro fuori tema.",
+   "Ora l'app si aggiorna sempre all'ultima versione, senza restare 'incastrata' su una vecchia copia salvata."
+ ]},
  {v:'1.3',d:'4 ago 2026',t:'Domande più oneste',items:[
    "Le domande sono più corrette: prima la risposta giusta era quasi sempre la più lunga e articolata, così si indovinava a occhio. Ora tutte le opzioni si somigliano — conta davvero solo sapere la materia.",
    "Aggiunto questo contatore di versione: tocca il numero in alto a sinistra per vedere le novità."

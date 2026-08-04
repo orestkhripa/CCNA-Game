@@ -1,5 +1,7 @@
 /* CCNA Quest service worker — offline support (network-first per l'HTML) */
-const CACHE = 'ccna-quest-v2';
+/* IMPORTANTE: alza questa versione a ogni release (deve seguire APP_VERSION in app.js),
+   così il service worker riscarica CSS/JS aggiornati invece di servirli dalla cache. */
+const CACHE = 'ccna-quest-v1.4';
 const ASSETS = ['./', './index.html', './style.css', './app.js', './manifest.webmanifest', './icon.svg'];
 
 self.addEventListener('install', e => {
