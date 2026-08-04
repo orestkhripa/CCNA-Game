@@ -3246,8 +3246,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview();});
 // ══════════════════════════════════════
 // VERSIONE & NOVITÀ · badge cliccabile con changelog in linguaggio semplice
 // ══════════════════════════════════════
-const APP_VERSION='1.4';
+const APP_VERSION='1.5';
 const CHANGELOG=[
+ {v:'1.5',d:'4 ago 2026',t:'Le nuove domande ora compaiono davvero',items:[
+   "Le 15 domande per ogni riassunto video ora appaiono correttamente: prima il telefono continuava a mostrare la vecchia copia salvata in memoria (per questo ne uscivano solo 6).",
+   "L'app ora carica sempre l'ultima versione al riavvio."
+ ]},
  {v:'1.4',d:'4 ago 2026',t:'Più domande e app sempre aggiornata',items:[
    "Ogni riassunto video ha ora almeno 15 domande, per allenarti molto di più su ciascun episodio.",
    "Sistemata l'etichetta della versione in alto: su alcuni telefoni appariva come un riquadro chiaro fuori tema.",
