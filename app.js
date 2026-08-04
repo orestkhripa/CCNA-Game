@@ -839,7 +839,7 @@ function openExamReview(i){
 }
 function swapReviewGloss(term){const g=GLOSSARY.find(x=>x.t===term);if(g){reviewGloss=g;renderReviewDetail();}}
 function toggleReviewSchema(){reviewSchemaOpen=!reviewSchemaOpen;renderReviewDetail();}
-function closeReview(){_id('review-modal').classList.remove('show');}
+function closeExamReview(){_id('review-modal').classList.remove('show');}
 function renderReviewDetail(){
   const r=_reviewCur;if(!r)return;
   const body=_id('review-modal-body');const L=['A','B','C','D','E','F'];
@@ -3084,8 +3084,48 @@ function finishReview(){
 }
 document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview();});
 // ══════════════════════════════════════
+// VERSIONE & NOVITÀ · badge cliccabile con changelog in linguaggio semplice
+// ══════════════════════════════════════
+const APP_VERSION='1.3';
+const CHANGELOG=[
+ {v:'1.3',d:'4 ago 2026',t:'Domande più oneste',items:[
+   "Le domande sono più corrette: prima la risposta giusta era quasi sempre la più lunga e articolata, così si indovinava a occhio. Ora tutte le opzioni si somigliano — conta davvero solo sapere la materia.",
+   "Aggiunto questo contatore di versione: tocca il numero in alto a sinistra per vedere le novità."
+ ]},
+ {v:'1.2',d:'3 ago 2026',t:'Esame come quello vero',items:[
+   "La simulazione d'esame è ora in inglese, come l'esame reale Cisco.",
+   "Niente più domande ripetute nella stessa simulazione.",
+   "Alla fine dell'esame puoi rivedere ogni risposta (giusta o sbagliata) con spiegazione, voce del glossario e schema collegati — e tornare quando vuoi al riepilogo."
+ ]},
+ {v:'1.1',d:'2 ago 2026',t:"Simulazione d'esame e app installabile",items:[
+   "Aggiunta la simulazione d'esame CCNA 200-301 a tempo, con punteggio per area.",
+   "Ora puoi installare l'app sul telefono e usarla anche senza connessione.",
+   "Nuova guida all'esame con piano di studio di 4 settimane."
+ ]},
+ {v:'1.0',d:'2 ago 2026',t:'Prima versione',items:[
+   "Percorso di livelli dal networking di base fino all'automazione.",
+   "Quiz a tempo, laboratori interattivi, glossario e schemi di riferimento."
+ ]}
+];
+function initVersionBadge(){const b=_id('nav-ver');if(b)b.textContent='v'+APP_VERSION;}
+function openChangelog(){
+  const body=_id('changelog-body');
+  let h='<div class="cl-title">✨ Novità dell\'app</div><div class="cl-sub">Versione attuale <b>v'+APP_VERSION+'</b> · ecco cosa è cambiato di recente.</div>';
+  CHANGELOG.forEach((r,i)=>{
+    h+='<div class="cl-entry"><div class="cl-head"><span class="cl-ver">v'+r.v+'</span>'+(i===0?'<span class="cl-now">ATTUALE</span>':'')+'<span class="cl-date">'+r.d+'</span></div>'+
+       '<div class="cl-h">'+escH(r.t)+'</div><ul class="cl-list">';
+    r.items.forEach(it=>{h+='<li>'+escH(it)+'</li>';});
+    h+='</ul></div>';
+  });
+  body.innerHTML=h;
+  _id('changelog-modal').classList.add('show');
+}
+function closeChangelog(){_id('changelog-modal').classList.remove('show');}
+
+// ══════════════════════════════════════
 // INIT
 // ══════════════════════════════════════
+initVersionBadge();
 integrateVideoQuizzes();
 updateUI();
 renderTree();

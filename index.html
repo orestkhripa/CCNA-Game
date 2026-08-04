@@ -18,6 +18,7 @@
 <!-- NAV -->
 <nav class="topnav">
   <div class="nav-brand" onclick="showView('home')">CCNA QUEST</div>
+  <button class="nav-ver" id="nav-ver" onclick="openChangelog()" title="Versione e novità" aria-label="Versione e novità">v1.3</button>
   <div class="nav-links">
     <button class="nav-btn active" id="nb-home"    onclick="showView('home')"><span class="nb-ico">🏠</span><span class="nb-txt">Home</span></button>
     <button class="nav-btn" id="nb-quiz"    onclick="showView('quiz')"><span class="nb-ico">🎮</span><span class="nb-txt">Quiz</span></button>
@@ -395,13 +396,23 @@
   </div>
 </div>
 
+<!-- overlay changelog / novità versione (linguaggio semplice per l'utente) -->
+<div class="gloss-modal" id="changelog-modal">
+  <div class="gloss-modal-backdrop" onclick="closeChangelog()"></div>
+  <div class="gloss-modal-card">
+    <button class="gloss-modal-close" onclick="closeChangelog()" aria-label="Chiudi">✕</button>
+    <div id="changelog-body"></div>
+    <button class="gloss-modal-back" onclick="closeChangelog()">Chiudi</button>
+  </div>
+</div>
+
 <!-- overlay revisione risposta d'esame (approfondimento senza perdere il resoconto) -->
 <div class="gloss-modal" id="review-modal">
-  <div class="gloss-modal-backdrop" onclick="closeReview()"></div>
+  <div class="gloss-modal-backdrop" onclick="closeExamReview()"></div>
   <div class="gloss-modal-card">
-    <button class="gloss-modal-close" onclick="closeReview()" aria-label="Chiudi">✕</button>
+    <button class="gloss-modal-close" onclick="closeExamReview()" aria-label="Chiudi">✕</button>
     <div id="review-modal-body"></div>
-    <button class="gloss-modal-back" onclick="closeReview()">‹ Torna al resoconto</button>
+    <button class="gloss-modal-back" onclick="closeExamReview()">‹ Torna al resoconto</button>
   </div>
 </div>
 

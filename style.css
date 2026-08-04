@@ -16,7 +16,22 @@ body{background:var(--bg);color:var(--text);font-family:'DM Sans',sans-serif;min
 .nav-btn .nb-ico{font-size:1rem;line-height:1;transition:transform .18s}
 .nav-btn:hover{color:var(--text);background:rgba(255,255,255,.04)}
 .nav-btn.active{color:var(--accent);background:rgba(59,130,246,.1);border-color:rgba(59,130,246,.35);box-shadow:0 0 14px rgba(59,130,246,.15)}
+.nav-ver{font-family:'JetBrains Mono',monospace;font-size:.62rem;font-weight:700;letter-spacing:.5px;color:var(--muted);background:var(--panel);border:1px solid var(--border);border-radius:20px;padding:3px 9px;cursor:pointer;transition:all .15s;white-space:nowrap;flex-shrink:0}
+.nav-ver:hover{border-color:var(--accent);color:var(--accent);box-shadow:0 0 12px rgba(59,130,246,.18)}
+.nav-ver:active{transform:scale(.95)}
 .nav-xp{margin-left:auto;display:flex;align-items:center;gap:10px;padding:6px 12px;background:var(--panel);border:1px solid var(--border);border-radius:10px}
+/* ─── CHANGELOG / NOVITÀ ─── */
+.cl-title{font-family:'Syne',sans-serif;font-size:1.35rem;font-weight:800;color:var(--cyan);margin-bottom:4px}
+.cl-sub{font-size:.82rem;color:var(--muted);line-height:1.5;margin-bottom:18px}
+.cl-entry{border-top:1px solid var(--border);padding:14px 0 4px}
+.cl-entry:first-of-type{border-top:none;padding-top:0}
+.cl-head{display:flex;align-items:center;gap:9px;margin-bottom:6px}
+.cl-ver{font-family:'JetBrains Mono',monospace;font-size:.82rem;font-weight:700;color:var(--accent)}
+.cl-now{font-family:'JetBrains Mono',monospace;font-size:.54rem;letter-spacing:1px;color:var(--green);background:rgba(16,185,129,.15);border:1px solid rgba(16,185,129,.35);border-radius:20px;padding:2px 8px}
+.cl-date{margin-left:auto;font-size:.7rem;color:var(--muted)}
+.cl-h{font-family:'Syne',sans-serif;font-weight:700;font-size:.95rem;margin-bottom:6px}
+.cl-list{margin:0 0 4px;padding-left:18px}
+.cl-list li{font-size:.85rem;line-height:1.6;color:var(--text);margin-bottom:6px}
 .nav-lv{font-family:'JetBrains Mono',monospace;font-size:.72rem;font-weight:700;color:var(--cyan)}
 .nav-track{width:70px;height:6px;background:var(--dim);border-radius:3px;overflow:hidden}
 .nav-fill{height:100%;background:linear-gradient(90deg,var(--accent),var(--cyan));border-radius:3px;transition:width .5s ease}
