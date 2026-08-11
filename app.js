@@ -1910,9 +1910,97 @@ const QGEN={osi_mod:genFromMatch,ip_addr:genFromMatch,wifi_mod:genFromMatch,swit
 function genQuizFor(modId,k){const f=QGEN[modId];if(!f)return[];const seen={},out=[];let t=0;while(out.length<k&&t<k*6){t++;const q=f(modId);if(q&&!seen[q.q]){seen[q.q]=1;out.push(q);}}return out;}
 function moduleOfQuestion(text){for(const k in QBANK){if(QBANK[k].some(q=>q.q===text))return k;}return LP.mod?LP.mod.id:'osi_mod';}
 // mappa modulo -> termine del glossario (scheda con definizione, approfondimento e diagramma)
-const GLOSS_MAP={net_basics:"LAN",binary:"Subnet mask",osi_mod:"Modello OSI",tcpip_mod:"TCP",ip_addr:"Indirizzo IP privato",subnetting:"CIDR",boss1:"CIDR",switching:"Switch",vlan_mod:"VLAN",routing_s:"Routing statico",ospf_mod:"OSPF",eigrp_mod:"EIGRP",boss2:"OSPF",acl_mod:"ACL",nat_mod:"NAT",ssh_sec:"SSH",boss3:"Port security",ipv6_mod:"IPv6",wan_mod:"IPSec",auto_mod:"SDN",wifi_mod:"SSID",redun_mod:"STP",ipserv_mod:"DHCP",ccna_cert:"Modello OSI"};
+const GLOSS_MAP={net_basics:"LAN",binary:"Sistema binario",osi_mod:"Modello OSI",tcpip_mod:"TCP",ip_addr:"Indirizzo IP privato",subnetting:"CIDR",boss1:"CIDR",switching:"Switch",vlan_mod:"VLAN",routing_s:"Routing statico",ospf_mod:"OSPF",eigrp_mod:"EIGRP",boss2:"OSPF",acl_mod:"ACL",nat_mod:"NAT",ssh_sec:"SSH",boss3:"Port security",ipv6_mod:"IPv6",wan_mod:"WAN",auto_mod:"SDN",wifi_mod:"SSID",redun_mod:"STP",ipserv_mod:"DHCP",ccna_cert:"Modello OSI"};
+// Risoluzione domanda -> voce di glossario tramite parole chiave in ordine di priorità
+// (specifico -> generico). Evita di agganciare il termine sbagliato (es. STP vs Switch).
+const GLOSS_KMAP=[
+ ["RSTP",["rapid spanning","rapid stp","802.1w","rstp","converge più rapid","convergenza più rapida","converge in pochi","versione di spanning tree converge"]],
+ ["STP",["spanning tree","spanning-tree","root bridge","bridge id","802.1d","loop di livello 2","loop l2","stp (","in stp","stato di porta stp","porta stp","dello spanning tree","lo spanning tree","spanning"]],
+ ["EtherChannel",["etherchannel","lacp","pagp","port-channel","aggrega più link","aggregazione di link","link fisici in un"]],
+ ["HSRP",["hsrp","first hop","gateway virtuale","gateway ridondante","gateway predefinito ridond","active/standby","router active","router standby","router inoltra normalmente"]],
+ ["Trunk / 802.1Q",["802.1q","trunk","nonegotiate"," dtp","dynamic auto","tag da 4 byte","non taggato appartiene","traffico non taggato","tagging vlan"]],
+ ["Native VLAN",["native vlan"]],
+ ["Access port",["porta access","access vlan","switchport mode access","porta alla vlan"]],
+ ["Inter-VLAN routing",["inter-vlan","router-on-a-stick","router on a stick","instradamento tra vlan","comunicano host di vlan","host di vlan diverse","host di vlan 10","tra vlan diverse","sottointerfacce","raggiungere un pc in vlan"]],
+ ["VLAN",["vlan","lampadina smart","iot","client isolation","device isolation","dispositivi iot"]],
+ ["CAM table",["cam table","tabella cam"]],
+ ["Port security",["port security","port-security","mac-address sticky","'sticky'"," sticky","err-disabled","violazione","porta switch inutilizzat","porte switch inutilizzat","porte inutilizzate","porta esposta","porta inutilizzata","spegnere le porte","shutdown","nmap","porte non usate","prima difesa","mac appreso","salva automaticamente il mac","attacco alla porta","tre condizioni","porte spente","individuare le porte","salva automaticamente il mac appreso"]],
+ ["MAC address",["mac address","indirizzo mac","mac sorgente","mac di destinazione","mac destinazione","48 bit","ffff.ffff.ffff","broadcast l2","indirizzo di livello 2","indirizzo fisico","layer 2 = ","serve un indirizzo","creando il frame"]],
+ ["Hub",["hub"]],
+ ["Full-duplex",["full-duplex","full duplex","half-duplex","half duplex","duplex"]],
+ ["Switch",["switch","flooding","frame alla porta","porta del destinatario","dominio di collisione","frame ethernet contiene","frame per una mac"]],
+ ["OSPF",["ospf","link-state","link state","dijkstra"," spf","area 0","area backbone","router id","exstart","exchange","lsdb"," lsa","adiacenz","224.0.0.5","designated router","costo) di ospf","wildcard mask corretta","router id un processo","stato ospf"]],
+ ["EIGRP",["eigrp","dual","feasible","successor","224.0.0.10","advanced distance vector"]],
+ ["Distanza amministrativa (AD)",["distanza amministrativa","amministrativa (ad)","administrative distance","ad più bassa","distanza amministrativa di","affidabilità di una fonte","stessa rete via statica"]],
+ ["Default route",["default route","rotta di default","gateway of last resort","0.0.0.0 0.0.0.0","0.0.0.0/0","default static","s* 0.0.0.0","default-information","rotta di ultima istanza"]],
+ ["Routing statico",["routing statico","rotta statica","ip route","next hop","next-hop","floating static","'connected'","rotta connected","interfaccia di uscita","destinazione e senza default","rotte /16"]],
+ ["Wildcard mask",["wildcard"]],
+ ["ACL",["acl","access control","access-list","access list","deny implicito","deny any","implicit deny","permit tcp","standard (1-99)","extended (100","ip access-group","named acl","regole di una acl"]],
+ ["PAT",["pat","overload","porta sorgente","numeri di porta sorgente","molti ip privati su un solo","sessioni di più host","distingue le sessioni"]],
+ ["NAT",["nat","inside local","inside global","outside local","outside global","address translation","traduce indirizzi","ip nat","esporre server","traduzioni nat","appare su internet","host interno appare","può viaggiare così","viaggiare così com'è"]],
+ ["APIPA",["apipa","169.254"]],
+ ["Indirizzo IP privato",["rfc 1918","ip privat","indirizzi privati","indirizzo privato","10.0.0.0 -","172.16.0.0","192.168.","privati (rfc","privati e il nat"]],
+ ["SLAAC",["slaac","autoconfigurazione stateless","stateless address"]],
+ ["Link-local",["link-local","link local","fe80"]],
+ ["IPv6",["ipv6","128 bit","hextet","gruppi da 16 bit","::1","2001:","fc00","ff02","global unicast","doppio due punti"," ndp","neighbor discovery","abbrevia 2001","loopback ipv6","prefisso ipv6"]],
+ ["VLSM",["vlsm","lunghezza variabile","maschere di lunghezza","punto-punto è meglio","punto a punto"]],
+ ["Block size",["block size","block-size"]],
+ ["Subnet mask",["subnet mask","maschera di sottorete","maschera di default","and logico","and bit a bit","255.255.255","maschera 255"]],
+ ["Network address",["indirizzo di rete","network address","host tutti a 0","host a 0"]],
+ ["Broadcast address",["indirizzo di broadcast della","broadcast della subnet","broadcast address","bit host a 1","bit host tutti a 1"]],
+ ["Classi IP",["classe a","classe b","classe c","classe d","multicast","loopback","127.0.0.1","ip pubblico valido","porzione host","32 bit (ipv4","indirizzo ipv4","bit compongono un indirizzo ipv4","indirizzo pubblico valido"]],
+ ["CIDR",["cidr","/26","/27","/28","/30","/23","/24","/20","/25","/29","prefisso","host utilizzabili","host usabili","2^h","suddividendo una","subnet /26","subnet mask corrispondente","primo host utilizzabile","quante subnet"]],
+ ["DHCP",["dhcp","dora","discover","offer","udp 67","67 (server","ip helper","helper-address","rogue","snooping","relay","lease","porte lavora il dhcp","apipa"]],
+ ["DNS",["dns","risolve i nomi","nomi di dominio","risolvere i nomi","porta 53","nomi in ip","nomi in indirizzi","tradurre i nomi"]],
+ ["NTP",["ntp","sincronizzare l'orario","udp 123","orologio dei dispositivi","sincronizza l'orologio","sincronizzare l'orologio","sincronizza l'orario"]],
+ ["Syslog",["syslog","udp 514","messaggi di log","log dei dispositivi","centralizzare i messaggi"]],
+ ["SNMP",["snmp","monitorare i dispositivi","monitorare (cpu","trap","udp 161","161/162"]],
+ ["QoS",["qos","quality of service","priorità al traffico","traffico sensibile","voce e video","priorità alla voce"]],
+ ["SSH",["ssh","telnet","porta 22","cifra la sessione","accesso remoto cifrato","enable secret","enable password","service password-encryption","banner","motd","crypto key","gestione remota","password di enable","cifra le password","password in chiaro nel running"]],
+ ["AAA",["aaa","authentication, authorization","radius","tacacs"]],
+ ["WLC",["wlc","wireless lan controller","capwap","lightweight","ap 'lightweight","ap autonom","autonomo (autonomous","autonoma"]],
+ ["WPA2 / WPA3",["wpa2","wpa3"," wpa","wep","cifratura wireless","sicurezza wireless","canali che non si sovrappongono","1, 6, 11","2.4 ghz","5 ghz","banda wi-fi","standard di sicurezza wireless"]],
+ ["SSID",["ssid","nome della rete wireless","nome identificativo di una rete wireless","war driving","voice vlan","rete guest"," guest"]],
+ ["Access Point (AP)",["access point","access-point","wireless access point","802.11","diffonde il segnale wireless","diffonde la rete via","onde radio"]],
+ ["PoE",["poe","power over ethernet","alimentazione e dati","power sourcing","powered device"," pse"," pd)"," pd ","802.3af","802.3at","802.3bt","inline power","alimentare telefoni","un solo cavo"]],
+ ["Fibra ottica",["fibra","impulsi di luce","single-mode","multimode","cladding","attenuazione","riflessione interna","core della fibra","laser","modo di luce","distanza arriva tipicamente il rame"]],
+ ["Cavo Ethernet",["cavo ethernet","doppino","twisted pair","utp","cavo crossover","crossover","straight-through","straight through","rj45","cat5","cat6","categoria","plenum"," emi","crosstalk","10base","100base","1000base","coppie di fili","auto-mdix","intreccia","intreccio","nemici del segnale","pin ","t568","cavo si usa","fast ethernet","in un cavo di rame","dati in un cavo","cavo di rame"," rame"]],
+ ["ARP",["arp","address resolution","scoprire il mac","mac associato a un ip","richiesta arp","invia il frame per primo","invia il frame l'host"]],
+ ["Firewall",["firewall","traffico non autorizzato","blocca il traffico non","ids","ips)","idps","soho","port forwarding","condividere il proprio ip","punti deboli","proprio ip pubblico"]],
+ ["VPN",["vpn","site-to-site","site to site","remote access","tunnel cifrato","anyconnect","cisco asa","piccola filiale","internet pubblico","filiale in modo economico"]],
+ ["IPSec",["ipsec","esp (","authentication header","ah autentica","gre"]],
+ ["MPLS",["mpls","label switching","etichette (label)","provider edge","customer edge","ce (customer","pe (provider","layer 2.5","metro ethernet","leased line","sd-wan","e-line","e-lan","e-tree"]],
+ ["WAN",["wan","site geograficamente","siti geograficamente","filiali","broadband","collega sedi","sedi distanti","area metropolitana"]],
+ ["Cloud",["cloud","on-prem","on-premises","capex","opex","hybrid","multi-cloud","kubernetes","container","microservizi","elasticità","on-premise","data center altrui","la maggior parte delle aziende","approccio adotta"]],
+ ["Data center",["spine-leaf","spine leaf"," leaf"," spine","east-west","north-south","top-of-rack"," tor","nexus","data center","virtualizzazione","hop separano","risorsa online","colocation","overlay","underlay","vxlan"]],
+ ["Design gerarchico",["single point of failure","spof","access layer","distribution layer","core layer","collapsed core","three-tier","3-tier","design gerarchico","daisy-chain","catalyst","switch multilayer","multilayer","campus","ridondanza","design a 2 livelli","design a 3 livelli","design a due livelli","tre livelli","a 3 livelli","a 2 livelli","access + distribution","distribution dei vari","distribution layer"]],
+ ["REST API",["rest api","rest,","rest?"," rest ","get, post","get/post","metodo http","metodi http","json","northbound","southbound","codice di stato http","200 ok","verbo http","chiave-valore","coppie chiave","formato di dati","api di rete","formato dati","api per le operazioni"]],
+ ["SDN",["sdn","control plane","data plane","software-defined","controller","ansible","playbook"," iac","infrastructure as code","python","automazione di rete","automazione","yaml"]],
+ ["3-way handshake",["three-way handshake","3-way handshake","3 way handshake","syn, syn-ack","syn-ack","three way handshake","il server risponde con","chiude lo scambio","il server chiude"]],
+ ["TCP",["tcp","affidabile","numeri di sequenza","windowing","controllo di flusso","numero di sequenza","orientato alla connessione","ritrasmission","handshake","trasferimento file affidabile","affidabilità garantita"]],
+ ["UDP",["udp","connectionless","senza connessione","senza garanzie","best-effort","best effort"]],
+ ["Porte TCP/UDP",["porta usa","porta 443","well-known","well known","porte tcp","numero di porta di destinazione","65.536","0-1023","numeri di porta","porta di destinazione appartiene","porte totali","https","header di livello 4","identificare il servizio","transport per identificare","porta e livello"]],
+ ["PDU",["pdu","segmento","pacchetto","unità dati","frame (l2","con l'header di livello 4"]],
+ ["Incapsulamento",["incapsulament","decapsulament","header a ogni livello","aggiunta di un header","buste sempre più grandi","header a ciascun livello","scendendo lo stack"]],
+ ["Modello OSI",["osi","7 livelli","sette livelli","livello session","livello presentation","session (5)","presentation (6)","application (7)","transport (4)","network (3)","data link (2)","physical (1)","mnemonico","modello di rete","modello tcp/ip","modelli di rete","livello application","livello transport","livello network","livello data link","livello physical","stack","arpanet","quale livello","a quale livello","livelli","sessione","il session","quale modello","modello è quello","implementato nei computer","di riferimento","foto a un mac","inviare una foto","produttori diversi","suddividere la comunicazione","suddividere le funzioni","presentation","session"]],
+ ["Sistema binario",["binario","binary","esadecimale"," hex","nibble","byte","ottetto","decimale","msb","2^32","2^8","cifra esadecimale","operazione logica"]],
+ ["Larghezza di banda",["larghezza di banda","bandwidth","throughput","bit per secondo","bps)"]],
+ ["Topologie di rete",["topologia","topologie","topologia a stella","mesh","magliata"," bus","anello"]],
+ ["Default gateway",["default gateway","gateway predefinito","server su un'altra rete","raggiungere un server","destinazione è su un'altra rete","a un'altra rete"]],
+ ["Subnet mask",["gruppo di indirizzi ip","rete a livello ip","identifica una 'rete'","stessa rete quando","intervallo di indirizzi"]],
+ ["LAN",["lan","rete locale","area ristretta","client-server","caratterizza il server","condividere dati","serve una rete","serve fondamentalmente una rete","in azienda si usano","apparati separati","azienda si usano apparati"]],
+ ["Router",["router","instrada","reti diverse","reti ip diverse","instradare","tra reti"," gateway","collega reti","cos'è, in sostanza","cos'è internet","pacchetti su internet","da router a router","competenza l'indirizzo ip","indirizzo ip (livello 3","serve il comando ping"," ping","arrivano a destinazione i pacchetti","indirizzo di livello 3","di livello 3?"]]
+];
 function glossForQuestion(text,modId){
-  if(text){const lo=text.toLowerCase();const cand=GLOSSARY.filter(g=>lo.indexOf(g.t.toLowerCase())>=0&&g.t.length>=4).sort((a,b)=>b.t.length-a.t.length);if(cand.length)return cand[0];}
+  if(text){
+    const lo=text.toLowerCase();
+    for(let i=0;i<GLOSS_KMAP.length;i++){
+      const kws=GLOSS_KMAP[i][1];
+      for(let j=0;j<kws.length;j++){
+        if(lo.indexOf(kws[j])>=0){const g=GLOSSARY.find(x=>x.t===GLOSS_KMAP[i][0]);if(g)return g;break;}
+      }
+    }
+  }
   const term=GLOSS_MAP[modId];return term&&GLOSSARY.find(x=>x.t===term);
 }
 function openTheory(modId,qtext){const g=glossForQuestion(qtext,modId)||(GLOSS_MAP[modId]&&GLOSSARY.find(x=>x.t===GLOSS_MAP[modId]));if(g)openGlossModal(g);}
@@ -2473,7 +2561,21 @@ const GLOSSARY=[
  {t:"IPSec",d:"Suite di sicurezza L3 per VPN: ESP cifra il payload, AH autentica."},
  {t:"MPLS",d:"Label switching usato dai provider per VPN L3 performanti e con QoS."},
  {t:"SDN",d:"Software-Defined Networking: separa il control plane (decisioni) dal data plane (inoltro)."},
- {t:"REST API",d:"Interfaccia basata su HTTP (GET/POST/PUT/DELETE) per automatizzare la configurazione."}
+ {t:"REST API",d:"Interfaccia basata su HTTP (GET/POST/PUT/DELETE) per automatizzare la configurazione."},
+ {t:"ARP",d:"Address Resolution Protocol: scopre il MAC associato a un indirizzo IP nella rete locale."},
+ {t:"Default gateway",d:"Il router a cui un host invia i pacchetti destinati a un'altra rete IP."},
+ {t:"Firewall",d:"Dispositivo o funzione che filtra il traffico in ingresso e in uscita, bloccando quello non autorizzato."},
+ {t:"VPN",d:"Virtual Private Network: tunnel cifrato che collega sedi o utenti remoti attraverso Internet."},
+ {t:"Cavo Ethernet",d:"Doppino di rame (UTP/STP) con 4 coppie intrecciate e connettore RJ45; l'intreccio riduce EMI e crosstalk."},
+ {t:"Fibra ottica",d:"Trasmette i dati con impulsi di luce: nessuna EMI, banda enorme e lunghe distanze (single/multimode)."},
+ {t:"PoE",d:"Power over Ethernet: alimentazione e dati sullo stesso cavo, per telefoni IP, access point e telecamere."},
+ {t:"Larghezza di banda",d:"Capacità di un collegamento in bit per secondo (bps); il throughput è la velocità realmente ottenuta."},
+ {t:"Sistema binario",d:"I computer usano la base 2 (bit): 1 byte = 8 bit; l'esadecimale (base 16) raggruppa 4 bit per cifra."},
+ {t:"Classi IP",d:"IPv4 storiche: A (/8), B (/16), C (/24), D multicast, E sperimentale; loopback 127.0.0.0/8."},
+ {t:"Porte TCP/UDP",d:"Numeri a 16 bit (0-65535) che identificano il servizio: HTTP 80, HTTPS 443, SSH 22, DNS 53."},
+ {t:"Design gerarchico",d:"Modello Cisco a livelli: Access (accesso), Distribution (aggregazione/routing/ACL), Core (backbone)."},
+ {t:"Data center",d:"Struttura che ospita i server; le reti moderne usano la topologia spine-leaf (sempre 2 hop)."},
+ {t:"Cloud",d:"Affittare infrastruttura di terzi (AWS/Azure/GCP) a consumo (opex), con elasticità e scalabilità."}
 ];
 // Approfondimenti + diagramma collegato (chiave in DIAGRAM) per ogni termine
 const GLOSS_MORE={
@@ -2537,7 +2639,21 @@ const GLOSS_MORE={
  "IPSec":{more:"Protegge le VPN a L3: ESP cifra il payload, AH autentica. Negozia chiavi e parametri con IKE. Spesso combinato con GRE per il multicast."},
  "MPLS":{more:"Il provider inoltra in base a etichette invece che all'IP: percorsi più rapidi e prevedibili, con supporto a VPN L3 e QoS."},
  "SDN":{more:"Separa il control plane (le decisioni, in un controller centrale) dal data plane (l'inoltro). Programmabile via API northbound/southbound."},
- "REST API":{more:"Interfaccia web (HTTP) per automatizzare i dispositivi: GET legge, POST crea, PUT aggiorna, DELETE elimina. Dati in JSON; 2xx=OK, 4xx/5xx=errore."}
+ "REST API":{more:"Interfaccia web (HTTP) per automatizzare i dispositivi: GET legge, POST crea, PUT aggiorna, DELETE elimina. Dati in JSON; 2xx=OK, 4xx/5xx=errore."},
+ "ARP":{more:"L'host manda una richiesta ARP in broadcast (MAC destinazione FFFF.FFFF.FFFF) 'chi ha questo IP?'; solo il proprietario risponde con il proprio MAC, che viene salvato nella cache ARP.",diag:"net_basics"},
+ "Default gateway":{more:"Se la destinazione è in un'altra rete, l'host non fa ARP per il server remoto: consegna il frame al default gateway (il router), che poi instrada verso la destinazione.",diag:"net_basics"},
+ "Firewall":{more:"Filtra il traffico secondo regole (porte, IP, stato della connessione) e lascia passare solo quello legittimo, in ingresso e in uscita. È il confine tra la rete interna e Internet.",diag:"net_basics"},
+ "VPN":{more:"Due tipi: site-to-site (un'appliance/firewall come un Cisco ASA collega due sedi) e remote access (software sul PC, es. AnyConnect). Il tunnel è cifrato (spesso IPSec) su Internet pubblico, economico ma senza QoS garantita."},
+ "Cavo Ethernet":{more:"UTP (non schermato) o STP (schermato, per ambienti con molta EMI). La categoria (cat5e, cat6) riguarda i fili di rame. Straight-through tra dispositivi diversi (PC↔switch), crossover tra dispositivi uguali. Standard: 10BASE-T, 100BASE-TX, 1000BASE-T."},
+ "Fibra ottica":{more:"La luce viaggia nel core e vi resta grazie alla riflessione interna totale del cladding. Multimode: core grande, distanze brevi (~300 m). Single-mode: core minuscolo con laser, fino a ~100 km. Nessuna EMI e banda enorme; è fragile, non piegarla bruscamente."},
+ "PoE":{more:"Il PSE (di solito lo switch) alimenta il PD (telefono, AP, telecamera). Standard: 802.3af (PoE, 15,4 W), 802.3at (PoE+, 30 W, il più diffuso), 802.3bt (PoE++). Un solo cavo per dati e corrente: niente elettricista, posizionamento flessibile."},
+ "Larghezza di banda":{more:"La banda è la capacità teorica del mezzo (Mbps, Gbps). Il throughput reale è spesso inferiore per overhead, congestione e latenza. Si misura in bit per secondo, non in byte."},
+ "Sistema binario":{more:"8 bit = 1 byte = 1 ottetto IPv4 (0-255). I pesi dei bit sono 128-64-32-16-8-4-2-1. L'esadecimale (0-9, A-F) mappa 4 bit per cifra ed è usato in MAC e IPv6. La subnet mask estrae la rete con un AND logico.",diag:"subnetting"},
+ "Classi IP":{more:"Il primo ottetto definisce la classe: A 1-126, B 128-191, C 192-223, D 224-239 (multicast), E 240-255. 127.0.0.0/8 è il loopback (127.0.0.1). Oggi si usano CIDR e VLSM invece delle classi fisse.",diag:"subnetting"},
+ "Porte TCP/UDP":{more:"Il livello Transport usa le porte per identificare il servizio. Well-known 0-1023: HTTP 80, HTTPS 443, SSH 22, Telnet 23, DNS 53, DHCP 67/68, NTP 123. Registrate 1024-49151, dinamiche 49152-65535.",diag:"tcpip_mod"},
+ "Design gerarchico":{more:"Access collega i dispositivi finali; Distribution aggrega, fa inter-VLAN routing, ACL e summarization; Core è il backbone velocissimo. Nel two-tier (collapsed core) il Distribution assorbe il Core. La ridondanza elimina i single point of failure.",diag:"net_basics"},
+ "Data center":{more:"Nel design spine-leaf ogni leaf (accesso) si collega a ogni spine (backbone) in full mesh: sempre 2 hop, load-balancing su link L3 (niente STP che blocca). Ottimizzato per il traffico east-west (server↔server). Cisco Nexus per il DC, Catalyst per il campus."},
+ "Cloud":{more:"Sposta la spesa da capex (comprare hardware) a opex (paghi ciò che usi). Elasticità: crei o elimini risorse in pochi click. Cloud-native = microservizi in container orchestrati (Kubernetes). Hybrid = mix on-prem+cloud; multi-cloud = più provider insieme."}
 };
 // collega i diagrammi dedicati ai termini che ne erano privi
 [["Full-duplex","duplex"],["UDP","udp"],["Routing statico","static_route"],["Default route","default_route"],["Distanza amministrativa (AD)","admin_distance"],["Wildcard mask","wildcard"],["ACL","acl"],["SSH","ssh_telnet"],["Port security","port_security"],["AAA","aaa"],["QoS","qos"],["IPSec","ipsec"],["MPLS","mpls"],["SDN","sdn"],["REST API","rest"]].forEach(p=>{if(GLOSS_MORE[p[0]])GLOSS_MORE[p[0]].diag=p[1];});
@@ -3246,8 +3362,12 @@ document.addEventListener('keydown',e=>{if(e.key==='Escape')closeReview();});
 // ══════════════════════════════════════
 // VERSIONE & NOVITÀ · badge cliccabile con changelog in linguaggio semplice
 // ══════════════════════════════════════
-const APP_VERSION='1.5';
+const APP_VERSION='1.6';
 const CHANGELOG=[
+ {v:'1.6',d:'4 ago 2026',t:'Approfondimenti collegati bene',items:[
+   "Il tasto 'Approfondisci' ora apre la scheda giusta per quella domanda: prima, ad esempio, una domanda sullo STP apriva la scheda dello Switch (che non ne parlava).",
+   "Aggiunte le spiegazioni per gli argomenti che non le avevano: ARP, cavi e fibra ottica, PoE, firewall, VPN, cloud, data center, sistema binario, classi IP, porte TCP/UDP e altro ancora."
+ ]},
  {v:'1.5',d:'4 ago 2026',t:'Le nuove domande ora compaiono davvero',items:[
    "Le 15 domande per ogni riassunto video ora appaiono correttamente: prima il telefono continuava a mostrare la vecchia copia salvata in memoria (per questo ne uscivano solo 6).",
    "L'app ora carica sempre l'ultima versione al riavvio."
